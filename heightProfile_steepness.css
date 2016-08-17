@@ -1,0 +1,35 @@
+  html, body, #map {
+        height:100%;
+        width:100%;
+        padding:0px;
+        margin:0px;
+     }
+.d3-tip {  
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+  font-size: 8px;
+  font-family: calibri;
+}
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+.focus circle {
+  fill: none;
+  stroke: steelblue;
+}
