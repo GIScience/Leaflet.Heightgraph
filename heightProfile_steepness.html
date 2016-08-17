@@ -269,6 +269,18 @@ if (typeof(newgeojson.features[0].properties.steepness) !== 'undefined'){
         .attr("font-family", "calibri")
         .attr("dy", ".35em");
 
+    var lineFocus = svgSec.append("g");
+        //.attr("class", "focus")
+      //.style("display", "none");
+
+    lineFocus.append("line");
+
+    lineFocus.append("text")
+        .attr("x", 5)
+        .attr("font-size", "8px")
+        .attr("font-family", "calibri")
+        .attr("dy", ".35em");
+
     svgSec.append('g')      
       .attr("transform", "translate(0," + height + ")")      // create a <g> element
       .attr('class', 'x axis') // specify classes
@@ -396,8 +408,11 @@ if (typeof(newgeojson.features[0].properties.steepness) !== 'undefined'){
       var d0 = d.coords[0].x, d1 = d.coords[1].x;  
       var d2 = d1 - x0 > x0 - d0 ? 0 : 1; // shortest distance between mouse and coords of polygon
       var y0=d.coords[d2].y;
-      focus.attr("transform", "translate(" +  x(x0)+ "," + y(y0) + ")");
+      focus.attr("transform", "translate(" +  x(x0)+ "," + y(d3.min(heightvalue)) + ")");
       focus.select("text").text(Math.round((x0/1000)*100)/100 + ' km');//text in km
+
+     // lineFocus.attr('x1', x(x0)).attr('x2', x(x0)).attr('y1', y(height)).attr('y2', y(height));
+      //lineFocus.attr("transform", "translate(" +  x(x0)+ "," + y(y0) + ")");
     }
   }
   </script>
