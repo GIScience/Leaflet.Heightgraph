@@ -6,23 +6,24 @@
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
   
   <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
-  <script type="text/javascript" src="../dist/leaflet.elevation-0.0.4.min.js"></script>
-
-  <!--[if lte IE 8]><link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.ie.css" /><![endif]-->
-
-  <link rel="stylesheet" href="../dist/leaflet.elevation-0.0.4.css" />
-
-  <script type="text/javascript" src="../dist/leaflet.elevation-0.0.4.min.js"></script>
   <script type="text/javascript" src="../HeightProfile/data.js"></script>
   <script type="text/javascript" src="../HeightProfile/heightProfile.js"></script>
   <script rel="stylesheet" src="../HeightProfile/heightProfile_steepness.css"></script>
  </head>
 <body>
-  <!-- <div id="map"></div> -->
-
+  <div class="myDiv" id="myDivId"> </div>
   <script type="text/javascript">
-  var div= document.body;
-  var doIt = heightprofile(newgeojson, div);
-    </script>
+
+  var myDiv= document.getElementById("myDivId"); 
+  var options = {width: 600, 
+    height: 125, 
+    margins:{
+      top:10,
+      right:20, 
+      bottom:30, 
+      left:50
+  }, div:myDiv};
+  var doIt = heightprofile(newgeojson, options);
+  </script>
 </body>
 </html>

@@ -4,6 +4,12 @@
         padding:0px;
         margin:0px;
      }
+.myDiv {
+  height: 300px;
+  width: 150px;
+  color: red;
+}
+.someclassname { height: 100px; }
 .d3-tip {  
   padding: 4px;
   background: rgba(0, 0, 0, 0.8);

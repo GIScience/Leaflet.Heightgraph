@@ -1,216 +1,216 @@
-var heightprofile = function (data, div){
-  //Abfrage ob Steepness vorhanden
+var heightprofile = function (data, options){
+  //if steepness available
   if (typeof(data.features[0].properties.steepness) !== 'undefined'){
-
-    //var pathData = updateBarData(data);
-    //function updateBarData(data){
       //distance: distance between start and endpoint of a linestring (=width of a bar)
       //last and first: distance between last coordinate with same steepness to first coordinate with different steepness 
       //polygonData: Data for d3.path (x1, y1; x2, y2; x3,y3; x4,y4) (Polygon as bar)    
       //var dataDistance = function(data){
-        var distance= [], steepness=[], heightvalue=[];
-        var first;
-        var featureLength = data.features.length;
-        var polygonData=[];
-        var adddist=[0];
-        var list = [];
+        var distance= calcDist(data);
+        var totaldistance = distance.reduce(function(a, b) { return a + b; }, 0);
+        var heightvalue= calculateHeightSteep(data).height;
+        var steepness = calculateHeightSteep(data).steep;
+        var polygonData= updateBarData(heightvalue);
+        var createSVG = createBarChart(polygonData, options);
 
-        for (var i=0; i<featureLength; i++){
-          var coordLength = data.features[i].geometry.coordinates.length;
-          for(var j=0; j<coordLength-1; j++){
-            var g = new L.LatLng(data.features[i].geometry.coordinates[j][1], data.features[i].geometry.coordinates[j][0]);
-            var h = new L.LatLng(data.features[i].geometry.coordinates[j+1][1], data.features[i].geometry.coordinates[j+1][0]);
-            var calc = g.distanceTo(h);
-            distance.push(calc);
-            heightvalue.push(data.features[i].geometry.coordinates[j][2]);
-            steepness.push(data.features[i].properties.steepness);
-            if (j+1 == coordLength-1){
-              heightvalue.push(data.features[i].geometry.coordinates[j+1][2]);
-              steepness.push(data.features[i].properties.steepness);
+        function calcDist(a){
+          var first;
+          var dist=[];
+          var featureLength = a.features.length;
+          for (var i=0; i<featureLength; i++){
+            var coordLength = a.features[i].geometry.coordinates.length;
+            for(var j=0; j<coordLength-1; j++){
+              var g = new L.LatLng(a.features[i].geometry.coordinates[j][1], a.features[i].geometry.coordinates[j][0]);
+              var h = new L.LatLng(a.features[i].geometry.coordinates[j+1][1], a.features[i].geometry.coordinates[j+1][0]);
+              var calc = g.distanceTo(h);
+              dist.push(calc);
+            }
+            var last =new L.LatLng(a.features[i].geometry.coordinates[coordLength-1][1], a.features[i].geometry.coordinates[coordLength-1][0]);
+            if (i>0){
+              first = new L.LatLng(a.features[i].geometry.coordinates[0][1], a.features[i].geometry.coordinates[0][0]);
+              calc= last.distanceTo(first);
+              dist.push(calc);
             }
           }
-          var last =new L.LatLng(data.features[i].geometry.coordinates[coordLength-1][1], data.features[i].geometry.coordinates[coordLength-1][0]);
-          if (i>0){
-            first = new L.LatLng(data.features[i].geometry.coordinates[0][1], data.features[i].geometry.coordinates[0][0]);
-            calc= last.distanceTo(first);
-            distance.push(calc);
+          return (dist);
+        };
+
+        //a= data
+        function calculateHeightSteep(a){
+          var height=[];
+          var steep=[];
+          for (var i=0; i<a.features.length; i++){
+            var coordNumber = a.features[i].geometry.coordinates.length;
+            for(var j=0; j<coordNumber; j++){
+              height.push(a.features[i].geometry.coordinates[j][2]);
+              steep.push(a.features[i].properties.steepness);
+            }
           }
-        }
-        var totaldistance = distance.reduce(function(a, b) { return a + b; }, 0);
+           var list={height:height, steep:steep};
+          return list;
+        };
 
-        //Data for svg-line-path
-        var count= heightvalue.length;
-        for (var i=0;i<count;i++){
-          adddist[i+1]=adddist[i]+distance[i];
-          polygonData.push({coords:[
-            {x:adddist[i], y:heightvalue[i]},
-            {x:adddist[(i+1==count)?i:i+1], y:heightvalue[(i+1==count)?i:i+1]},
-            {x:adddist[(i+1==count)?i:i+1], y:d3.min(heightvalue)},
-            {x:adddist[i], y:d3.min(heightvalue)}], 
-            steepness:steepness[i]});
-        }
-      //   list.push({
-      //       totaldistance: totaldistance,
-      //       heightvalue:heightvalue,
-      //       distance: distance,
-      //       polygonData: polygonData
-      //   });
+        //a= heightvalue
+        function updateBarData(a){
+          var list =[];
+          var adddist=[0];
+          var count = a.length;
+          for (var i=0;i<count;i++){
+            adddist[i+1]=adddist[i]+distance[i];
+            list.push({coords:[
+              {x:adddist[i], y:a[i]},
+              {x:adddist[(i+1==count)?i:i+1], y:a[(i+1==count)?i:i+1]},
+              {x:adddist[(i+1==count)?i:i+1], y:d3.min(a)},
+              {x:adddist[i], y:d3.min(a)}], 
+              steepness:steepness[i]});
+          }
+          return list;
+        };
 
-      //   console.log(list);
-      //   return list;
-      // } 
-      //   console.log(polygonData)
- 
+        function createBarChart(data, options){
+          //SVG area
+          var margin = options.margins,
+            width = 500 - margin.left - margin.right,
+            height = 300 - margin.top - margin.bottom;
 
+          var x = d3.scale.linear()
+            .range([0, width])
+            .domain([0, totaldistance]);
 
-      //SVG area
-      var margin = {top: 20, right: 20, bottom: 70, left: 40},
-        width = 500 - margin.left - margin.right,
-        height = 300 - margin.top - margin.bottom;
+          var y = d3.scale.linear()
+            .range([height, 0])
+            .domain(d3.extent(heightvalue, function(d) { return d }));
 
-      //domain = data space
-      //range = screen space
-      var x = d3.scale.linear()
-        .range([0, width])
-        .domain([0, totaldistance]);
+          var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+            //.ticks(1);
 
-      var y = d3.scale.linear()
-        .range([height, 0])
-        .domain(d3.extent(heightvalue, function(d) { return d }));
+          var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
 
-      var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom");
-        //.ticks(1);
+          var tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function(d) {
+              return  ((d.coords[0].y+d.coords[1].y)/2 + " m") ;
+            });
 
-      var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left");
+          var tipDist = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function(d) {
+              return  (d) ;
+            });
 
-      //tooltips with height
-      var tip = d3.tip()
-        .attr('class', 'd3-tip')
-        .offset([-10, 0])
-        .html(function(d) {
-          return  ((d.coords[0].y+d.coords[1].y)/2 + " m") ;
-        });
+          var svgSec = d3.select(options.div).append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", 
+                  "translate(" + margin.left + "," + margin.top + ")");
 
-      var tipDist = d3.tip()
-        .attr('class', 'd3-tip')
-        .offset([-10, 0])
-        .html(function(d) {
-          return  (d) ;
-        });
+          svgSec.call(tip);
 
+          var focus = svgSec.append("g")
+            .attr("class", "focus")
+            //.style("display", "none");
 
-      var svgSec = d3.select("body").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", 
-              "translate(" + margin.left + "," + margin.top + ")");
+          focus.append("circle")
+              .attr("r", 3);
 
-      svgSec.call(tip);
+          focus.append("text")
+              .attr("x", 5)
+              .attr("font-size", "8px")
+              .attr("font-family", "calibri")
+              .attr("dy", ".35em");
 
-      var focus = svgSec.append("g")
-        .attr("class", "focus")
-        //.style("display", "none");
+          svgSec.append('g')      
+            .attr("transform", "translate(0," + height + ")")      // create a <g> element
+            .attr('class', 'x axis') // specify classes
+            .call(xAxis)
+            .append("text")
+                //.attr("transform", "rotate(-90)")
+                .attr("x", width-40)
+                .attr("dy", ".0em")
+                .style("font-size", "8px")
+                .attr("font-family", "calibri")
+                .style("text-anchor", "initial")
+                .text("Distance [m]");
 
-      focus.append("circle")
-          .attr("r", 3);
+          svgSec.append('g')
+            .attr('class', 'y axis')
+            .call(yAxis)
+            .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -35)
+                .attr("y", 5)
+                .attr("dy", ".71em")
+                .style("font-size", "8px")
+                .attr("font-family", "calibri")
+                .style("text-anchor", "initial")
+                .text("Height [m]");
 
-      focus.append("text")
-          .attr("x", 5)
-          .attr("font-size", "8px")
-          .attr("font-family", "calibri")
-          .attr("dy", ".35em");
+          svgSec.selectAll('.axis line, .axis path')
+           .style({'stroke': 'Black', 'fill': 'none', 'stroke-width': '1'});
 
-      svgSec.append('g')      
-        .attr("transform", "translate(0," + height + ")")      // create a <g> element
-        .attr('class', 'x axis') // specify classes
-        .call(xAxis)
-        .append("text")
-            //.attr("transform", "rotate(-90)")
-            .attr("x", width-40)
-            .attr("dy", ".0em")
-            .style("font-size", "8px")
-            .attr("font-family", "calibri")
-            .style("text-anchor", "initial")
-            .text("Distance [m]");
+          var legendData = [{steepness:'15%', color:'red'}, {steepness:'10%', color:'orange'}, {steepness:'5%', color:'yellow'},{steepness:'0%', color:'greenyellow'}];
+          var legendRectSize = 7;
+          var legendSpacing = 7;
 
-      svgSec.append('g')
-        .attr('class', 'y axis')
-        .call(yAxis)
-        .append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("x", -35)
-            .attr("y", 5)
-            .attr("dy", ".71em")
-            .style("font-size", "8px")
-            .attr("font-family", "calibri")
-            .style("text-anchor", "initial")
-            .text("Height [m]");
+          var legend = svgSec.selectAll('.legend')
+            .data(legendData)
+            .enter()
+            .append('g')
+            .attr('class', 'legend')
+            .attr('transform', function(d, i) {
+              var height = legendRectSize + legendSpacing;
+              var offset =  height * 2;
+              var horz = -2 * legendRectSize;
+              var vert = i * height - offset;
+              return 'translate(' + horz + ',' + vert + ')';
+            });
 
-      svgSec.selectAll('.axis line, .axis path')
-       .style({'stroke': 'Black', 'fill': 'none', 'stroke-width': '1'});
+          legend.append('rect')
+            .attr('width', legendRectSize)
+            .attr('height', legendRectSize)
+            .attr('x', 30)
+            .attr('y', 30)
+            .style('fill', function(d){
+                 return ( d.color);});
 
-      var legendData = [{steepness:'15%', color:'red'}, {steepness:'10%', color:'orange'}, {steepness:'5%', color:'yellow'},{steepness:'0%', color:'greenyellow'}];
-      var legendRectSize = 7;
-      var legendSpacing = 7;
+          legend.append('text')
+          .attr('x', 40)
+          .attr('y', 36)
+          .style('font-size', 10)
+          .style('font-family', 'calibri')
+          .text(function(d) { return d.steepness; });
 
-      var legend = svgSec.selectAll('.legend')
-        .data(legendData)
-        .enter()
-        .append('g')
-        .attr('class', 'legend')
-        .attr('transform', function(d, i) {
-          var height = legendRectSize + legendSpacing;
-          var offset =  height * 2;
-          var horz = -2 * legendRectSize;
-          var vert = i * height - offset;
-          return 'translate(' + horz + ',' + vert + ')';
-        });
+          //bars as polygons (path)
+          var polygon = d3.svg.line()
+              .x(function(d) { return x(d.x); })
+              .y(function(d) { return y(d.y); });
 
-      legend.append('rect')
-        .attr('width', legendRectSize)
-        .attr('height', legendRectSize)
-        .attr('x', 30)
-        .attr('y', 30)
-        .style('fill', function(d){
-             return ( d.color);});
-
-      legend.append('text')
-      .attr('x', 40)
-      .attr('y', 36)
-      .style('font-size', 10)
-      .style('font-family', 'calibri')
-      .text(function(d) { return d.steepness; });
-
-      //bars as polygons (path)
-      var polygon = d3.svg.line()
-          .x(function(d) { return x(d.x); })
-          .y(function(d) { return y(d.y); });
-
-      svgSec.selectAll('hpath')
-       .data(polygonData)
-       .enter()
-       .append('path')
-       //.attr('leafletId', id)
-       .attr('d', function(d) {return polygon(d.coords);})
-       //.attr("data-legend",function(d) { return d.steepness})
-       .attr("fill-opacity", 0.6)
-       .attr('fill', function(d){
-         return ( d.steepness ==-2 ?
-             "red" : d.steepness ==-1 ? 
-             "orange": d.steepness == 0 ? 
-             "yellow" : d.steepness == 1 ? 
-             "greenyellow" : "greenyellow")
-        })
-        .on('mouseover', handleMouseOver)
-        .on("mouseout", handleMouseOut)
-        .on("mousemove", mousemove);
-
-    // Create Event Handlers for mouse
+          svgSec.selectAll('hpath')
+           .data(data)
+           .enter()
+           .append('path')
+           //.attr('leafletId', id)
+           .attr('d', function(d) {return polygon(d.coords);})
+           //.attr("data-legend",function(d) { return d.steepness})
+           .attr("fill-opacity", 0.6)
+           .attr('fill', function(d){
+             return ( d.steepness ==-2 ?
+                 "red" : d.steepness ==-1 ? 
+                 "orange": d.steepness == 0 ? 
+                 "yellow" : d.steepness == 1 ? 
+                 "greenyellow" : "greenyellow")
+            })
+            .on('mouseover', handleMouseOver)
+            .on("mouseout", handleMouseOut)
+            .on("mousemove", mousemove);
+      
+      // Create Event Handlers for mouse
       function handleMouseOver(d, i) {                
             // Use D3 to select element, change color and size
         tip.show(d);
@@ -255,4 +255,5 @@ var heightprofile = function (data, div){
         focus.select("text").text(Math.round((x0/1000)*100)/100 + ' km');//text in km
       }
     }
+  }
 };
