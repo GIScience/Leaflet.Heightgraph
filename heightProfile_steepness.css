@@ -8,6 +8,7 @@
   height: 300px;
   width: 150px;
   color: red;
+  font-family: calibri;
 }
 .someclassname { height: 100px; }
 .d3-tip {  
@@ -22,6 +23,7 @@
 .d3-tip:after {
   box-sizing: border-box;
   display: inline;
+  font-family: calibri;
   font-size: 10px;
   width: 100%;
   color: rgba(0, 0, 0, 0.8);
@@ -34,8 +36,13 @@
   margin: -1px 0 0 0;
   top: 100%;
   left: 0;
+  font-family: calibri;
 }
 .focus circle {
   fill: none;
   stroke: steelblue;
+}
+.focusLine line{
+  stroke-width: 2;
+  stroke: black;
 }
