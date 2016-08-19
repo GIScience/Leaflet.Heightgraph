@@ -200,7 +200,7 @@ var heightprofile = function (data, options){
            //.attr("data-legend",function(d) { return d.steepness})
            .attr("fill-opacity", 0.6)
            .attr('fill', function(d){
-             return ( d.steepness ==-2 ?
+             return ( d.steepness == -2 ?
                  "red" : d.steepness ==-1 ? 
                  "orange": d.steepness == 0 ? 
                  "yellow" : d.steepness == 1 ? 
