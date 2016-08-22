@@ -78,12 +78,10 @@ var calcDistances = function(a) {
             // catch steps between features
             if (j == 0 && i > 0) {
                 calc = last.distanceTo(g);
-                console.log(calc)
                 distances.distance.push(calc);
             }
             var h = new L.LatLng(a.features[i].geometry.coordinates[j + 1][0], a.features[i].geometry.coordinates[j + 1][1]);
             calc = g.distanceTo(h);
-            console.log(calc)
             distances.distance.push(calc);
             // save last
             if (j == coordLength - 2) {
