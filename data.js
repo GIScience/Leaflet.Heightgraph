@@ -39,7 +39,8 @@ var newgeojson = {
             ]
         },
         "properties": {
-            "steepness": 6
+            "steepness": 6,
+            "waypoint_coordinates": [[49.414254, 8.6943055, 116.6]]
         }
     }, {
         "type": "Feature",
@@ -125,7 +126,8 @@ var newgeojson = {
             ]
         },
         "properties": {
-            "steepness": 9
+            "steepness": 9,
+            "waypoint_coordinates": [[49.4176615, 8.6983135, 233.2],[49.4188825, 8.7025868, 297.3]]
         }
     }],
     "properties": {
@@ -134,3 +136,4 @@ var newgeojson = {
         "summary": "Bins of elevation types in route"
     }
 };
+

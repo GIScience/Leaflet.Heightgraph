@@ -54,16 +54,28 @@ var legendData = [{
         color: '#AD0F0C'
     }
 }];
+/**
+ * Returns distance between each coordinate of Linestring
+ * @param {FeatureCollection} a
+ * @returns {Number|Array| Object} Object that contains distances between coordinates and sum of distances as totaldistance 
+ */
 var calcDistances = function(a) {
     distances = {};
     var first, calc;
+    //var wpList=[];
     distances.distance = [];
+    distances.wpDistance= [];
     var featureLength = a.features.length;
     console.log(featureLength)
     for (var i = 0; i < featureLength; i++) {
         var coordLength = a.features[i].geometry.coordinates.length;
         console.log('coordLength', coordLength)
         for (var j = 0; j < coordLength - 1; j++) {
+            // if (typeof(a.features[i].properties.waypoint_coordinates[i])!=="undefined"){
+                
+            //         var wp= new L.LatLng(a.features[i].properties.waypoint_coordinates[k][0],a.features[i].properties.waypoint_coordinates[k][1]));
+            //     }
+            // }
             var g = new L.LatLng(a.features[i].geometry.coordinates[j][0], a.features[i].geometry.coordinates[j][1]);
             // catch steps between features
             if (j == 0 && i > 0) {
@@ -79,16 +91,27 @@ var calcDistances = function(a) {
             if (j == coordLength - 2) {
                 last = h;
             }
+        }// Waypoints - Distance
+        if (typeof(a.features[i].properties.waypoint_coordinates)!=="undefined"){
+            for (var l=0; l<a.features[i].properties.waypoint_coordinates.length; l++){
+                if (new L.LatLng(a.features[i].properties.waypoint_coordinates[l][0],a.features[i].properties.waypoint_coordinates[l][1])==g)
+                distances.wpDistance.push(distances.distance.reduce(function(pv, cv) { return pv + cv; }, 0));
+            }
         }
-    } 
+    }
     distances.totaldistance = distances.distance.reduce(function(pv, cv) { return pv + cv; }, 0);
-    console.log(distances)
+    console.log(distances);
     return distances;
 };
+/**
+ * Returns the values (height, steepness) of the FeatureCollection as Array in list
+ * @param {FeatureCollection} a
+ * @returns {Number|Array|Object} list with height values and steepness values as array
+ */
 var calculateHeightSteep = function(a) {
     var height = [];
     var steep = [];
-    for (var i = 0; i < a.features.length; i++) {
+    for (var i = 0; i < a.features.length; i++){ 
         var coordNumber = a.features[i].geometry.coordinates.length;
         for (var j = 0; j < coordNumber; j++) {
             height.push(a.features[i].geometry.coordinates[j][2]);
@@ -101,8 +124,15 @@ var calculateHeightSteep = function(a) {
     };
     return list;
 };
+/**
+ * Returns list with four x and y coordinates for svg-path (Polygon) and steepness type
+ * @param {Array} a: heightvalue
+ * @param {Array} steepness
+ * @returns {Number|Array|Object} list with coordinates and steepness values as array
+ */
 var updateBarData = function(a, steepness) {
     var list = [];
+    var wplist= [];
     var adddist = [0];
     var count = a.length;
     for (var i = 0; i < count; i++) {
@@ -123,10 +153,16 @@ var updateBarData = function(a, steepness) {
             }],
             steepness: steepness[i]
         });
+        
     }
     return list;
 };
-var createBarChart = function(data, options, heightvalue) {
+/**
+ * @param {Object} polygonData: (x,y-coords, steepness)
+ * @param {Object} options: size-options for barChart, div for barChart
+ * @param {Array} heightvalue: heightvalue of each coordinate
+ */
+var createBarChart = function(polygonData, options, heightvalue) {
     //SVG area
     var margin = options.margins,
         width = 1000 - margin.left - margin.right,
@@ -138,7 +174,7 @@ var createBarChart = function(data, options, heightvalue) {
     var xAxis = d3.svg.axis().scale(x).orient("bottom");
     //.ticks(1);
     var yAxis = d3.svg.axis().scale(y).orient("left");
-    var tip = d3.tip().attr('class', 'd3-tip').offset([-10, 0]).style('font-family', 'calibri').html(function(d) {
+    var tip = d3.tip().attr('class', 'd3-tip').offset([-10, 0]).html(function(d) {
         return ((Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100) + " m");
     });
     var tipDist = d3.tip().attr('class', 'd3-tip').offset([-10, 0]).html(function(d) {
@@ -148,7 +184,7 @@ var createBarChart = function(data, options, heightvalue) {
     svgSec.call(tip);
     var focus = svgSec.append("g").attr("class", "focus").style("display", "none");
     focus.append("circle").attr("r", 3);
-    focus.append("text").attr("x", 5).attr("font-size", "12px").attr("font-family", "calibri").attr("dy", ".35em");
+    focus.append("text").attr("x", 5).attr("font-size", "12px").attr("font-family", "calibri").attr("dy", ".35em").style("background", "black");
     var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
     var focusLine = focusLineGroup.append("line").attr("stroke-width", 2).attr("stroke", "black").attr("x1", 10).attr("x2", 10).attr("y1", y(d3.max(heightvalue))).attr("y2", y(d3.min(heightvalue))).style("display", "none");
     svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
@@ -183,7 +219,7 @@ var createBarChart = function(data, options, heightvalue) {
     }).y(function(d) {
         return y(d.y);
     });
-    svgSec.selectAll('hpath').data(data).enter().append('path')
+    svgSec.selectAll('hpath').data(polygonData).enter().append('path')
         //.attr('leafletId', id)
         .attr('d', function(d) {
             return polygon(d.coords);
@@ -218,10 +254,17 @@ var createBarChart = function(data, options, heightvalue) {
         focusLine.style("display", "initial").attr('x1', x(x0)).attr('y1', y(y0)).attr('x2', x(x0));
     }
 };
+/**
+ * @param {FeatureCollection} data
+ * @param {Object} options: size-options for barChart, div for barChart
+ */
 var heightprofile = function(data, options) {
+    //remove previous chart
+    d3.select("svg").remove();
     var distances = calcDistances(data);
     var heightvalue = calculateHeightSteep(data).height;
     var steepness = calculateHeightSteep(data).steep;
+    var waypointPosition = calculateHeightSteep(data).wpFeatPos;
     var polygonData = updateBarData(heightvalue, steepness);
     var createSVG = createBarChart(polygonData, options, heightvalue);
 };
