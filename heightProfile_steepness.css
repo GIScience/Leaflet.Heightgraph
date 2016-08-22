@@ -36,6 +36,8 @@
       content: "\25BC";
       position: absolute;
       text-align: center;
+      background: black;
+      opacity: 0.5;
   }
   /* Style northward tooltips differently */
   
@@ -45,6 +47,8 @@
       left: 0;
       font-family: calibri;
       background-color: black;
+      background: black;
+      opacity: 0.5;
   }
   
   .focus circle {

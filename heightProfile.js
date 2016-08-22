@@ -64,18 +64,16 @@ var calcDistances = function(a) {
     var first, calc;
     //var wpList=[];
     distances.distance = [];
-    distances.wpDistance= [];
+    distances.wpDistance = [];
     var featureLength = a.features.length;
-    console.log(featureLength)
+    var wpPos=[];
+    var wpPosDist=[];
+    var lengthCoords=[];
+    var wpDistance=[];
     for (var i = 0; i < featureLength; i++) {
         var coordLength = a.features[i].geometry.coordinates.length;
         console.log('coordLength', coordLength)
         for (var j = 0; j < coordLength - 1; j++) {
-            // if (typeof(a.features[i].properties.waypoint_coordinates[i])!=="undefined"){
-                
-            //         var wp= new L.LatLng(a.features[i].properties.waypoint_coordinates[k][0],a.features[i].properties.waypoint_coordinates[k][1]));
-            //     }
-            // }
             var g = new L.LatLng(a.features[i].geometry.coordinates[j][0], a.features[i].geometry.coordinates[j][1]);
             // catch steps between features
             if (j == 0 && i > 0) {
@@ -91,14 +89,45 @@ var calcDistances = function(a) {
             if (j == coordLength - 2) {
                 last = h;
             }
-        }// Waypoints - Distance
+        }//if Waypoints available
         if (typeof(a.features[i].properties.waypoint_coordinates)!=="undefined"){
             for (var l=0; l<a.features[i].properties.waypoint_coordinates.length; l++){
-                if (new L.LatLng(a.features[i].properties.waypoint_coordinates[l][0],a.features[i].properties.waypoint_coordinates[l][1])==g)
-                distances.wpDistance.push(distances.distance.reduce(function(pv, cv) { return pv + cv; }, 0));
+                for (var j = 0; j < coordLength - 1; j++){
+                    var wpCoord = a.features[i].properties.waypoint_coordinates[l];
+                    var Coord = a.features[i].geometry.coordinates[j];
+                    //find Position of WayPoint in Feature: comparison of Coords and WayPoints
+                    if (wpCoord[0]==Coord[0]&&wpCoord[1]==Coord[1]){
+                    wpPos.push([i,j]);
+                    }
+                }
             }
         }
+        lengthCoords[i] = coordLength;
     }
+    var WayPointList=[];
+    var position = 0;
+    // find Position of Waypoints and its distances
+    for (var o=0; o<wpPos.length; o++){
+        if(wpPos[o][0]==0){
+            position += wpPos[o][1];
+            wpPosDist.push(position);
+            var wpArr=distances.distance.slice(0,(position+1));
+            wpDistance= wpArr.reduce(function(pv, cv) { return pv + cv; }, 0);
+            distances.wpDistance.push(wpDistance);
+            WayPointList.push([position, wpDistance]);
+        }else{
+            for(var m=0; m<wpPos[o][0];m++){
+                position = lengthCoords[m] // sum coords in last features
+            }
+            position += wpPos[o][1]; 
+            wpPosDist.push(position);
+            var wpArr=distances.distance.slice(0,(position+1));
+            wpDistance= wpArr.reduce(function(pv, cv) { return pv + cv; }, 0);
+            distances.wpDistance.push(wpDistance);
+            WayPointList.push([position, wpDistance]);
+        }
+    }
+    console.log(WayPointList);
     distances.totaldistance = distances.distance.reduce(function(pv, cv) { return pv + cv; }, 0);
     console.log(distances);
     return distances;
