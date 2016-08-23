@@ -88,10 +88,10 @@ var calcDistances = function(a) {
                 last = h;
             }
         }//if Waypoints available
-        if (typeof(a.features[i].properties.waypoint_coordinates)!=="undefined"){
-            for (var l=0; l<a.features[i].properties.waypoint_coordinates.length; l++){
+        if (typeof(a.properties.waypoint_coordinates)!=="undefined"){
+            for (var l=0; l<a.properties.waypoint_coordinates.length; l++){
                 for (var j = 0; j < coordLength - 1; j++){
-                    var wpCoord = a.features[i].properties.waypoint_coordinates[l];
+                    var wpCoord = a.properties.waypoint_coordinates[l];
                     var Coord = a.features[i].geometry.coordinates[j];
                     //find Position of WayPoint in Feature: comparison of Coords and WayPoints
                     if (wpCoord[0]==Coord[0]&&wpCoord[1]==Coord[1]){
@@ -216,7 +216,7 @@ var updateWaypointData = function(a, b) {
                 y: d3.min(b)
             }, {
                 x: a.wpDistance[i],
-                y: d3.max(b)
+                y: (d3.max(b)/2)
 
             }]
         });
@@ -305,7 +305,7 @@ var createBarChart = function(polygonData, waypointData, options, heightvalue, d
         .attr('r', 5)
         //.attr("data-legend",function(d) { return d.steepness})
         .attr('fill', 'black');
-        
+
     //barChart as path
     svgSec.selectAll('hpath').data(polygonData).enter().append('path')
         //.attr('leafletId', id)

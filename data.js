@@ -21,8 +21,7 @@ var newgeojson = {
             ]
         },
         "properties": {
-            "steepness": 6,
-            "waypoint_coordinates": [[49.4142723, 8.6943519, 130], [49.4142292, 8.6973656, 138]]
+            "steepness": 6
         }
     }, {
         "type": "Feature",
@@ -103,14 +102,14 @@ var newgeojson = {
             ]
         },
         "properties": {
-            "steepness": 9,
-            "waypoint_coordinates": [[49.4176615, 8.6983135, 233.2],[49.4188825, 8.7025868, 297.3]]
+            "steepness": 9
         }
     }],
     "properties": {
         "Creator": "OpenRouteService.org",
         "records": 2,
-        "summary": "Bins of elevation types in route"
+        "summary": "Bins of elevation types in route",
+        "waypoint_coordinates": [[49.414283, 8.6947326, 130],[49.4176615, 8.6983135, 233.2],[49.4188825, 8.7025868, 297.3]]
     }
 };
 
