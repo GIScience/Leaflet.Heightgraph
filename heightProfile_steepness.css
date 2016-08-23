@@ -6,7 +6,7 @@
   }
   
   .myDiv {
-      height: 300px;
+      height: 600px;
       width: 150px;
       color: red;
       font-family: calibri;
@@ -59,4 +59,10 @@
   .focusLine line {
       stroke-width: 2;
       stroke: black;
+  }
+  .wpLine {
+    pointer-events: none;
+  }
+  .wp-text{
+    color: white;
   }

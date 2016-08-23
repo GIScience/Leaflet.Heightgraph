@@ -57,7 +57,7 @@ var legendData = [{
 /**
  * Returns distance between each coordinate of Linestring
  * @param {FeatureCollection} a
- * @returns {Number|Array| Object} Object that contains distances between coordinates and sum of distances as totaldistance 
+ * @returns {Number|Array| Object} Object that contains distances between coordinates, the coordinates, and sum of distances as totaldistance
  */
 var calcDistances = function(a) {
     distances = {};
@@ -70,6 +70,7 @@ var calcDistances = function(a) {
     var wpPosDist=[];
     var lengthCoords=[];
     var wpDistance=[];
+    distances.coordsOfDist=[];
     for (var i = 0; i < featureLength; i++) {
         var coordLength = a.features[i].geometry.coordinates.length;
         console.log('coordLength', coordLength)
@@ -79,10 +80,12 @@ var calcDistances = function(a) {
             if (j == 0 && i > 0) {
                 calc = last.distanceTo(g);
                 distances.distance.push(calc);
+                distances.coordsOfDist.push([last,g]);
             }
             var h = new L.LatLng(a.features[i].geometry.coordinates[j + 1][0], a.features[i].geometry.coordinates[j + 1][1]);
             calc = g.distanceTo(h);
             distances.distance.push(calc);
+            distances.coordsOfDist.push([g,h]);
             // save last
             if (j == coordLength - 2) {
                 last = h;
@@ -126,6 +129,7 @@ var calcDistances = function(a) {
         }
     }
     distances.totaldistance = distances.distance.reduce(function(pv, cv) { return pv + cv; }, 0);
+    console.log(distances);
     return distances;
 };
 /**
@@ -193,7 +197,8 @@ var updateBarData = function(a, steepness) {
                 x: adddist[i],
                 y: d3.min(a)
             }],
-            steepness: steepness[i]
+            steepness: steepness[i],
+            LatLng: distances.coordsOfDist[i]
         });
     } 
     return list;
@@ -288,24 +293,6 @@ var createBarChart = function(polygonData, waypointData, options, heightvalue, d
         return y(d.y);
     });
 
-    //Waypoints-Line
-    svgSec.selectAll('linePath').data(waypointData).enter().append('path')
-        .attr('d', function(d) {
-            return polygon(d.wpCoords);
-        })
-        .attr("stroke-width", 2).attr('stroke', 'black');
-    //Waypoints-Circle
-    svgSec.selectAll('hcircle').data(waypointData).enter().append('circle')
-        .attr('cx', function(d) {
-            return x(d.wpCoords[1].x);
-        })
-        .attr('cy', function(d) {
-            return y(d.wpCoords[1].y);
-        })
-        .attr('r', 5)
-        //.attr("data-legend",function(d) { return d.steepness})
-        .attr('fill', 'black');
-
     //barChart as path
     svgSec.selectAll('hpath').data(polygonData).enter().append('path')
         //.attr('leafletId', id)
@@ -316,6 +303,41 @@ var createBarChart = function(polygonData, waypointData, options, heightvalue, d
         .attr("fill-opacity", 0.6).attr('fill', function(d) {
             return (d.steepness - 5 == -5 ? '#028306' : d.steepness - 5 == -4 ? '#2AA12E' : d.steepness - 5 == -3 ? '#53BF56' : d.steepness - 5 == -2 ? '#7BDD7E' : d.steepness - 5 == -1 ? '#A4FBA6' : d.steepness - 5 == 0 ? '#ffcc99' : d.steepness - 5 == 1 ? '#F29898 ' : d.steepness - 5 == -2 ? '#E07575' : d.steepness - 5 == 3 ? '#CF5352' : d.steepness - 5 == 4 ? '#BE312F' : d.steepness - 5 == 5 ? '#AD0F0C' : '#AD0F0C');
         }).on('mouseover', handleMouseOver).on("mouseout", handleMouseOut).on("mousemove", mousemove);
+
+        //Waypoints-Line
+    svgSec.selectAll('linePath').data(waypointData).enter().append('path').attr('class','wpLine')
+        .attr('d', function(d) {
+            return polygon(d.wpCoords);
+        })
+        .attr('pointer-events', 'none')
+        .attr("stroke-width", 2).attr('stroke', 'black');
+    //Waypoints-Circle
+    svgSec.selectAll('hcircle').data(waypointData).enter().append('circle')
+        .attr('cx', function(d) {
+            return x(d.wpCoords[1].x);
+        })
+        .attr('cy', function(d) {
+            return y(d.wpCoords[1].y);
+        })
+        .attr('pointer-events', 'none')
+        .attr('r', 8)
+        //.attr("data-legend",function(d) { return d.steepness})
+        .attr('fill', 'black');
+
+    svgSec.selectAll('wpText').data(waypointData).enter().append("text")
+        .attr("class", "wp-text")
+        .attr("dx", function(d) {
+            return x(d.wpCoords[1].x)-3.5;
+        })
+        .attr("dy", function(d) {
+            return y(d.wpCoords[1].y+5);
+        })
+        .text(function(d, i) {
+            return i+1;
+        })
+        .style('color','white')
+        .style('font-size', '12px')
+        .style('font-family','calibri');
             
     // Create Event Handlers for mouse
     function handleMouseOver(d, i) {
@@ -338,6 +360,8 @@ var createBarChart = function(polygonData, waypointData, options, heightvalue, d
             d1 = d.coords[1].x;
         var d2 = d1 - x0 > x0 - d0 ? 0 : 1; // shortest distance between mouse and coords of polygon
         var y0 = d.coords[d2].y;
+        var LatLngCoords = d.LatLng;
+        console.log(LatLngCoords)
         focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + y(d3.min(heightvalue)) + ")");
         focus.select("text").text(Math.round((x0 / 1000) * 100) / 100 + ' km'); //text in km
         focusLine.style("display", "initial").attr('x1', x(x0)).attr('y1', y(y0)).attr('x2', x(x0));
