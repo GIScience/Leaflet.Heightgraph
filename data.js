@@ -22,7 +22,7 @@ var newgeojson = {
         },
         "properties": {
             "steepness": 6,
-            "waypoint_coordinates": [[49.414254, 8.6943055, 116.6]]
+            "waypoint_coordinates": [[49.4142723, 8.6943519, 130], [49.4142292, 8.6973656, 138]]
         }
     }, {
         "type": "Feature",

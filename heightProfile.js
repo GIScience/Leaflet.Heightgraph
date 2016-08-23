@@ -1,7 +1,7 @@
 var legendData = [{
     '-5': {
         text: '16%+',
-        color: '#028306'
+        color: '#028306' //gruen
     }
 }, {
     '-4': {
@@ -51,7 +51,7 @@ var legendData = [{
 }, {
     '5': {
         text: '16%+',
-        color: '#AD0F0C'
+        color: '#AD0F0C' //rot
     }
 }];
 /**
@@ -125,9 +125,7 @@ var calcDistances = function(a) {
             WayPointList.push([position, wpDistance]);
         }
     }
-    console.log(WayPointList);
     distances.totaldistance = distances.distance.reduce(function(pv, cv) { return pv + cv; }, 0);
-    console.log(distances);
     return distances;
 };
 /**
@@ -151,6 +149,23 @@ var calculateHeightSteep = function(a) {
     };
     return list;
 };
+/**
+ * Returns values of steepness as Array without duplicates 
+ * @param {Array} a: steepness values of all coords
+ * @returns {Array} list with steepness color and text as array
+ */
+var updateLegend = function(a){
+    var legendList=[];
+    //remove duplicates
+    var cleanList = a.filter(function(elem, index, self) {
+        return index == self.indexOf(elem);
+    }); 
+    for (var i=0; i<cleanList.length; i++){
+        var j= cleanList[i]-5;
+        legendList.push(legendData[cleanList[i]][j]);
+    }
+    return legendList;
+}
 /**
  * Returns list with four x and y coordinates for svg-path (Polygon) and steepness type
  * @param {Array} a: heightvalue
@@ -180,16 +195,42 @@ var updateBarData = function(a, steepness) {
             }],
             steepness: steepness[i]
         });
-        
-    }
+    } 
     return list;
 };
+// a: distances
+//b: heightvalue
+/**
+ * Returns list with two x and y coordinates for svg-path (Line and circle)
+ * @param {Array|Object} a: distances
+ * @param {Array} b: heightvalue
+ * @returns {Number|Array|Object} list with coordinates as array
+ */
+var updateWaypointData = function(a, b) {
+    var list=[];
+    var length= a.wpDistance.length;
+    for (var i=0; i< length; i++){
+        list.push({
+            wpCoords:[{
+                x: a.wpDistance[i],
+                y: d3.min(b)
+            }, {
+                x: a.wpDistance[i],
+                y: d3.max(b)
+
+            }]
+        });
+    }
+    return list;
+}
 /**
  * @param {Object} polygonData: (x,y-coords, steepness)
+ * @param {Object} waypointData: (x,y-coords)
  * @param {Object} options: size-options for barChart, div for barChart
  * @param {Array} heightvalue: heightvalue of each coordinate
+ * @param {Object} dynamicLegend: values for legend (text and color)
  */
-var createBarChart = function(polygonData, options, heightvalue) {
+var createBarChart = function(polygonData, waypointData, options, heightvalue, dynamicLegend) {
     //SVG area
     var margin = options.margins,
         width = 1000 - margin.left - margin.right,
@@ -227,25 +268,45 @@ var createBarChart = function(polygonData, options, heightvalue) {
     });
     var legendRectSize = 7;
     var legendSpacing = 7;
-    var legend = svgSec.selectAll('.legend').data(legendData).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
+    var legend = svgSec.selectAll('.legend').data(dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
         var height = legendRectSize + legendSpacing;
         var offset = height * 2;
         var horz = -2 * legendRectSize;
         var vert = i * height - offset;
         return 'translate(' + horz + ',' + vert + ')';
     });
-    legend.append('rect').attr('width', legendRectSize).attr('height', legendRectSize).attr('x', 30).attr('y', 30).style('fill', function(d, i) {
-        return (d[i - 5].color);
+    legend.append('rect').attr('width', legendRectSize).attr('height', legendRectSize).attr('x', 30).attr('y', 30).style('fill', function(d, i){
+        return (d.color);
     });
     legend.append('text').attr('x', 40).attr('y', 36).style('font-size', 10).style('font-family', 'calibri').text(function(d, i) {
-        return d[i - 5].text;
+        return d.text;
     });
-    //bars as polygons (path)
+    //scale data (polygon-path)
     var polygon = d3.svg.line().x(function(d) {
         return x(d.x);
     }).y(function(d) {
         return y(d.y);
     });
+
+    //Waypoints-Line
+    svgSec.selectAll('linePath').data(waypointData).enter().append('path')
+        .attr('d', function(d) {
+            return polygon(d.wpCoords);
+        })
+        .attr("stroke-width", 2).attr('stroke', 'black');
+    //Waypoints-Circle
+    svgSec.selectAll('hcircle').data(waypointData).enter().append('circle')
+        .attr('cx', function(d) {
+            return x(d.wpCoords[1].x);
+        })
+        .attr('cy', function(d) {
+            return y(d.wpCoords[1].y);
+        })
+        .attr('r', 5)
+        //.attr("data-legend",function(d) { return d.steepness})
+        .attr('fill', 'black');
+        
+    //barChart as path
     svgSec.selectAll('hpath').data(polygonData).enter().append('path')
         //.attr('leafletId', id)
         .attr('d', function(d) {
@@ -255,6 +316,7 @@ var createBarChart = function(polygonData, options, heightvalue) {
         .attr("fill-opacity", 0.6).attr('fill', function(d) {
             return (d.steepness - 5 == -5 ? '#028306' : d.steepness - 5 == -4 ? '#2AA12E' : d.steepness - 5 == -3 ? '#53BF56' : d.steepness - 5 == -2 ? '#7BDD7E' : d.steepness - 5 == -1 ? '#A4FBA6' : d.steepness - 5 == 0 ? '#ffcc99' : d.steepness - 5 == 1 ? '#F29898 ' : d.steepness - 5 == -2 ? '#E07575' : d.steepness - 5 == 3 ? '#CF5352' : d.steepness - 5 == 4 ? '#BE312F' : d.steepness - 5 == 5 ? '#AD0F0C' : '#AD0F0C');
         }).on('mouseover', handleMouseOver).on("mouseout", handleMouseOut).on("mousemove", mousemove);
+            
     // Create Event Handlers for mouse
     function handleMouseOver(d, i) {
         // Use D3 to select element, change color and size
@@ -291,7 +353,9 @@ var heightprofile = function(data, options) {
     var distances = calcDistances(data);
     var heightvalue = calculateHeightSteep(data).height;
     var steepness = calculateHeightSteep(data).steep;
+    var dynamicLegend = updateLegend(steepness);
     var waypointPosition = calculateHeightSteep(data).wpFeatPos;
     var polygonData = updateBarData(heightvalue, steepness);
-    var createSVG = createBarChart(polygonData, options, heightvalue);
+    var waypointData = updateWaypointData(distances, heightvalue);
+    var createSVG = createBarChart(polygonData, waypointData, options, heightvalue, dynamicLegend);
 };
