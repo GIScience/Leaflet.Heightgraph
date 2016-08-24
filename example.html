@@ -1,30 +1,43 @@
-<title>Coordinate viewing test page</title>
-  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<html>
+    <head>
+        <title>Elevation Graph Example</title>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+        <link rel="stylesheet" href="https://rawgit.com/Caged/d3-tip/master/examples/example-styles.css">
+        <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+        <script type="text/javascript" src="data.js"></script>
+        <script type="text/javascript" src="settings.js"></script>
+        <script type="text/javascript" src="heightProfile.js"></script>
+        <link rel="stylesheet" src="heightProfile.css"></script>
+    </head>
+    <style>
+        #elevationgraph {
+            /*
+            height: 0;
+            width: 0;
+            */
+        }
+    </style>
+    <body>
+        <div id="elevationgraph"></div>
+        <script type="text/javascript">
 
-  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-  <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
-  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
-  
-  <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
-  <script type="text/javascript" src="../HeightProfile/data.js"></script>
-  <script type="text/javascript" src="../HeightProfile/heightProfile.js"></script>
-  <link rel="stylesheet" src="../HeightProfile/heightProfile_steepness.css"></script>
- </head>
-<body>
-  <div class="myDiv" id="myDivId"> </div>
-  <script type="text/javascript">
+            var elevationGraph = document.getElementById("elevationgraph"); 
+            
+            var options = {
+                width: 600, 
+                height: 125, 
+                margins: {
+                    top: 10,
+                    right: 20, 
+                    bottom: 30, 
+                    left: 50
+                }, 
+                div: elevationGraph};
 
-  var myDiv= document.getElementById("myDivId"); 
-  var options = {width: 600, 
-    height: 125, 
-    margins:{
-      top:10,
-      right:20, 
-      bottom:30, 
-      left:50
-  }, div:myDiv};
-  var doIt = heightprofile(newgeojson, options);
-  var doItagain = heightprofile(newgeojson, options);
-  </script>
-</body>
+            heightprofile(newgeojson, options);
+
+        </script>
+    </body>
 </html>
