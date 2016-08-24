@@ -1,26 +1,26 @@
 var legendData = [{
     '-5': {
-        text: '16%+',
+        text: '- 16%+',
         color: '#028306' //gruen
     }
 }, {
     '-4': {
-        text: '10-15%',
+        text: '- 10-15%',
         color: '#2AA12E'
     }
 }, {
     '-3': {
-        text: '7-9%',
+        text: '- 7-9%',
         color: '#53BF56'
     }
 }, {
     '-2': {
-        text: '4-6%',
+        text: '- 4-6%',
         color: '#7BDD7E'
     }
 }, {
     '-1': {
-        text: '1-3%',
+        text: '- 1-3%',
         color: '#A4FBA6'
     }
 }, {

@@ -109,12 +109,16 @@ var calculateHeightSteep = function(a) {
  * @param {Array} a: steepness values of all coords
  * @returns {Array} list with steepness color and text as array
  */
-var updateLegend = function(a) {
+var updateLegend = function(a){
     var legendList = [];
     //remove duplicates
     var cleanList = a.filter(function(elem, index, self) {
         return index == self.indexOf(elem);
     });
+    function sortNumber(a,b) {
+        return a - b;
+    }
+    cleanList.sort(sortNumber);
     for (var i = 0; i < cleanList.length; i++) {
         var j = cleanList[i] - 5;
         legendList.push(legendData[cleanList[i]][j]);
@@ -261,6 +265,7 @@ var createBarChart = function(polygonData, waypointData, options, heightvalue, d
     // legend
     var legendRectSize = 7;
     var legendSpacing = 7;
+    console.log(dynamicLegend);
     var legend = svgSec.selectAll('.legend').data(dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
         var height = legendRectSize + legendSpacing;
         var offset = height * 2;
