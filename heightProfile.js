@@ -248,12 +248,15 @@ var createBarChart = function(polygonData, waypointData, options, heightvalue, d
         .attr('class', 'x axis') // specify classes
         .call(xAxis).append("text")
         //.attr("transform", "rotate(-90)")
-        .attr("x", width - 60).attr("y", y(d3.max(heightvalue)) - 5).style("font-size", "12px").attr("font-family", "calibri").style("text-anchor", "initial").text("Distance [m]");
-    svgSec.append('g').attr('class', 'y axis').call(yAxis).append("text").attr("transform", "rotate(-90)").attr("x", -50).attr("y", 4).attr("dy", ".71em").style("font-size", "12px").attr("font-family", "calibri").style("text-anchor", "initial").text("Height [m]");
-    svgSec.selectAll('.axis line, .axis path').style({
+        .attr("x", width - 20).attr("y", y(d3.max(heightvalue)) + 15).style("font-size", "12px").style("text-anchor", "initial").text("km");
+    svgSec.append('g').attr('class', 'y axis').call(yAxis).append("text").attr("x", -30).attr("y", 4).attr("dy", "0").style("font-size", "12px").style("text-anchor", "initial").text("hm");
+    svgSec.selectAll('.axis path').style({
         'stroke': 'Black',
         'fill': 'none',
         'stroke-width': '1'
+    });
+    svgSec.selectAll('.axis line').style({
+        'visibility': 'hidden'
     });
     // legend
     var legendRectSize = 7;
@@ -295,7 +298,7 @@ var createBarChart = function(polygonData, waypointData, options, heightvalue, d
         var LatLngCoords = d.LatLng;
         var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
         console.log(segmentCenter);
-        focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + y(d3.min(heightvalue) + 10) + ")");
+        focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + y(d3.min(heightvalue) + 15) + ")");
         focus.select("text").text(Math.round((x0 / 1000) * 100) / 100 + ' km'); //text in km
         focusLine.style("display", "initial").attr('x1', x(x0)).attr('y1', y(y0)).attr('x2', x(x0));
     }
