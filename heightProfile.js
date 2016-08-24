@@ -36,12 +36,13 @@ var calcDistances = function(a) {
             }
         } //if Waypoints available
         if (typeof(a.properties.waypoint_coordinates) !== "undefined") {
+            console.log(a.properties.waypoint_coordinates)
             for (var l = 0; l < a.properties.waypoint_coordinates.length; l++) {
                 for (var j = 0; j < coordLength - 1; j++) {
                     var wpCoord = a.properties.waypoint_coordinates[l];
                     var Coord = a.features[i].geometry.coordinates[j];
                     //find Position of WayPoint in Feature: comparison of Coords and WayPoints
-                    if (wpCoord[0] == Coord[0] && wpCoord[1] == Coord[1]) {
+                    if (wpCoord.lon == Coord[0] && wpCoord.lat == Coord[1]) {
                         wpPos.push([i, j]);
                     }
                 }

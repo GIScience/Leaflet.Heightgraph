@@ -977,7 +977,7 @@ var newgeojson = {
     "properties": {
         "Creator": "OpenRouteService.org",
         "records": 20,
-        "summary": "Bins of elevation types in route"
+        "summary": "Bins of elevation types in route",
+        "waypoint_coordinates":[{"lat":"49.41633392300034","lon":"8.681602478027346"},{"lat":"49.42448556744801","lon":"8.706321716308596"},{"lat":"49.46946274203339","lon":"8.759536743164064"},{"lat":"49.530110915185276","lon":"8.787002563476564"}]
     }
 };
-//"waypoint_coordinates": [[49.414283, 8.6947326, 130],[49.4176615, 8.6983135, 233.2],[49.4188825, 8.7025868, 297.3]];
