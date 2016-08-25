@@ -101,14 +101,14 @@ L.Control.Heightgraph = L.Control.extend({
         for (var i = 0; i < featureLength; i++) {
             var coordLength = a.features[i].geometry.coordinates.length;
             for (var j = 0; j < coordLength - 1; j++) {
-                var g = new L.LatLng(a.features[i].geometry.coordinates[j][0], a.features[i].geometry.coordinates[j][1]);
+                var g = new L.LatLng(a.features[i].geometry.coordinates[j][1], a.features[i].geometry.coordinates[j][0]);
                 // catch steps between features
                 if (j == 0 && i > 0) {
                     calc = last.distanceTo(g);
                     distances.distance.push(calc);
                     distances.coordsOfDist.push([last, g]);
                 }
-                var h = new L.LatLng(a.features[i].geometry.coordinates[j + 1][0], a.features[i].geometry.coordinates[j + 1][1]);
+                var h = new L.LatLng(a.features[i].geometry.coordinates[j + 1][1], a.features[i].geometry.coordinates[j + 1][0]);
                 calc = g.distanceTo(h);
                 distances.distance.push(calc);
                 distances.coordsOfDist.push([g, h]);

@@ -38,8 +38,9 @@
             attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
         });
 
-        var bounds = new L.LatLngBounds(new L.LatLng(-44.6, 170), new L.LatLng(-45, 168));
+        var bounds = new L.LatLngBounds(new L.LatLng(49.3356786,8.493329), new L.LatLng(49.4912906, 8.8714796 ));
 
+    
         var hg = L.control.heightgraph({
             width: 750,
             height: 125,
@@ -54,6 +55,10 @@
         hg.addTo(map);
         
         hg.addData(geojson);
+
+        L.geoJson(geojson,{
+            //onEachFeature: hg.addData.bind(hg) //working on a better solution
+        }).addTo(map);
 
         map.addLayer(openstreetmap).fitBounds(bounds);
 
