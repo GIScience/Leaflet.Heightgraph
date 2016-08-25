@@ -2,42 +2,62 @@
     <head>
         <title>Elevation Graph Example</title>
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <style>
+            html, body, #map {
+                height:100%;
+                width:100%;
+                padding:0px;
+                margin:0px;
+            } 
+        </style>
+        <!-- Leaflet -->
+        <link rel="stylesheet" href="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
+        <script src="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="heightProfile.css"/>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
         <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
         <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
         <link rel="stylesheet" href="https://rawgit.com/Caged/d3-tip/master/examples/example-styles.css">
-        <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
         <script type="text/javascript" src="data.js"></script>
         <script type="text/javascript" src="settings.js"></script>
         <script type="text/javascript" src="heightProfile.js"></script>
-        <link rel="stylesheet" src="heightProfile.css"></script>
+        
     </head>
-    <style>
-        #elevationgraph {
-            /*
-            height: 0;
-            width: 0;
-            */
-        }
-    </style>
-    <body>
-        <div id="elevationgraph"></div>
-        <script type="text/javascript">
 
-            var elevationGraph = document.getElementById("elevationgraph"); 
-            
-            var options = {
-                width: 600, 
-                height: 125, 
-                margins: {
-                    top: 60,
-                    right: 20, 
-                    bottom: 30, 
-                    left: 50
-                }, 
-                div: elevationGraph};
+    <div id="map"></div>
 
-            heightprofile(newgeojson, options);
+    <script type="text/javascript">
+        var map = new L.Map('map');
 
-        </script>
-    </body>
+        var url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            attr = 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+
+
+        var openstreetmap = L.tileLayer(url, {
+            id: 'openstreetmap',
+            attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+        });
+
+        var bounds = new L.LatLngBounds(new L.LatLng(-44.6, 170), new L.LatLng(-45, 168));
+
+        var hg = L.control.heightgraph({
+            width: 750,
+            height: 125,
+            margins: {
+                top: 45,
+                right: 20,
+                bottom: 30,
+                left: 50
+            }
+        });
+
+        hg.addTo(map);
+        
+        hg.addData(geojson);
+
+        map.addLayer(openstreetmap).fitBounds(bounds);
+
+
+    </script>
+
 </html>

@@ -1,4 +1,4 @@
-var newgeojson = {
+var geojson = {
     "type": "FeatureCollection",
     "features": [{
         "type": "Feature",

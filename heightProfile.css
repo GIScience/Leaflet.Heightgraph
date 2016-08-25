@@ -15,3 +15,36 @@
   .wp-text {
       pointer-events: none;
   }
+  
+  .heightGraph {
+      width: 26px !important;
+      height: 26px;
+      display: block;
+      box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
+      cursor: auto;
+      background-color: #FFFFFF;
+  }
+  
+  .heightGraph:before {
+      content: "\f1fe";
+      font-family: FontAwesome;
+      color: #707070;
+      position: absolute;
+      z-index: -1;
+      margin-top: 5px;
+      margin-left: 6px;
+  }
+  
+  .background {
+      margin-left: 35px;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+  }
+  
+  .heightGraph-collapsed .background {
+      display: none;
+  }
+  
+  .heightGraph-collapsed .elevation-toggle {
+      display: block;
+  }
