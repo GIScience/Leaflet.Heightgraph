@@ -17,10 +17,9 @@
   }
   
   .tick, .tick text {
-    fill: #fff;
+      fill: #fff;
   }
-
-
+  
   .heightGraph {
       width: 26px !important;
       height: 26px;
@@ -28,6 +27,20 @@
       box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
       cursor: auto;
       background-color: #FFFFFF;
+      cursor: default;
+      -webkit-touch-callout: none;
+      /* iOS Safari */
+      -webkit-user-select: none;
+      /* Chrome/Safari/Opera */
+      -khtml-user-select: none;
+      /* Konqueror */
+      -moz-user-select: none;
+      /* Firefox */
+      -ms-user-select: none;
+      /* Internet Explorer/Edge */
+      user-select: none;
+      /* Non-prefixed version, currently
+                                  not supported by any browser */
   }
   
   .heightGraph:before {

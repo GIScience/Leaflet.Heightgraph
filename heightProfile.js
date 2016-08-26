@@ -287,7 +287,6 @@ L.Control.Heightgraph = L.Control.extend({
         });
         var svgSec = d3.select(this._container).append("svg").attr("class", "background").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         
-
         // axes and axes labels
         svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
             .attr('class', 'x axis') // specify classes
