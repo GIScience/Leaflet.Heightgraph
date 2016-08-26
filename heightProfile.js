@@ -269,6 +269,7 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _createBarChart: function(polygonData, waypointData, container, heightvalue, dynamicLegend) {
         //SVG area
+        console.log(distances.totaldistance)
         var margin = this.options.margins,
             width = this.options.width - margin.left - margin.right,
             height = 180 - margin.top - margin.bottom;
@@ -276,8 +277,11 @@ L.Control.Heightgraph = L.Control.extend({
         var y = d3.scale.linear().range([height, 0]).domain(d3.extent(heightvalue, function(d) {
             return d;
         }));
-        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4);
-        //.ticks(1);
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4).tickFormat(function(d) {
+            return d/1000;
+            // var prefix = d3.formatPrefix(d);
+            // return prefix.scale(d) //+ prefix.symbol;
+        });
         var yAxis = d3.svg.axis().scale(y).orient("left").ticks(4);
         var tip = d3.tip().attr('class', 'd3-tip').offset([-10, 0]).html(function(d) {
             return ((Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100) + " m");
@@ -286,15 +290,10 @@ L.Control.Heightgraph = L.Control.extend({
             return (d);
         });
         var svgSec = d3.select(this._container).append("svg").attr("class", "background").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        
         // axes and axes labels
         svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
             .attr('class', 'x axis') // specify classes
-            .call(xAxis).append("text")
-            .attr("x", width - 20).attr("y", y(d3.max(heightvalue)) + 15).style("font-size", "12px")
-            .style("text-anchor", "middle")
-            .attr("fill", "#fff")
-            .text("km");
+            .call(xAxis).append("text").attr("x", width - 20).attr("y", y(d3.max(heightvalue)) + 15).style("font-size", "12px").style("text-anchor", "middle").attr("fill", "#fff").text("km");
         svgSec.append('g').attr('class', 'y axis').call(yAxis).append("text").attr("x", -30).attr("y", -5).attr("fill", "#fff").attr("dy", "0").style("font-size", "12px").style("text-anchor", "initial").text("hm");
         svgSec.selectAll('.axis path').style({
             'stroke': '#fff',
@@ -304,11 +303,6 @@ L.Control.Heightgraph = L.Control.extend({
         svgSec.selectAll('.axis line').style({
             'visibility': 'hidden'
         });
-
-
-
-
-
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
             return x(d.x);
@@ -333,7 +327,6 @@ L.Control.Heightgraph = L.Control.extend({
         }).attr("height", function(d) {
             return 14;
         }).attr("y", "-7").attr("x", "-1").style("fill", "#000");
-
         var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
         var focusLine = focusLineGroup.append("line").attr("stroke-width", 1).attr("fill", "#fff").attr("x1", 10).attr("x2", 10).attr("y1", y(d3.max(heightvalue))).attr("y2", y(d3.min(heightvalue))).style("display", "none");
         // waypoints line
@@ -355,7 +348,6 @@ L.Control.Heightgraph = L.Control.extend({
         }).text(function(d, i) {
             return i + 1;
         }).style('fill', 'white').style('font-size', '12px');
-        
         // legend
         var legendRectSize = 7;
         var legendSpacing = 7;
