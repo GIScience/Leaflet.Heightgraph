@@ -14,6 +14,7 @@ L.Control.Heightgraph = L.Control.extend({
         var opts = this.options;
         var controlDiv = this._container = L.DomUtil.create('div', 'heightGraph');
         //controlDiv.title = 'Height Graph Profile';
+        this._map = map;
         this._initToggle();
         this._cont = d3.select(controlDiv);
         return controlDiv;
@@ -87,16 +88,13 @@ L.Control.Heightgraph = L.Control.extend({
      * @returns {Number|Array| Object} Object that contains distances between coordinates, the coordinates, and sum of distances as totaldistance
      */
     _calcDistances: function(a) {
+        console.log(a)
         distances = {};
         var first, calc;
         //var wpList=[];
         distances.distance = [];
         distances.wpDistance = [];
         var featureLength = a.features.length;
-        var wpPos = [];
-        var wpPosDist = [];
-        var lengthCoords = [];
-        var wpDistance = [];
         distances.coordsOfDist = [];
         for (var i = 0; i < featureLength; i++) {
             var coordLength = a.features[i].geometry.coordinates.length;
@@ -116,46 +114,6 @@ L.Control.Heightgraph = L.Control.extend({
                 if (j == coordLength - 2) {
                     last = h;
                 }
-            } //if Waypoints available
-            if (typeof(a.properties.waypoint_coordinates) !== "undefined") {
-                for (var l = 0; l < a.properties.waypoint_coordinates.length; l++) {
-                    for (var j = 0; j < coordLength - 1; j++) {
-                        var wpCoord = a.properties.waypoint_coordinates[l];
-                        var Coord = a.features[i].geometry.coordinates[j];
-                        //find Position of WayPoint in Feature: comparison of Coords and WayPoints
-                        if (wpCoord.lon == Coord[0] && wpCoord.lat == Coord[1]) {
-                            wpPos.push([i, j]);
-                        }
-                    }
-                }
-            }
-            lengthCoords[i] = coordLength;
-        }
-        var WayPointList = [];
-        var position = 0;
-        // find Position of Waypoints and its distances
-        for (var o = 0; o < wpPos.length; o++) {
-            if (wpPos[o][0] == 0) {
-                position += wpPos[o][1];
-                wpPosDist.push(position);
-                var wpArr = distances.distance.slice(0, (position + 1));
-                wpDistance = wpArr.reduce(function(pv, cv) {
-                    return pv + cv;
-                }, 0);
-                distances.wpDistance.push(wpDistance);
-                WayPointList.push([position, wpDistance]);
-            } else {
-                for (var m = 0; m < wpPos[o][0]; m++) {
-                    position = lengthCoords[m] // sum coords in last features
-                }
-                position += wpPos[o][1];
-                wpPosDist.push(position);
-                var wpArr = distances.distance.slice(0, (position + 1));
-                wpDistance = wpArr.reduce(function(pv, cv) {
-                    return pv + cv;
-                }, 0);
-                distances.wpDistance.push(wpDistance);
-                WayPointList.push([position, wpDistance]);
             }
         }
         distances.totaldistance = distances.distance.reduce(function(pv, cv) {
@@ -261,6 +219,20 @@ L.Control.Heightgraph = L.Control.extend({
         }
         return list;
     },
+    _showMarker: function(ll) {
+        if (!this._marker) {
+            this._marker = new L.circleMarker(ll, {
+                radius: 5,
+                fillColor: "#ff7800",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8,
+            }).addTo(this._map);
+        } else {
+            this._marker.setLatLng(ll);
+        }
+    },
     /**
      * @param {Object} polygonData: (x,y-coords, steepness)
      * @param {Object} waypointData: (x,y-coords)
@@ -269,7 +241,6 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _createBarChart: function(polygonData, waypointData, container, heightvalue, dynamicLegend) {
         //SVG area
-        console.log(distances.totaldistance)
         var margin = this.options.margins,
             width = this.options.width - margin.left - margin.right,
             height = 180 - margin.top - margin.bottom;
@@ -278,7 +249,7 @@ L.Control.Heightgraph = L.Control.extend({
             return d;
         }));
         var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4).tickFormat(function(d) {
-            return d/1000;
+            return d / 1000;
             // var prefix = d3.formatPrefix(d);
             // return prefix.scale(d) //+ prefix.symbol;
         });
@@ -379,6 +350,7 @@ L.Control.Heightgraph = L.Control.extend({
             focus.style("display", "none");
             focusLine.style("display", "none");
         }
+        var self = this;
 
         function mousemove(d) {
             var x0 = x.invert(d3.mouse(this)[0]); //distance in m   
@@ -388,6 +360,7 @@ L.Control.Heightgraph = L.Control.extend({
             var y0 = d.coords[d2].y;
             var LatLngCoords = d.LatLng;
             var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
+            self._showMarker(segmentCenter);
             focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + y(d3.min(heightvalue)) + ")");
             focus.select("text").text(Math.round((x0 / 1000) * 100) / 100 + ' km'); //text in km
             focusLine.style("display", "initial").attr('x1', x(x0)).attr('y1', y(y0)).attr('x2', x(x0));

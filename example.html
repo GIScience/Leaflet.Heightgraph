@@ -56,7 +56,6 @@
         hg.addData(geojson);
 
         L.geoJson(geojson,{
-            //onEachFeature: hg.addData.bind(hg) //working on a better solution
         }).addTo(map);
 
         map.addLayer(openstreetmap).fitBounds(bounds);
