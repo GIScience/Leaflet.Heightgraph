@@ -16,6 +16,11 @@
       pointer-events: none;
   }
   
+  .tick, .tick text {
+    fill: #fff;
+  }
+
+
   .heightGraph {
       width: 26px !important;
       height: 26px;
@@ -37,7 +42,7 @@
   
   .background {
       margin-left: 35px;
-      background-color: rgba(0, 0, 0, 0.4);
+      background-color: rgba(0, 0, 0, 0.6);
       border-radius: 10px;
   }
   
@@ -47,4 +52,8 @@
   
   .heightGraph-collapsed .elevation-toggle {
       display: block;
+  }
+  
+  .d3-tip {
+      z-index: 9999;
   }

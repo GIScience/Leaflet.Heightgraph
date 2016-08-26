@@ -13,7 +13,7 @@ L.Control.Heightgraph = L.Control.extend({
     onAdd: function(map) {
         var opts = this.options;
         var controlDiv = this._container = L.DomUtil.create('div', 'heightGraph');
-        controlDiv.title = 'Height Graph Profile';
+        //controlDiv.title = 'Height Graph Profile';
         this._initToggle();
         this._cont = d3.select(controlDiv);
         return controlDiv;
@@ -276,9 +276,9 @@ L.Control.Heightgraph = L.Control.extend({
         var y = d3.scale.linear().range([height, 0]).domain(d3.extent(heightvalue, function(d) {
             return d;
         }));
-        var xAxis = d3.svg.axis().scale(x).orient("bottom");
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4);
         //.ticks(1);
-        var yAxis = d3.svg.axis().scale(y).orient("left");
+        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(4);
         var tip = d3.tip().attr('class', 'd3-tip').offset([-10, 0]).html(function(d) {
             return ((Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100) + " m");
         });
@@ -286,6 +286,30 @@ L.Control.Heightgraph = L.Control.extend({
             return (d);
         });
         var svgSec = d3.select(this._container).append("svg").attr("class", "background").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+
+        // axes and axes labels
+        svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
+            .attr('class', 'x axis') // specify classes
+            .call(xAxis).append("text")
+            .attr("x", width - 20).attr("y", y(d3.max(heightvalue)) + 15).style("font-size", "12px")
+            .style("text-anchor", "middle")
+            .attr("fill", "#fff")
+            .text("km");
+        svgSec.append('g').attr('class', 'y axis').call(yAxis).append("text").attr("x", -30).attr("y", -5).attr("fill", "#fff").attr("dy", "0").style("font-size", "12px").style("text-anchor", "initial").text("hm");
+        svgSec.selectAll('.axis path').style({
+            'stroke': '#fff',
+            'fill': 'none',
+            'stroke-width': '1'
+        });
+        svgSec.selectAll('.axis line').style({
+            'visibility': 'hidden'
+        });
+
+
+
+
+
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
             return x(d.x);
@@ -304,9 +328,15 @@ L.Control.Heightgraph = L.Control.extend({
             }).on('mouseover', handleMouseOver).on("mouseout", handleMouseOut).on("mousemove", mousemove);
         // focus line
         var focus = svgSec.append("g").attr("class", "focus").style("display", "none");
-        focus.append("text").attr("x", 5).attr("font-size", "12px").attr("dy", ".35em").style("background", "black");
+        focus.append("text").attr("x", 5).attr("font-size", "10px").attr("dy", ".35em").style("background", "black").attr("fill", "#fff");
+        focus.insert("rect", "text").attr("width", function(d) {
+            return 53;
+        }).attr("height", function(d) {
+            return 14;
+        }).attr("y", "-7").attr("x", "-1").style("fill", "#000");
+
         var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
-        var focusLine = focusLineGroup.append("line").attr("stroke-width", 1).attr("stroke", "black").attr("x1", 10).attr("x2", 10).attr("y1", y(d3.max(heightvalue))).attr("y2", y(d3.min(heightvalue))).style("display", "none");
+        var focusLine = focusLineGroup.append("line").attr("stroke-width", 1).attr("fill", "#fff").attr("x1", 10).attr("x2", 10).attr("y1", y(d3.max(heightvalue))).attr("y2", y(d3.min(heightvalue))).style("display", "none");
         // waypoints line
         svgSec.selectAll('linePath').data(waypointData).enter().append('path').attr('class', 'wpLine').attr('d', function(d) {
             return polygon(d.wpCoords);
@@ -326,21 +356,7 @@ L.Control.Heightgraph = L.Control.extend({
         }).text(function(d, i) {
             return i + 1;
         }).style('fill', 'white').style('font-size', '12px');
-        // axes and axes labels
-        svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
-            .attr('class', 'x axis') // specify classes
-            .call(xAxis).append("text")
-            //.attr("transform", "rotate(-90)")
-            .attr("x", width - 20).attr("y", y(d3.max(heightvalue)) + 15).style("font-size", "12px").style("text-anchor", "initial").text("km");
-        svgSec.append('g').attr('class', 'y axis').call(yAxis).append("text").attr("x", -30).attr("y", 4).attr("dy", "0").style("font-size", "12px").style("text-anchor", "initial").text("hm");
-        svgSec.selectAll('.axis path').style({
-            'stroke': 'Black',
-            'fill': 'none',
-            'stroke-width': '1'
-        });
-        svgSec.selectAll('.axis line').style({
-            'visibility': 'hidden'
-        });
+        
         // legend
         var legendRectSize = 7;
         var legendSpacing = 7;
@@ -354,7 +370,7 @@ L.Control.Heightgraph = L.Control.extend({
         legend.append('rect').attr('width', legendRectSize).attr('height', legendRectSize).attr('x', 30).attr('y', 30).style('fill', function(d, i) {
             return (d.color);
         });
-        legend.append('text').attr('x', 40).attr('y', 36).style('font-size', 10).style('font-family', 'calibri').text(function(d, i) {
+        legend.append('text').attr('x', 40).attr('y', 36).style('font-size', 10).attr('fill', '#fff').text(function(d, i) {
             return d.text;
         });
         svgSec.call(tip);
@@ -381,7 +397,7 @@ L.Control.Heightgraph = L.Control.extend({
             var y0 = d.coords[d2].y;
             var LatLngCoords = d.LatLng;
             var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
-            focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + y(d3.min(heightvalue) + 15) + ")");
+            focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + y(d3.min(heightvalue)) + ")");
             focus.select("text").text(Math.round((x0 / 1000) * 100) / 100 + ' km'); //text in km
             focusLine.style("display", "initial").attr('x1', x(x0)).attr('y1', y(y0)).attr('x2', x(x0));
         }
