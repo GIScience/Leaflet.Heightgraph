@@ -227,12 +227,14 @@ L.Control.Heightgraph = L.Control.extend({
             var heightG = d3.select(".leaflet-overlay-pane svg").append("g");
             this._mouseHeightFocus = heightG.append('svg:line').attr('class', 'height-focus line').attr('x2', '0').attr('y2', '0').attr('x1', '0').attr('y1', '0');
             this._mouseHeightFocusLabel = heightG.append("svg:text").attr("class", "height-focus-label");
+            this._mouseHeightFocusLabelRect = heightG.insert("rect", "text").attr("class", "height-focus-label-rect").attr("y", "-7").attr("x", "-1");
             var pointG = this._pointG = heightG.append("g");
             pointG.append("svg:circle").attr("r", 5).attr("cx", 0).attr("cy", 0).attr("class", "height-focus circle-lower");
         }
         this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY);
-        this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").style("visibility", "visible").attr('fill', color);
-        this._mouseHeightFocusLabel.attr("x", layerpoint.x).attr("y", normalizedY).text(height + " m");
+        this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").attr('fill', color);
+        this._mouseHeightFocusLabelRect.attr("x", layerpoint.x).attr("y", normalizedY);
+        this._mouseHeightFocusLabel.attr("x", layerpoint.x+3).attr("y", normalizedY+11).text(height + " m");
     },
     /**
      * @param {Object} polygonData: (x,y-coords, steepness)
@@ -339,7 +341,7 @@ L.Control.Heightgraph = L.Control.extend({
             var d0 = d.coords[0].x,
                 d1 = d.coords[1].x;
             var d2 = d1 - x0 > x0 - d0 ? 0 : 1; // shortest distance between mouse and coords of polygon
-            var y0 = d.coords[d2].y;
+            var y0 = (Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100); //height
             var LatLngCoords = d.LatLng;
             var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
             self._showMarker(segmentCenter, y0, heightvalue, color);

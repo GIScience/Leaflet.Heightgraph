@@ -170,6 +170,10 @@
 .height-focus-label {
     pointer-events: none;
     visibility: visible;
+    background-color: black;
+    font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+    fill: white;
+    font-size: 12px;
 }
 
 .height-focus.line {
@@ -185,5 +189,11 @@
     weight: 1;
     opacity: 1;
     fillOpacity: 0.8;
+    visibility: visible;
+}
+.height-focus-label-rect{
+    width: 53;
+    height: 14;
+    fill: #000;
     visibility: visible;
 }
