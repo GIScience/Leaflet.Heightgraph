@@ -282,7 +282,7 @@ L.Control.Heightgraph = L.Control.extend({
                 return polygon(d.coords);
             })
             //.attr("data-legend",function(d) { return d.steepness})
-            .attr("fill-opacity", 0.6).attr('stroke', 0).attr('fill', function(d) {
+            .attr("fill-opacity", 0.8).attr('stroke', 0).attr('fill', function(d) {
                 return (d.steepness - 5 == -5 ? '#028306' : d.steepness - 5 == -4 ? '#2AA12E' : d.steepness - 5 == -3 ? '#53BF56' : d.steepness - 5 == -2 ? '#7BDD7E' : d.steepness - 5 == -1 ? '#A4FBA6' : d.steepness - 5 == 0 ? '#ffcc99' : d.steepness - 5 == 1 ? '#F29898 ' : d.steepness - 5 == -2 ? '#E07575' : d.steepness - 5 == 3 ? '#CF5352' : d.steepness - 5 == 4 ? '#BE312F' : d.steepness - 5 == 5 ? '#AD0F0C' : '#AD0F0C');
             }).on('mouseover', handleMouseOver).on("mouseout", handleMouseOut).on("mousemove", mousemove);
         // focus line
