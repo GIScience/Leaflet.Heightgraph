@@ -259,20 +259,16 @@ L.Control.Heightgraph = L.Control.extend({
         var tipDist = d3.tip().attr('class', 'd3-tip').offset([-10, 0]).html(function(d) {
             return (d);
         });
-        var svgSec = d3.select(this._container).append("svg").attr("class", "background").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var svgSec = d3.select(this._container).append("svg").attr("class", "background").attr('shape-rendering','crispEdges').attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         // axes and axes labels
         svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
             .attr('class', 'x axis') // specify classes
-            .call(xAxis).append("text").attr("x", width - 20).attr("y", y(d3.max(heightvalue)) + 15).style("font-size", "12px").style("text-anchor", "middle").attr("fill", "#fff").text("km");
-        svgSec.append('g').attr('class', 'y axis').call(yAxis).append("text").attr("x", -30).attr("y", -5).attr("fill", "#fff").attr("dy", "0").style("font-size", "12px").style("text-anchor", "initial").text("hm");
-        svgSec.selectAll('.axis path').style({
-            'stroke': '#fff',
-            'fill': 'none',
-            'stroke-width': '1'
-        });
-        svgSec.selectAll('.axis line').style({
-            'visibility': 'hidden'
-        });
+            .call(xAxis);
+        svgSec.append('g').attr('class', 'y axis').call(yAxis);
+        var xAxisText = svgSec.append("text").attr('class', 'AxisText') // text label for the x axis
+            .attr("x", width / 2).attr("y", height + 25).text("km");
+        var yAxisText = svgSec.append("text").attr('class', 'AxisText') // text label for the y axis
+            .attr("x", -20).attr("y", height-height-10 ).text("hm");
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
             return x(d.x);
@@ -286,17 +282,13 @@ L.Control.Heightgraph = L.Control.extend({
                 return polygon(d.coords);
             })
             //.attr("data-legend",function(d) { return d.steepness})
-            .attr("fill-opacity", 0.6).attr('fill', function(d) {
+            .attr("fill-opacity", 0.6).attr('stroke', 0).attr('fill', function(d) {
                 return (d.steepness - 5 == -5 ? '#028306' : d.steepness - 5 == -4 ? '#2AA12E' : d.steepness - 5 == -3 ? '#53BF56' : d.steepness - 5 == -2 ? '#7BDD7E' : d.steepness - 5 == -1 ? '#A4FBA6' : d.steepness - 5 == 0 ? '#ffcc99' : d.steepness - 5 == 1 ? '#F29898 ' : d.steepness - 5 == -2 ? '#E07575' : d.steepness - 5 == 3 ? '#CF5352' : d.steepness - 5 == 4 ? '#BE312F' : d.steepness - 5 == 5 ? '#AD0F0C' : '#AD0F0C');
             }).on('mouseover', handleMouseOver).on("mouseout", handleMouseOut).on("mousemove", mousemove);
         // focus line
-        var focus = svgSec.append("g").attr("class", "focus").style("display", "none");
-        focus.append("text").attr("x", 5).attr("font-size", "10px").attr("dy", ".35em").style("background", "black").attr("fill", "#fff");
-        focus.insert("rect", "text").attr("width", function(d) {
-            return 53;
-        }).attr("height", function(d) {
-            return 14;
-        }).attr("y", "-7").attr("x", "-1").style("fill", "#000");
+        var focus = svgSec.append("g").attr("class", "focus");
+        focus.append("text").attr("x", 5).attr("dy", ".35em");
+        focus.insert("rect", "text").attr("width", 53).attr("height", 14).attr("y", "-7").attr("x", "-1").style("fill", "#000");
         var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
         var focusLine = focusLineGroup.append("line").attr("stroke-width", 1).attr("fill", "#fff").attr("x1", 10).attr("x2", 10).attr("y1", y(d3.max(heightvalue))).attr("y2", y(d3.min(heightvalue))).style("display", "none");
         // waypoints line
@@ -320,7 +312,7 @@ L.Control.Heightgraph = L.Control.extend({
         }).style('fill', 'white').style('font-size', '12px');
         // legend
         var legendRectSize = 7;
-        var legendSpacing = 7;
+        var legendSpacing = 3;
         var legend = svgSec.selectAll('.legend').data(dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
             var offset = height * 2;
@@ -328,10 +320,10 @@ L.Control.Heightgraph = L.Control.extend({
             var vert = i * height - offset;
             return 'translate(' + horz + ',' + vert + ')';
         });
-        legend.append('rect').attr('width', legendRectSize).attr('height', legendRectSize).attr('x', 30).attr('y', 30).style('fill', function(d, i) {
+        legend.append('rect').attr('class', 'legend-rect').attr('width', legendRectSize).attr('height', legendRectSize).attr('x', 30).attr('y', 30).style('fill', function(d, i) {
             return (d.color);
         });
-        legend.append('text').attr('x', 40).attr('y', 36).style('font-size', 10).attr('fill', '#fff').text(function(d, i) {
+        legend.append('text').attr('class', 'legend-text').attr('x', 40).attr('y', 36).style('font-size', 9).attr('fill', '#fff').attr('text-align', 'right').text(function(d, i) {
             return d.text;
         });
         svgSec.call(tip);

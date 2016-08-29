@@ -103,3 +103,29 @@
     left: 0;
     text-align: center;
 }
+.legend-rect {
+    pointer-events: none;
+}
+.legend-text {
+   pointer-events: none; 
+}
+.axisText{
+    text-anchor: middle;
+    color:#fff;
+    fill:#fff;
+    font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+.axis path{
+    stroke: #fff;
+    fill: none;
+    stroke-width: 1;
+}
+.axis line{
+    visibility: hidden;
+}
+.focus {
+    display: none;
+    font-size: 10px;
+    background: black;
+    fill: #fff;
+}
