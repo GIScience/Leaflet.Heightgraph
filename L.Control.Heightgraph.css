@@ -46,21 +46,52 @@
     display: block;
 }
 
+.background {
+    shape-rendering: crispEdges;
+}
+
+.bars {
+    fill-opacity: 0.6;
+}
+
 
 /* d3 styles */
+
+.focus rect {
+    width: 53;
+    height: 14;
+    fill: #000;
+}
 
 .focusLine line {
     stroke-width: 1;
     stroke: black;
+    fill: #fff;
+    display: none;
     cursor: default;
 }
 
 .wpLine {
     pointer-events: none;
+    stroke-width: 2;
+    stroke: black;
 }
 
 .wp-text {
     pointer-events: none;
+    fill: white;
+    font-size: 12px;
+}
+
+.legend-rect {
+    width: 6;
+    height: 6;
+}
+
+.legend-text {
+    fill: #fff;
+    font-size: 9;
+    text-align: right;
 }
 
 .tick, .tick text {
@@ -103,29 +134,56 @@
     left: 0;
     text-align: center;
 }
+
 .legend-rect {
     pointer-events: none;
 }
+
 .legend-text {
-   pointer-events: none; 
+    pointer-events: none;
 }
-.axisText{
+
+.axisText {
     text-anchor: middle;
-    color:#fff;
-    fill:#fff;
+    color: #fff;
+    fill: #fff;
     font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
-.axis path{
+
+.axis path {
     stroke: #fff;
     fill: none;
     stroke-width: 1;
 }
-.axis line{
+
+.axis line {
     visibility: hidden;
 }
+
 .focus {
     display: none;
     font-size: 10px;
     background: black;
     fill: #fff;
+}
+
+.height-focus-label {
+    pointer-events: none;
+    visibility: visible;
+}
+
+.height-focus.line {
+    stroke: black;
+    stroke-width: 1;
+    opacity: 1;
+    visibility: visible;
+}
+
+.height-focus.circle-lower {
+    /*fill: #ff7800;*/
+    color: "#000";
+    weight: 1;
+    opacity: 1;
+    fillOpacity: 0.8;
+    visibility: visible;
 }
