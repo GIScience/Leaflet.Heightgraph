@@ -275,7 +275,7 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("x", -20).attr("y", height - height - 10).text("hm");
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
-            return x(d.x);
+            return x(d.x);f
         }).y(function(d) {
             return y(d.y);
         });
