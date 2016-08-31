@@ -192,7 +192,7 @@ L.Control.Heightgraph = L.Control.extend({
                 }],
                 steepness: steepness[i],
                 color: legendData[steepness[i]][steepness[i] - 5].color,
-                LatLng: distances.coordsOfDist[i]        
+                LatLng: distances.coordsOfDist[i]
             });
         }
         return list;
@@ -234,7 +234,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY);
         this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").attr('fill', color);
         this._mouseHeightFocusLabelRect.attr("x", layerpoint.x).attr("y", normalizedY);
-        this._mouseHeightFocusLabel.attr("x", layerpoint.x+3).attr("y", normalizedY+11).text(height + " m");
+        this._mouseHeightFocusLabel.attr("x", layerpoint.x + 3).attr("y", normalizedY + 11).text(height + " m");
     },
     /**
      * @param {Object} polygonData: (x,y-coords, steepness)
@@ -279,34 +279,6 @@ L.Control.Heightgraph = L.Control.extend({
         }).y(function(d) {
             return y(d.y);
         });
-
-        
-        // svgSec.selectAll('lines').data(heightvalue).enter().append("line").attr("class", "line-border-path")
-        // .attr('x1', function(d,i){ return (i);})
-        // .attr('y1', function(d,i){ return y(d);})
-        // .attr('x2', function(d,i){ return x(i);})
-        // .attr('y2', function(d,i){ return y(d);})
-        // .attr('stroke-width', 2)
-        // .attr('fill', 'white');
-
- 
-
-//     lines = lines.data(routeheight);
-
-//     lines.enter().append("line");
-
-//     lines.attr("x1", function(d,i){return x(d.position);})
-//     .attr("x2", function(d,i){
-//         return x(routeheight[(i+1 == routeheight.length)?i:i+1].position);
-//     })
-//     .attr("y1", function(d,i){return y(d.heightval-1);})
-//     .attr("y2", function(d,i){
-//         return y( (i+1 == routeheight.length)?
-//                       d.heightval-1:routeheight[i+1].heightval-1);
-//     })
-//     .attr("stroke-width", 1)
-
-// }
         // bar chart as path
         svgSec.selectAll('hpath').data(polygonData).enter().append('path').attr('class', 'bars').attr('d', function(d) {
             return polygon(d.coords);
@@ -333,7 +305,7 @@ L.Control.Heightgraph = L.Control.extend({
         // legend
         var legendRectSize = 7;
         var legendSpacing = 4;
-                //legendBox.append(legend);
+        //legendBox.append(legend);
         var legend = svgSec.selectAll('.legend').data(dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
             var offset = height * 2;
@@ -341,37 +313,32 @@ L.Control.Heightgraph = L.Control.extend({
             var vert = i * height - offset;
             return 'translate(' + horz + ',' + vert + ')';
         });
-        legend.append('rect').attr('class', 'legend-rect').attr('x', width+20).attr('y', 8).style('fill', function(d, i) {
+        legend.append('rect').attr('class', 'legend-rect').attr('x', width + 20).attr('y', 8).style('fill', function(d, i) {
             return (d.color);
         });
-        legend.append('text').attr('class', 'legend-text').attr('x', width+30).attr('y', 15).text(function(d, i) {
+        legend.append('text').attr('class', 'legend-text').attr('x', width + 30).attr('y', 15).text(function(d, i) {
             return d.text;
         });
-
         //line top border
-        var borderTopLine = d3.svg.line()
-            .x(function(d) { 
-            return x(d.coords[0].x); 
-            })
-            .y(function(d){ 
-                return y(d.coords[0].y); 
-            });
+        var borderTopLine = d3.svg.line().x(function(d) {
+            return x(d.coords[0].x);
+        }).y(function(d) {
+            return y(d.coords[0].y);
+        });
         svgSec.append("svg:path").attr("d", borderTopLine(polygonData)).attr('class', 'borderTop');
-
         svgSec.call(tip);
-
         // Create Event Handlers for mouse
         function handleMouseOver(d, i) {
             // Use D3 to select element, change color and size
             tip.show(d);
             focus.style("display", null);
             focusLine.style("display", null);
-            if (typeof(self._mouseHeightFocus)!="undefined"){
+            if (typeof(self._mouseHeightFocus) != "undefined") {
                 self._mouseHeightFocus.style("display", null);
                 self._mouseHeightFocusLabel.style("display", null);
                 self._mouseHeightFocusLabelRect.style("display", null);
                 self._pointG.style("display", null);
-            }   
+            }
         }
 
         function handleMouseOut(d, i) {
