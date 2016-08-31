@@ -228,7 +228,7 @@ L.Control.Heightgraph = L.Control.extend({
             this._mouseHeightFocus = heightG.append('svg:line').attr('class', 'height-focus line').attr('x2', '0').attr('y2', '0').attr('x1', '0').attr('y1', '0');
             this._mouseHeightFocusLabel = heightG.append("svg:text").attr("class", "height-focus-label");
             this._mouseHeightFocusLabelRect = heightG.insert("rect", "text").attr("class", "height-focus-label-rect").attr("y", "-7").attr("x", "-1");
-            var pointG = this._pointG = heightG.append("g");
+            var pointG = this._pointG = heightG.append("g").attr('class', 'height-focus circle');
             pointG.append("svg:circle").attr("r", 5).attr("cx", 0).attr("cy", 0).attr("class", "height-focus circle-lower");
         }
         this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY);

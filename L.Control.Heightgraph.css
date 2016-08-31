@@ -188,9 +188,12 @@
 
 .height-focus.line {
     stroke: black;
-    stroke-width: 2;
+    stroke-width: 1;
     opacity: 1;
     visibility: visible;
+}
+.height-focus.circle {
+    stroke:black;
 }
 
 .height-focus.circle-lower {
