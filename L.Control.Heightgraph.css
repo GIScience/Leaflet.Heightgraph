@@ -33,21 +33,29 @@
 }
 
 .heightGraph .background {
+    position: absolute;
     margin-left: 35px;
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 10px;
+    shape-rendering: crispEdges;
 }
+.heightGraph .backgroundBox {
+    position: absolute;
+    margin-left: 35px;
+    fill: transparent;
+    border-radius: 10px;
+    rx:10;
+    ry:10;
+    stroke: white;
+    stroke-width: 4;
 
+}
 .heightGraph-collapsed .background {
     display: none;
 }
 
 .heightGraph-collapsed .elevation-toggle {
     display: block;
-}
-
-.background {
-    shape-rendering: crispEdges;
 }
 
 .bars {
@@ -157,7 +165,9 @@
 }
 
 .axis line {
-    visibility: hidden;
+    fill: white;
+    stroke: white;
+    shape-rendering: crispEdges;
 }
 
 .focus {
@@ -178,7 +188,7 @@
 
 .height-focus.line {
     stroke: black;
-    stroke-width: 1;
+    stroke-width: 2;
     opacity: 1;
     visibility: visible;
 }

@@ -251,12 +251,12 @@ L.Control.Heightgraph = L.Control.extend({
         var y = d3.scale.linear().range([height, 0]).domain(d3.extent(heightvalue, function(d) {
             return d;
         }));
-        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(4).tickFormat(function(d) {
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(8).tickFormat(function(d) {
             return d / 1000;
             // var prefix = d3.formatPrefix(d);
             // return prefix.scale(d) //+ prefix.symbol;
         });
-        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(4);
+        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(8);
         var tip = d3.tip().attr('class', 'd3-tip').offset([-10, 0]).html(function(d) {
             return ((Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100) + " m");
         });
@@ -264,18 +264,19 @@ L.Control.Heightgraph = L.Control.extend({
             return (d);
         });
         var svgSec = d3.select(this._container).append("svg").attr("class", "background").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var borderBox = svgSec.append("rect").attr("class","backgroundBox").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).attr('x',-margin.left).attr('y',-margin.top).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         // axes and axes labels
         svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
             .attr('class', 'x axis') // specify classes
             .call(xAxis);
         svgSec.append('g').attr('class', 'y axis').call(yAxis);
         var xAxisText = svgSec.append("text").attr('class', 'AxisText') // text label for the x axis
-            .attr("x", width / 2).attr("y", height + 25).text("km");
+            .attr("x", width / 2).attr("y", height + 27).text("km");
         var yAxisText = svgSec.append("text").attr('class', 'AxisText') // text label for the y axis
             .attr("x", -20).attr("y", height - height - 10).text("hm");
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
-            return x(d.x);f
+            return x(d.x);
         }).y(function(d) {
             return y(d.y);
         });
@@ -305,6 +306,7 @@ L.Control.Heightgraph = L.Control.extend({
         // legend
         var legendRectSize = 7;
         var legendSpacing = 4;
+                //legendBox.append(legend);
         var legend = svgSec.selectAll('.legend').data(dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
             var offset = height * 2;
@@ -312,12 +314,13 @@ L.Control.Heightgraph = L.Control.extend({
             var vert = i * height - offset;
             return 'translate(' + horz + ',' + vert + ')';
         });
-        legend.append('rect').attr('class', 'legend-rect').attr('x', 30).attr('y', 30).style('fill', function(d, i) {
+        legend.append('rect').attr('class', 'legend-rect').attr('x', width+20).attr('y', 8).style('fill', function(d, i) {
             return (d.color);
         });
-        legend.append('text').attr('class', 'legend-text').attr('x', 40).attr('y', 36).text(function(d, i) {
+        legend.append('text').attr('class', 'legend-text').attr('x', width+30).attr('y', 15).text(function(d, i) {
             return d.text;
         });
+
         svgSec.call(tip);
         // Create Event Handlers for mouse
         function handleMouseOver(d, i) {
@@ -325,6 +328,12 @@ L.Control.Heightgraph = L.Control.extend({
             tip.show(d);
             focus.style("display", null);
             focusLine.style("display", null);
+            if (typeof(self._mouseHeightFocus)!="undefined"){
+                self._mouseHeightFocus.style("display", null);
+                self._mouseHeightFocusLabel.style("display", null);
+                self._mouseHeightFocusLabelRect.style("display", null);
+                self._pointG.style("display", null);
+            }   
         }
 
         function handleMouseOut(d, i) {
@@ -332,6 +341,10 @@ L.Control.Heightgraph = L.Control.extend({
             tip.hide(d);
             focus.style("display", "none");
             focusLine.style("display", "none");
+            self._mouseHeightFocus.style("display", "none");
+            self._mouseHeightFocusLabel.style("display", "none");
+            self._mouseHeightFocusLabelRect.style("display", "none");
+            self._pointG.style("display", "none");
         }
         var self = this;
 
