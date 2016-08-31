@@ -39,17 +39,7 @@
     border-radius: 10px;
     shape-rendering: crispEdges;
 }
-.heightGraph .backgroundBox {
-    position: absolute;
-    margin-left: 35px;
-    fill: transparent;
-    border-radius: 10px;
-    rx:10;
-    ry:10;
-    stroke: white;
-    stroke-width: 4;
 
-}
 .heightGraph-collapsed .background {
     display: none;
 }
@@ -61,7 +51,11 @@
 .bars {
     fill-opacity: 0.6;
 }
-
+.borderTop{
+    stroke-width:1;
+    stroke: white;
+    fill: none;
+}
 
 /* d3 styles */
 

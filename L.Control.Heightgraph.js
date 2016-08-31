@@ -192,7 +192,7 @@ L.Control.Heightgraph = L.Control.extend({
                 }],
                 steepness: steepness[i],
                 color: legendData[steepness[i]][steepness[i] - 5].color,
-                LatLng: distances.coordsOfDist[i]
+                LatLng: distances.coordsOfDist[i]        
             });
         }
         return list;
@@ -264,7 +264,6 @@ L.Control.Heightgraph = L.Control.extend({
             return (d);
         });
         var svgSec = d3.select(this._container).append("svg").attr("class", "background").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        var borderBox = svgSec.append("rect").attr("class","backgroundBox").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).attr('x',-margin.left).attr('y',-margin.top).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         // axes and axes labels
         svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
             .attr('class', 'x axis') // specify classes
@@ -280,6 +279,34 @@ L.Control.Heightgraph = L.Control.extend({
         }).y(function(d) {
             return y(d.y);
         });
+
+        
+        // svgSec.selectAll('lines').data(heightvalue).enter().append("line").attr("class", "line-border-path")
+        // .attr('x1', function(d,i){ return (i);})
+        // .attr('y1', function(d,i){ return y(d);})
+        // .attr('x2', function(d,i){ return x(i);})
+        // .attr('y2', function(d,i){ return y(d);})
+        // .attr('stroke-width', 2)
+        // .attr('fill', 'white');
+
+ 
+
+//     lines = lines.data(routeheight);
+
+//     lines.enter().append("line");
+
+//     lines.attr("x1", function(d,i){return x(d.position);})
+//     .attr("x2", function(d,i){
+//         return x(routeheight[(i+1 == routeheight.length)?i:i+1].position);
+//     })
+//     .attr("y1", function(d,i){return y(d.heightval-1);})
+//     .attr("y2", function(d,i){
+//         return y( (i+1 == routeheight.length)?
+//                       d.heightval-1:routeheight[i+1].heightval-1);
+//     })
+//     .attr("stroke-width", 1)
+
+// }
         // bar chart as path
         svgSec.selectAll('hpath').data(polygonData).enter().append('path').attr('class', 'bars').attr('d', function(d) {
             return polygon(d.coords);
@@ -321,7 +348,18 @@ L.Control.Heightgraph = L.Control.extend({
             return d.text;
         });
 
+        //line top border
+        var borderTopLine = d3.svg.line()
+            .x(function(d) { 
+            return x(d.coords[0].x); 
+            })
+            .y(function(d){ 
+                return y(d.coords[0].y); 
+            });
+        svgSec.append("svg:path").attr("d", borderTopLine(polygonData)).attr('class', 'borderTop');
+
         svgSec.call(tip);
+
         // Create Event Handlers for mouse
         function handleMouseOver(d, i) {
             // Use D3 to select element, change color and size
