@@ -33,9 +33,11 @@
 }
 
 .heightGraph .background {
+    position: absolute;
     margin-left: 35px;
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 10px;
+    shape-rendering: crispEdges;
 }
 
 .heightGraph-collapsed .background {
@@ -46,14 +48,14 @@
     display: block;
 }
 
-.background {
-    shape-rendering: crispEdges;
-}
-
 .bars {
     fill-opacity: 0.7;
 }
-
+.borderTop{
+    stroke-width:1;
+    stroke: white;
+    fill: none;
+}
 
 /* d3 styles */
 
@@ -157,7 +159,9 @@
 }
 
 .axis line {
-    visibility: hidden;
+    fill: white;
+    stroke: white;
+    shape-rendering: crispEdges;
 }
 
 .focus {
@@ -181,6 +185,9 @@
     stroke-width: 1;
     opacity: 1;
     visibility: visible;
+}
+.height-focus.circle {
+    stroke:black;
 }
 
 .height-focus.circle-lower {
