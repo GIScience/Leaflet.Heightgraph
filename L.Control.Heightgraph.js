@@ -324,9 +324,22 @@ L.Control.Heightgraph = L.Control.extend({
             return x(d.coords[0].x);
         }).y(function(d) {
             return y(d.coords[0].y);
-        });
+        }).interpolate("basis");
         svgSec.append("svg:path").attr("d", borderTopLine(polygonData)).attr('class', 'borderTop');
         svgSec.call(tip);
+        // tick length
+        d3.selectAll("g.y.axis g.tick line").attr("x2", function(d) {
+            //d for the tick line is the value
+            //of that tick 
+            //(a number between 0 and 1, in this case)
+            return -4;
+        });
+        d3.selectAll("g.x.axis g.tick line").attr("y2", function(d) {
+            //d for the tick line is the value
+            //of that tick 
+            //(a number between 0 and 1, in this case)
+            return 4;
+        });
         // Create Event Handlers for mouse
         function handleMouseOver(d, i) {
             // Use D3 to select element, change color and size
