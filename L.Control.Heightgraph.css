@@ -37,7 +37,6 @@
     margin-left: 35px;
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 10px;
-    shape-rendering: crispEdges;
 }
 
 .heightGraph-collapsed .background {
@@ -50,12 +49,15 @@
 
 .bars {
     fill-opacity: 0.7;
+    shape-rendering: crispEdges;
 }
-.borderTop{
+
+.borderTop {
     stroke-width: 2;
     stroke: #fff;
     fill: none;
 }
+
 
 /* d3 styles */
 
@@ -186,8 +188,9 @@
     opacity: 1;
     visibility: visible;
 }
+
 .height-focus.circle {
-    stroke:black;
+    stroke: black;
 }
 
 .height-focus.circle-lower {
@@ -198,7 +201,8 @@
     fillOpacity: 0.8;
     visibility: visible;
 }
-.height-focus-label-rect{
+
+.height-focus-label-rect {
     width: 53;
     height: 14;
     fill: #000;
