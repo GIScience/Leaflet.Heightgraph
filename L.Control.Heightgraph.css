@@ -208,3 +208,9 @@
     fill: #000;
     visibility: visible;
 }
+.selection {
+    position: absolute;
+    bottom : 2px;
+    left: 90px;
+    z-index: 1;
+}

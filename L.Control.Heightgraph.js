@@ -17,12 +17,17 @@ L.Control.Heightgraph = L.Control.extend({
         this._map = map;
         this._initToggle();
         this._cont = d3.select(controlDiv);
+        // create combobox for selection
+        var selection = document.createElement("select");
+        selection.setAttribute("class","selection");
+        this._container.appendChild(selection);
         return controlDiv;
     },
     onRemove: function(map) {
         this._container = null;
     },
     addData: function(data) {
+        this._selectionvalue = this._selection();
         this._distances = this._calcDistances(data);
         this._heightvalue = this._calculateHeightSteep(data).height;
         this._steepness = this._calculateHeightSteep(data).steep;
@@ -81,6 +86,25 @@ L.Control.Heightgraph = L.Control.extend({
         this._x.domain([0, 1]);
         this._y.domain([0, 1]);
         this._updateAxis();
+    },
+    _selection: function(){
+        var value="steepness";
+        d3.select(".selection")
+        .on("change", function(){
+            console.log(this.value);
+            return this.value;
+        })
+          .selectAll("option")
+            .data([
+              "steepness",
+              "speed",
+              "surfaces",
+              "waytypes",
+              "none"
+            ])
+          .enter().append("option")
+            .attr("value", function(d) { return d; })
+            .text(function(d) { return d; });
     },
     /**
      * Returns distance between each coordinate of Linestring
@@ -169,7 +193,7 @@ L.Control.Heightgraph = L.Control.extend({
      * @param {Array} steepness
      * @returns {Number|Array|Object} list with coordinates and steepness values as array
      */
-    _updateBarData: function(a, steepness) {
+    _updateBarData: function(a, steepness, value) {
         var list = [];
         var wplist = [];
         var adddist = [0];
