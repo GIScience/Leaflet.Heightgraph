@@ -39,6 +39,7 @@
 
         var bounds = new L.LatLngBounds(new L.LatLng(49.3356786,8.493329), new L.LatLng(49.4912906, 8.8714796 ));
 
+        var profileType ="steepness";
     
         var hg = L.control.heightgraph({
             width: 750,
@@ -53,7 +54,7 @@
 
         hg.addTo(map);
         
-        hg.addData(geojson);
+        hg.addData(geojson, profileType);
 
         L.geoJson(geojson).addTo(map);
 
