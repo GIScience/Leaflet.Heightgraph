@@ -27,6 +27,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._container = null;
     },
     addData: function(data, profileType) {
+        console.log(data, profileType)
         this._profileType = profileType;
         this._selectionvalue = this._selection();
         this._distances = this._calcDistances(data);
@@ -89,6 +90,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._updateAxis();
     },
     _selection: function(){
+        console.warn(true)
         var value="steepness";
         var map = this._map;
         d3.select(".selection")
