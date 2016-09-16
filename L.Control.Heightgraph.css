@@ -214,3 +214,9 @@
     left: 90px;
     z-index: 1;
 }
+.dataButton {
+    position: absolute;
+    bottom : 2px;
+    left: 200px;
+    z-index: 1;
+}

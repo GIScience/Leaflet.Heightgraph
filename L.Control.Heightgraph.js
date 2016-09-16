@@ -21,20 +21,34 @@ L.Control.Heightgraph = L.Control.extend({
         var selection = document.createElement("select");
         selection.setAttribute("class","selection");
         this._container.appendChild(selection);
+        this._profileType ="none";
+        var button = document.createElement("button");
+        var t = document.createTextNode("change");      
+        button.appendChild(t);
+        button.setAttribute("type","button");
+        button.setAttribute("class","dataButton");
+        button.onclick= onChange;
+        function onChange() {
+            d3.select("svgSec").remove();
+            var div = document.getElementsByClassName("background");
+            div[0].remove();
+            hg.addData(newgeojson);
+        }
+        this._container.appendChild(button);        
         return controlDiv;
     },
     onRemove: function(map) {
         this._container = null;
     },
-    addData: function(data, profileType) {
-        this._profileType = profileType;
-        this._selectionvalue = this._selection();
-        this._distances = this._calcDistances(data);
-        this._heightvalue = this._calculateHeightType(data).height;
-        this._type = this._calculateHeightType(data).type;
+    addData: function(data) {
+        this._selection(data);
+        this._selectedData = this._dataSelection(data, this._profileType);
+        this._distances = this._calcDistances(this._selectedData);
+        this._heightvalue = this._calculateHeightType(this._selectedData).height;
+        this._type = this._calculateHeightType(this._selectedData).type;
         this._dynamicLegend = this._updateLegend(this._type, this._profileType);
-        this._waypointPosition = this._calculateHeightType(data).wpFeatPos;
-        this._polygonData = this._updateBarData(this._heightvalue, this._type, this._profileType, data);
+        this._waypointPosition = this._calculateHeightType(this._selectedData).wpFeatPos;
+        this._polygonData = this._updateBarData(this._heightvalue, this._type, this._profileType, this._selectedData);
         this._waypointData = this._updateWaypointData(this._distances, this._heightvalue);
         this._createSVG = this._createBarChart(this._polygonData, this._waypointData, this._cont, this._heightvalue, this._dynamicLegend);
     },
@@ -88,29 +102,54 @@ L.Control.Heightgraph = L.Control.extend({
         this._y.domain([0, 1]);
         this._updateAxis();
     },
-    _selection: function(){
-        var value="steepness";
-        var map = this._map;
+    _selection: function(data){
+        var e = this;       
         d3.select(".selection")
-        .on("change", function() {
-            //$( ".heightgraph" ).remove();
+        .on("change", function () {
             d3.select("svgSec").remove();
             var div = document.getElementsByClassName("background");
             div[0].remove();
-            var profileType = this.value;
-            hg.addData(geojson, profileType);
+            e._profileType = this.value;
+            //this._dataSelection(data, this._profileType)
+            hg.addData(data);
         })
           .selectAll("option")
             .data([
+              "none",
               "steepness",
               "speed",
               "surfaces",
-              "waytypes",
-              "none"
+              "waytypes"
+
             ])
           .enter().append("option")
             .attr("value", function(d) { return d; })
             .text(function(d) { return d; });
+    },
+    /**
+     * Returns FeatureCollection of a special type (steepness, waytypes,..) 
+     * @param {FeatureCollection} a
+     * @param {String} type: profile that should be presented
+     */
+
+    _dataSelection: function(a, type){
+        var length=a.length;
+        for (var i=0; i<length; i++){
+            if(typeof(a[i].features[1].properties.waytype)!=="undefined" && type=="waytypes"){
+                data=a[i];
+            } if(typeof(a[i].features[1].properties.surface)!=="undefined" && type=="surfaces"){
+                data=a[i];
+            } if(typeof(a[i].features[1].properties.speed)!=="undefined" && type=="speed"){
+                data=a[i];
+            } if(typeof(a[i].features[1].properties.steepness)!=="undefined" && type=="steepness"){
+                data=a[i];
+            } if(type=="none"){
+                data=a[1];
+            }
+        } if(length==1){
+            data=a[0];
+        }
+    return data;
     },
     /**
      * Returns distance between each coordinate of Linestring
@@ -118,13 +157,11 @@ L.Control.Heightgraph = L.Control.extend({
      * @returns {Number|Array| Object} Object that contains distances between coordinates, the coordinates, and sum of distances as totaldistance
      */
     _calcDistances: function(a) {
-        console.log(a)
         distances = {};
         var first, calc;
         //var wpList=[];
         distances.distance = [];
         distances.wpDistance = [];
-        var featureCollectionlength = a.length
         var featureLength = a.features.length;
         distances.coordsOfDist = [];
         for (var i = 0; i < featureLength; i++) {
@@ -150,7 +187,6 @@ L.Control.Heightgraph = L.Control.extend({
         distances.totaldistance = distances.distance.reduce(function(pv, cv) {
             return pv + cv;
         }, 0);
-        console.log(distances)
         return distances;
     },
     /**
@@ -170,7 +206,6 @@ L.Control.Heightgraph = L.Control.extend({
                     type.push(a.features[i].properties.steepness);
                 } if (profileType=="waytypes" && typeof(a.features[i].properties.waytype)!=="undefined") {
                     type.push(a.features[i].properties.waytype);
-                    console.log("done")
                 } if (profileType=="none") {
                     type.push("none");
                 } if (profileType=="surfaces" && typeof(a.features[i].properties.surface)!=="undefined") {
@@ -182,7 +217,6 @@ L.Control.Heightgraph = L.Control.extend({
             height: height,
             type: type
         };
-        console.log(list)
         return list;
     },
     /**
@@ -214,9 +248,10 @@ L.Control.Heightgraph = L.Control.extend({
                 legendList[i] = {text: WayType[cleanList[i]], color: WayTypeColors[cleanList[i]]};
             } if(b=="surfaces"){
                 legendList[i] = {text: SurfaceType[cleanList[i]], color: SurfaceTypeColors[cleanList[i]]};
+            } if(b=="speed"){
+                console.log("no settings available");
             }
         }
-        console.log(legendList)
         return legendList;
     },
     /**
@@ -265,7 +300,6 @@ L.Control.Heightgraph = L.Control.extend({
                 LatLng: distances.coordsOfDist[i]
             });
         }
-        console.log(list)
         return list;
     },
     /**
@@ -453,6 +487,6 @@ L.Control.Heightgraph = L.Control.extend({
         }
     }
 });
-L.control.heightgraph = function(options, profileType) {
-    return new L.Control.Heightgraph(options, profileType);
+L.control.heightgraph = function(options) {
+    return new L.Control.Heightgraph(options);
 };
