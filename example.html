@@ -11,13 +11,14 @@
             } 
         </style>
         <!-- Leaflet -->
-        <link rel="stylesheet" href="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
-        <script src="https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
         <link rel="stylesheet" href="L.Control.Heightgraph.css"/>
         <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
         <script src="https://d3js.org/d3.v3.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>   
         <script type="text/javascript" src="data.js"></script>
+        <script type="text/javascript" src="waytypedata_steep.js"></script>
         <script type="text/javascript" src="L.Control.Heightgraph.settings.js"></script>
         <script type="text/javascript" src="L.Control.Heightgraph.js"></script>
         
@@ -38,27 +39,26 @@
         });
 
         var bounds = new L.LatLngBounds(new L.LatLng(49.3356786,8.493329), new L.LatLng(49.4912906, 8.8714796 ));
-
-        var profileType ="steepness";
     
         var hg = L.control.heightgraph({
-            width: 750,
-            height: 125,
+            width: 800,
+            height: 200,
             margins: {
                 top: 45,
-                right: 50,
-                bottom: 30,
+                right: 60,
+                bottom: 40,
                 left: 50
             }
         });
 
         hg.addTo(map);
         
-        hg.addData(geojson, profileType);
+        hg.addData(geojson);
 
         L.geoJson(geojson).addTo(map);
 
         map.addLayer(openstreetmap).fitBounds(bounds);
+
 
 
     </script>

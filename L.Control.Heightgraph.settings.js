@@ -67,7 +67,7 @@ var WayType =  {
         9: 'Ferry',
         10: 'Construction'
     };
-var WayTypeColors = ['#7d7de5', '#7070ce', '#6464b7', '#5757a0', '#4b4b89', '#3e3e72', '#32325b', '#252544', '#19192d', '#0c0c16'];
+var WayTypeColors = ['#7d7de5', '#7070ce', '#6464b7', '#5757a0', '#4b4b89', '#3e3e72', '#32325b', '#252544', '#19192d', '#0c0c16', '#000000'];
 var SurfaceType = {
         0: 'Other',
         1: 'Paved',
@@ -89,5 +89,5 @@ var SurfaceType = {
         17: 'Grass',
         18: 'GrassPaver'
     };
-var SurfaceTypeColors= ['#45C4F9', '#37A4F5', '#339AF3', '#257AEF', '#2070EE', '#1250EA', '#0D46E9', '#0431E6', '#0431E6', '#0027E5'];
+var SurfaceTypeColors= ['#31276f', '#372c7d', '#3d318c', '#44369a', '#4a3ba9', '#5040b7', '#5b4bc0', '#685ac5', '#7568ca', '#8377cf', '#9085d4', '#9d94d9', '#aaa2df', '#b8b1e4', '#c5bfe9', '#d2ceee', '#dfdcf3', '#edebf8', '#faf9fd'];
     
