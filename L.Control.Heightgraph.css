@@ -216,7 +216,11 @@
 }
 .dataButton {
     position: absolute;
-    bottom : 2px;
-    left: 200px;
+    left:810px;
+    bottom: 2px;
     z-index: 1;
+    color:white;
+    background:black;
+    border:none;
+    opacity: 0.5;
 }

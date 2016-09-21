@@ -17,8 +17,7 @@
         <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
         <script src="https://d3js.org/d3.v3.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>   
-        <script type="text/javascript" src="data.js"></script>
-        <script type="text/javascript" src="waytypedata_steep.js"></script>
+        <script type="text/javascript" src="waytypedata.js"></script>
         <script type="text/javascript" src="L.Control.Heightgraph.settings.js"></script>
         <script type="text/javascript" src="L.Control.Heightgraph.js"></script>
         
@@ -54,6 +53,8 @@
         hg.addTo(map);
         
         hg.addData(geojson);
+
+        console.warn(geojson)
 
         L.geoJson(geojson).addTo(map);
 
