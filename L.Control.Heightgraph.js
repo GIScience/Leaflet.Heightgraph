@@ -57,8 +57,20 @@ L.Control.Heightgraph = L.Control.extend({
         button.setAttribute("type","button");
         button.setAttribute("class","dataButton");
         this._container.appendChild(button);
-        var y= document.getElementsByClassName("heightGraph.leaflet-control");
-        console.log(y)
+            button.addEventListener('click', function(){
+            button.style.display = 'block'; 
+            this.style.display = 'none';
+            var y= document.getElementsByClassName("selection");
+            y[0].hidden="true";
+        });
+
+
+        // var z= document.getElementsByClassName("heightGraph leaflet-control");
+        // console.log(z);
+        //z.addEventListener('click', function(){
+         //   L.DomEvent.on(button, 'click', this._expand, this);
+        //});
+
         //button.onclick= (this._expand, this);
         if (!L.Browser.android) {
             L.DomEvent.on(button, 'click', this._expand, this);
