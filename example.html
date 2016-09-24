@@ -54,8 +54,6 @@
         
         hg.addData(geojson);
 
-        console.warn(geojson)
-
         L.geoJson(geojson).addTo(map);
 
         map.addLayer(openstreetmap).fitBounds(bounds);
