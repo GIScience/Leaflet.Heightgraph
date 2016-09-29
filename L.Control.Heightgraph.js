@@ -108,7 +108,12 @@ L.Control.Heightgraph = L.Control.extend({
             var background = document.getElementsByClassName("background");
             background[0].remove();
             self._profileType = this.value;
-            self._selectedData = data[self._profileType];
+            if (self._profileType == -1){
+                self._selectedData = data[0];
+            } else{
+                data[self._profileType];
+            }
+            //self._selectedData = data[self._profileType];
             self._calcDistances();
             self._calculateHeightType();
             self._dynamicLegend = self._updateLegend();
@@ -173,6 +178,7 @@ L.Control.Heightgraph = L.Control.extend({
         var first, calc;
         //var wpList=[];
         var a = this._selectedData;
+        console.log(a);
         distances.distance = [];
         distances.wpDistance = [];
         var featureLength = a.features.length;
@@ -252,6 +258,7 @@ L.Control.Heightgraph = L.Control.extend({
                 legendList[i] = {
                     text: "",
                     color: "none"
+
                 };
             }
             if (b == "0") {
