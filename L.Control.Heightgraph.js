@@ -111,9 +111,8 @@ L.Control.Heightgraph = L.Control.extend({
             if (self._profileType == -1){
                 self._selectedData = data[0];
             } else{
-                data[self._profileType];
+                self._selectedData = data[self._profileType];
             }
-            //self._selectedData = data[self._profileType];
             self._calcDistances();
             self._calculateHeightType();
             self._dynamicLegend = self._updateLegend();
