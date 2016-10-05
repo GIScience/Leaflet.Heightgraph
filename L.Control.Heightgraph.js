@@ -250,8 +250,10 @@ L.Control.Heightgraph = L.Control.extend({
         cleanList.sort(sortNumber);
         for (var i = 0; i < cleanList.length; i++) {
             if (b == "2") {
-                var j = cleanList[i] - 5;
-                legendList.push(SteepnessType[cleanList[i]][j]);
+                legendList[i] = {
+                    text: SteepnessType[cleanList[i]],
+                    color: colors.SteepColor[cleanList[i]]
+                };
             }
             if (b == "-1") {
                 legendList[i] = {
@@ -263,13 +265,13 @@ L.Control.Heightgraph = L.Control.extend({
             if (b == "0") {
                 legendList[i] = {
                     text: WayType[cleanList[i]],
-                    color: WayTypeColors[cleanList[i]]
+                    color: colors.WayColors[cleanList[i]]
                 };
             }
             if (b == "1") {
                 legendList[i] = {
                     text: SurfaceType[cleanList[i]],
-                    color: SurfaceTypeColors[cleanList[i]]
+                    color: colors.SurfaceColors[cleanList[i]]
                 };
             }
         }
@@ -298,16 +300,16 @@ L.Control.Heightgraph = L.Control.extend({
             for (var j = 0; j < featureslength; j++) {
                 adddist[i + 1] = adddist[i] + distances.distance[i];
                 if (profileType == "2") {
-                    color = SteepnessType[types[i]][types[i] - 5].color;
+                    color = colors.SteepColor[types[i]];
                 }
                 if (profileType == "-1") {
                     color = "black";
                 }
                 if (profileType == "0") {
-                    color = WayTypeColors[types[i]];
+                    color = colors.WayColors[types[i]];
                 }
                 if (profileType == "1") {
-                    color = SurfaceTypeColors[types[i]];
+                    color = colors.SurfaceColors[types[i]];
                 }
             }
             list.push({

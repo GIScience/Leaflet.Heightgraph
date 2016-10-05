@@ -1,59 +1,73 @@
-var SteepnessType = [{
-    '-5': {
-        text: '16%+',
-        color: '#028306' //gruen
-    }
-}, {
-    '-4': {
-        text: '10-15%',
-        color: '#2AA12E'
-    }
-}, {
-    '-3': {
-        text: '7-9%',
-        color: '#53BF56'
-    }
-}, {
-    '-2': {
-        text: '4-6%',
-        color: '#7BDD7E'
-    }
-}, {
-    '-1': {
-        text: '1-3%',
-        color: '#A4FBA6'
-    }
-}, {
-    '0': {
-        text: '0%',
-        color: '#ffcc99'
-    }
-}, {
-    '1': {
-        text: '1-3%',
-        color: '#F29898'
-    }
-}, {
-    '2': {
-        text: '4-6%',
-        color: '#E07575'
-    }
-}, {
-    '3': {
-        text: '7-9%',
-        color: '#CF5352'
-    }
-}, {
-    '4': {
-        text: '10-15%',
-        color: '#BE312F'
-    }
-}, {
-    '5': {
-        text: '16%+',
-        color: '#AD0F0C' //rot
-    }
-}];
+// var SteepnessType = [{
+//     '-5': {
+//         text: '16%+',
+//         color: '#028306' //gruen
+//     }
+// }, {
+//     '-4': {
+//         text: '10-15%',
+//         color: '#2AA12E'
+//     }
+// }, {
+//     '-3': {
+//         text: '7-9%',
+//         color: '#53BF56'
+//     }
+// }, {
+//     '-2': {
+//         text: '4-6%',
+//         color: '#7BDD7E'
+//     }
+// }, {
+//     '-1': {
+//         text: '1-3%',
+//         color: '#A4FBA6'
+//     }
+// }, {
+//     '0': {
+//         text: '0%',
+//         color: '#ffcc99'
+//     }
+// }, {
+//     '1': {
+//         text: '1-3%',
+//         color: '#F29898'
+//     }
+// }, {
+//     '2': {
+//         text: '4-6%',
+//         color: '#E07575'
+//     }
+// }, {
+//     '3': {
+//         text: '7-9%',
+//         color: '#CF5352'
+//     }
+// }, {
+//     '4': {
+//         text: '10-15%',
+//         color: '#BE312F'
+//     }
+// }, {
+//     '5': {
+//         text: '16%+',
+//         color: '#AD0F0C' //rot
+//     }
+// }];
+var SteepnessType = {        
+        0: '16%',
+        1: '10-15%',
+        2: '7-9%',
+        3: '4-6%',
+        4: '1-3%',
+        5: '0%',
+        6: '1-3%',
+        7: '4-6%',
+        8: '7-9%',
+        9: '10-15%',
+        10: '16%'
+
+};
 var WayType =  {
         0: 'Other',
         1: 'StateRoad',
@@ -68,7 +82,6 @@ var WayType =  {
         10: 'Construction'
     };
 //var WayTypeColors = ['#7d7de5', '#7070ce', '#6464b7', '#5757a0', '#4b4b89', '#3e3e72', '#32325b', '#252544', '#19192d', '#0c0c16', '#000000'];
-var WayTypeColors = chroma.scale(['white','#45c4f9']).colors(11); 
 var SurfaceType = {
         0: 'Other',
         1: 'Paved',
@@ -91,4 +104,25 @@ var SurfaceType = {
         18: 'GrassPaver'
     };
 //var SurfaceTypeColors= ['#31276f', '#372c7d', '#3d318c', '#44369a', '#4a3ba9', '#5040b7', '#5b4bc0', '#685ac5', '#7568ca', '#8377cf', '#9085d4', '#9d94d9', '#aaa2df', '#b8b1e4', '#c5bfe9', '#d2ceee', '#dfdcf3', '#edebf8', '#faf9fd'];
- var SurfaceTypeColors = chroma.scale(['white','blue']).colors(19);   
+
+var dynWayTypeColors = dynColors('white','turquoise',11);
+var dynSurfaceColors = dynColors('white','blue',19);
+var dynSteepnessColors = dynColors('#028306', '#AD0F0C',10);
+var WayColors = toObject(dynWayTypeColors);
+var SurfaceColors = toObject(dynSurfaceColors);
+var SteepColor = toObject(dynSteepnessColors);
+
+function dynColors(first, last, amount){
+    return (chroma.scale([first,last]).colors(amount));
+
+}
+
+function toObject(arr) {
+  var rv = {};
+  for (var i = 0; i < arr.length; ++i)
+    rv[i] = arr[i];
+  return rv;
+}
+
+var colors = {WayColors, SurfaceColors, SteepColor};
+
