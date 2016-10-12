@@ -60,17 +60,9 @@
 
 
 /* d3 styles */
-
-.focus rect {
-    width: 53;
-    height: 14;
-    fill: #000;
-}
-
 .focusLine line {
-    stroke-width: 1;
-    stroke: black;
-    fill: #fff;
+    stroke-width: 2;
+    stroke: #FFF;
     display: none;
     cursor: default;
 }
@@ -94,7 +86,7 @@
 
 .legend-text {
     fill: #fff;
-    font-size: 9;
+    font-size: 10;
     text-align: right;
 }
 
@@ -151,7 +143,6 @@
     text-anchor: middle;
     color: #fff;
     fill: #fff;
-    font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
 .axis path {
@@ -169,58 +160,38 @@
 .focus {
     display: none;
     font-size: 10px;
-    background: black;
+    background: #888;
     fill: #fff;
 }
 
 .height-focus-label {
     pointer-events: none;
     visibility: visible;
-    background-color: black;
-    font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
-    fill: white;
+    background-color: #888;
+    fill: #000;
     font-size: 12px;
 }
 
 .height-focus.line {
-    stroke: black;
+    stroke: #888;
     stroke-width: 1;
-    opacity: 1;
     visibility: visible;
 }
 
 .height-focus.circle {
-    stroke: black;
+    stroke: #888;
 }
 
 .height-focus.circle-lower {
-    /*fill: #ff7800;*/
-    color: "#000";
     weight: 1;
-    opacity: 1;
-    fillOpacity: 0.8;
     visibility: visible;
 }
 
-.height-focus-label-rect {
-    width: 53;
-    height: 14;
-    fill: #000;
-    visibility: visible;
-}
 .selection {
     position: absolute;
-    bottom : 2px;
-    left: 90px;
+    top : 10px;
+    left: 45px;
     z-index: 1;
-}
-.dataButton {
-    position: absolute;
-    left:810px;
-    bottom: 2px;
-    z-index: 1;
-    color:white;
-    background:black;
-    border:none;
-    opacity: 0.5;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
 }

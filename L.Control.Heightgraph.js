@@ -39,37 +39,25 @@ L.Control.Heightgraph = L.Control.extend({
     _initToggle: function() {
         /* inspired by L.Control.Layers */
         var container = this._container;
-        //Makes this work on IE10 Touch devices by stopping it from firing a mouseout event when the touch is released
-        container.setAttribute('aria-haspopup', true);
         if (!L.Browser.touch) {
             L.DomEvent.disableClickPropagation(container);
             //.disableScrollPropagation(container);
         } else {
             L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation);
         }
-        var button = document.createElement("button");
-        var t = document.createTextNode("x");
-        button.appendChild(t);
-        button.setAttribute("type", "button");
-        button.setAttribute("class", "dataButton");
-        this._container.appendChild(button);
-        button.addEventListener('click', function() {
-            button.style.display = 'block';
-            this.style.display = 'none';
-            document.getElementsByClassName("selection")[0].hidden = true;
-            document.getElementsByClassName("background")[0].style.display = "none";
-            //L.DomUtil.addClass(container, 'heightGraph-collapsed');
-        });
-      
         if (!L.Browser.android) {
             L.DomEvent.on(container, 'click', this._expand);
         }
     },
     _expand: function(e) {
         if (e.target.className == "heightGraph leaflet-control") {
-            document.getElementsByClassName("background")[0].style.display = "block";
-            document.getElementsByClassName("selection")[0].hidden = false;
-            document.getElementsByClassName("dataButton")[0].style.display = "block";
+            if (document.getElementsByClassName("background")[0].style.display == 'none') {
+                document.getElementsByClassName("background")[0].style.display = "block";
+                document.getElementsByClassName("selection")[0].hidden = false;
+            } else {
+                document.getElementsByClassName("selection")[0].hidden = true;
+                document.getElementsByClassName("background")[0].style.display = "none";
+            }
         }
         // if (this._container.className.indexOf('heightGraph-collapsed') > -1) {
         //     this._container.className = this._container.className.replace(' heightGraph-collapsed', '');
@@ -108,9 +96,9 @@ L.Control.Heightgraph = L.Control.extend({
             var background = document.getElementsByClassName("background");
             background[0].remove();
             self._profileType = this.value;
-            if (self._profileType == -1){
+            if (self._profileType == -1) {
                 self._selectedData = data[0];
-            } else{
+            } else {
                 self._selectedData = data[self._profileType];
             }
             self._calcDistances();
@@ -251,27 +239,26 @@ L.Control.Heightgraph = L.Control.extend({
         for (var i = 0; i < cleanList.length; i++) {
             if (b == "2") {
                 legendList[i] = {
-                    text: SteepnessType[cleanList[i]],
-                    color: colors.SteepColor[cleanList[i]]
+                    text: mappings.steepnessTypes[cleanList[i]].text,
+                    color: mappings.steepnessTypes[cleanList[i]].color
                 };
             }
             if (b == "-1") {
                 legendList[i] = {
                     text: "",
                     color: "none"
-
                 };
             }
             if (b == "0") {
                 legendList[i] = {
-                    text: WayType[cleanList[i]],
-                    color: colors.WayColors[cleanList[i]]
+                    text: mappings.wayTypes[cleanList[i]].text,
+                    color: mappings.wayTypes[cleanList[i]].color
                 };
             }
             if (b == "1") {
                 legendList[i] = {
-                    text: SurfaceType[cleanList[i]],
-                    color: colors.SurfaceColors[cleanList[i]]
+                    text: mappings.surfaceTypes[cleanList[i]].text,
+                    color: mappings.surfaceTypes[cleanList[i]].color
                 };
             }
         }
@@ -290,27 +277,27 @@ L.Control.Heightgraph = L.Control.extend({
         var data = this._selectedData;
         var distances = this._distances;
         var profileType = this._profileType;
-        var list = [];
-        var wplist = [];
-        var adddist = [0];
         var count = heightvalues.length;
-        var color;
-        var featureslength = data.features.length;
+        var color, text, wplist = [],
+            list = [];
+        var adddist = [0];
         for (var i = 0; i < count; i++) {
-            for (var j = 0; j < featureslength; j++) {
-                adddist[i + 1] = adddist[i] + distances.distance[i];
-                if (profileType == "2") {
-                    color = colors.SteepColor[types[i]];
-                }
-                if (profileType == "-1") {
-                    color = "black";
-                }
-                if (profileType == "0") {
-                    color = colors.WayColors[types[i]];
-                }
-                if (profileType == "1") {
-                    color = colors.SurfaceColors[types[i]];
-                }
+            adddist[i + 1] = adddist[i] + distances.distance[i];
+            if (profileType == "2") {
+                color = mappings.steepnessTypes[types[i]].color;
+                text = mappings.steepnessTypes[types[i]].text;
+            }
+            if (profileType == "-1") {
+                color = "black";
+                text = "";
+            }
+            if (profileType == "0") {
+                color = mappings.wayTypes[types[i]].color;
+                text = mappings.wayTypes[types[i]].text;
+            }
+            if (profileType == "1") {
+                color = mappings.surfaceTypes[types[i]].color;
+                text = mappings.surfaceTypes[types[i]].text;
             }
             list.push({
                 coords: [{
@@ -327,6 +314,7 @@ L.Control.Heightgraph = L.Control.extend({
                     y: d3.min(heightvalues)
                 }],
                 type: types[i],
+                text: text,
                 color: color,
                 LatLng: distances.coordsOfDist[i]
             });
@@ -355,22 +343,23 @@ L.Control.Heightgraph = L.Control.extend({
         }
         return list;
     },
-    _showMarker: function(ll, height, heightvalue, color) {
+    _showMarker: function(ll, height, heightvalue, color, text) {
         var layerpoint = this._map.latLngToLayerPoint(ll);
         var normalizedAlt = height / (d3.max(heightvalue) * 5) * height;
         var normalizedY = layerpoint.y - normalizedAlt;
         if (!this._mouseHeightFocus) {
             var heightG = d3.select(".leaflet-overlay-pane svg").append("g");
             this._mouseHeightFocus = heightG.append('svg:line').attr('class', 'height-focus line').attr('x2', '0').attr('y2', '0').attr('x1', '0').attr('y1', '0');
-            this._mouseHeightFocusLabel = heightG.append("svg:text").attr("class", "height-focus-label");
-            this._mouseHeightFocusLabelRect = heightG.insert("rect", "text").attr("class", "height-focus-label-rect").attr("y", "-7").attr("x", "-1");
+            this._mouseHeightFocusLabel = heightG.append("svg").attr('class', 'height-focus-label');
             var pointG = this._pointG = heightG.append("g").attr('class', 'height-focus circle');
             pointG.append("svg:circle").attr("r", 5).attr("cx", 0).attr("cy", 0).attr("class", "height-focus circle-lower");
         }
         this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY);
         this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").attr('fill', color);
-        this._mouseHeightFocusLabelRect.attr("x", layerpoint.x).attr("y", normalizedY);
-        this._mouseHeightFocusLabel.attr("x", layerpoint.x + 3).attr("y", normalizedY + 11).text(height + " m");
+        this._mouseHeightFocusLabel.selectAll("*").remove();
+        d3.select('.height-focus-label text').remove();
+        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 3).attr("y", normalizedY + 11).text(height + " m");
+        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 3).attr("y", normalizedY + 23).text(text);
     },
     /**
      erfljkdflgdf
@@ -383,7 +372,7 @@ L.Control.Heightgraph = L.Control.extend({
         //SVG area
         var margin = this.options.margins,
             width = this.options.width - margin.left - margin.right,
-            height = 180 - margin.top - margin.bottom;
+            height = this.options.height - margin.top - margin.bottom;
         var x = d3.scale.linear().range([0, width]).domain([0, distances.totaldistance]);
         var y = d3.scale.linear().range([height, 0]).domain(d3.extent(heightvalues, function(d) {
             return d;
@@ -441,7 +430,7 @@ L.Control.Heightgraph = L.Control.extend({
         });*/
         // legend
         var legendRectSize = 7;
-        var legendSpacing = 4;
+        var legendSpacing = 7;
         //legendBox.append(legend);
         var legend = svgSec.selectAll('.legend').data(dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
@@ -486,7 +475,6 @@ L.Control.Heightgraph = L.Control.extend({
             if (typeof(self._mouseHeightFocus) != "undefined") {
                 self._mouseHeightFocus.style("display", null);
                 self._mouseHeightFocusLabel.style("display", null);
-                self._mouseHeightFocusLabelRect.style("display", null);
                 self._pointG.style("display", null);
             }
         }
@@ -498,13 +486,13 @@ L.Control.Heightgraph = L.Control.extend({
             focusLine.style("display", "none");
             self._mouseHeightFocus.style("display", "none");
             self._mouseHeightFocusLabel.style("display", "none");
-            self._mouseHeightFocusLabelRect.style("display", "none");
             self._pointG.style("display", "none");
         }
         var self = this;
 
         function mousemove(d) {
             var color = d.color;
+            var text = d.text;
             var x0 = x.invert(d3.mouse(this)[0]); //distance in m   
             var d0 = d.coords[0].x,
                 d1 = d.coords[1].x;
@@ -512,8 +500,8 @@ L.Control.Heightgraph = L.Control.extend({
             var y0 = (Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100); //height
             var LatLngCoords = d.LatLng;
             var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
-            self._showMarker(segmentCenter, y0, heightvalues, color);
-            focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + y(d3.min(heightvalues)) + ")");
+            self._showMarker(segmentCenter, y0, heightvalues, color, text);
+            focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + y(d3.min(heightvalues) + 15) + ")");
             focus.select("text").text(Math.round((x0 / 1000) * 100) / 100 + ' km'); //text in km
             focusLine.style("display", "initial").attr('x1', x(x0)).attr('y1', y(y0)).attr('x2', x(x0));
         }
