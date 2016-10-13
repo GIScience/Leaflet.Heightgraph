@@ -1,50 +1,37 @@
 /* container styles */
-
-.heightGraph {
-    width: 26px !important;
-    height: 26px;
-    display: block;
-    box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
-    cursor: auto;
-    background-color: #FFFFFF;
-    -webkit-touch-callout: none;
-    /* iOS Safari */
-    -webkit-user-select: none;
-    /* Chrome/Safari/Opera */
-    -khtml-user-select: none;
-    /* Konqueror */
-    -moz-user-select: none;
-    /* Firefox */
-    -ms-user-select: none;
-    /* Internet Explorer/Edge */
-    user-select: none;
-    /* Non-prefixed version, currently
-                                  not supported by any browser */
-}
-
-.heightGraph:before {
-    content: "\f1fe";
-    font-family: FontAwesome;
-    color: #707070;
-    position: absolute;
-    z-index: -1;
-    margin-top: 5px;
-    margin-left: 6px;
-}
-
-.heightGraph .background {
-    position: absolute;
-    margin-left: 35px;
-    background-color: rgba(0, 0, 0, 0.6);
+.background {
+    background-color: #FFF;
     border-radius: 10px;
-}
-
-.heightGraph-collapsed .background {
     display: none;
 }
 
-.heightGraph-collapsed .elevation-toggle {
+.heightgraph-toggle {
+    cursor: pointer;
+    box-shadow: 0 1px 7px rgba(0, 0, 0, .4);
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    width: 28px;
+    height: 28px;
+    background: #f8f8f9;
     display: block;
+}
+
+.heightgraph-toggle-icon {
+    background: url(images/area-chart.svg) no-repeat center center;
+    background-size: 14px 14px;
+    width: 26px;
+    height: 26px;
+    position: absolute;
+
+}
+
+.heightgraph-close-icon {
+    background: url(images/remove.svg) no-repeat center center;
+    background-size: 14px 14px;
+    width: 26px;
+    height: 26px;
+    position: absolute;
+    right: 0;
 }
 
 .bars {
@@ -53,16 +40,16 @@
 }
 
 .borderTop {
-    stroke-width: 2;
-    stroke: #fff;
+    stroke-width: 1;
+    stroke: #444;
     fill: none;
 }
 
 
 /* d3 styles */
 .focusLine line {
-    stroke-width: 2;
-    stroke: #FFF;
+    stroke-width: 1;
+    stroke: #444;
     display: none;
     cursor: default;
 }
@@ -80,18 +67,18 @@
 }
 
 .legend-rect {
-    width: 6;
-    height: 6;
+    pointer-events: none;
 }
 
 .legend-text {
-    fill: #fff;
+    fill: #000;
     font-size: 10;
     text-align: right;
+    pointer-events: none;
 }
 
 .tick, .tick text {
-    fill: #fff;
+    fill: #000;
 }
 
 
@@ -131,14 +118,6 @@
     text-align: center;
 }
 
-.legend-rect {
-    pointer-events: none;
-}
-
-.legend-text {
-    pointer-events: none;
-}
-
 .axisText {
     text-anchor: middle;
     color: #fff;
@@ -146,22 +125,31 @@
 }
 
 .axis path {
-    stroke: #fff;
+    stroke: #000;
     fill: none;
     stroke-width: 1;
 }
 
 .axis line {
-    fill: white;
-    stroke: white;
+    stroke: #000;
     shape-rendering: crispEdges;
 }
 
 .focus {
     display: none;
     font-size: 10px;
-    background: #888;
-    fill: #fff;
+    fill: #000;
+        pointer-events: none;
+
+
+}
+
+.focus rect {
+    fill: rgba(255,255,255,0.8);
+    stroke-width: 1;
+    stroke: #000;
+        pointer-events: none;
+
 }
 
 .height-focus-label {
@@ -173,13 +161,13 @@
 }
 
 .height-focus.line {
-    stroke: #888;
+    stroke: #444;
     stroke-width: 1;
     visibility: visible;
 }
 
 .height-focus.circle {
-    stroke: #888;
+    stroke: #444;
 }
 
 .height-focus.circle-lower {
@@ -189,9 +177,10 @@
 
 .selection {
     position: absolute;
-    top : 10px;
-    left: 45px;
+    top : 7px;
+    left: 7px;
     z-index: 1;
-    background: rgba(0,0,0,0.5);
-    color: #fff;
+    background: #FFF;
+    color: #000;
+    display: none;
 }
