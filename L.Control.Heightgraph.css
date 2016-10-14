@@ -1,4 +1,5 @@
 /* container styles */
+
 .background {
     background-color: #FFF;
     border-radius: 10px;
@@ -22,7 +23,6 @@
     width: 26px;
     height: 26px;
     position: absolute;
-
 }
 
 .heightgraph-close-icon {
@@ -32,6 +32,7 @@
     height: 26px;
     position: absolute;
     right: 0;
+    display: none;
 }
 
 .bars {
@@ -47,6 +48,7 @@
 
 
 /* d3 styles */
+
 .focusLine line {
     stroke-width: 1;
     stroke: #444;
@@ -81,43 +83,6 @@
     fill: #000;
 }
 
-
-/* d3 tip styles */
-
-.d3-tip {
-    font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
-    line-height: 1;
-    padding: 4px;
-    background: rgba(0, 0, 0, 1);
-    color: #fff;
-    font-size: 10px;
-    border-radius: 4px;
-    pointer-events: none;
-    overflow: visible;
-    z-index: 9999;
-}
-
-
-/* Creates a small triangle extender for the tooltip */
-
-.d3-tip:after {
-    box-sizing: border-box;
-    display: inline;
-    width: 100%;
-    line-height: 1;
-    color: rgba(0, 0, 0, 0.8);
-    position: absolute;
-    pointer-events: none;
-}
-
-.d3-tip.n:after {
-    content: "\25BC";
-    margin: -3px 0 0 0;
-    top: 100%;
-    left: 0;
-    text-align: center;
-}
-
 .axisText {
     text-anchor: middle;
     color: #fff;
@@ -139,31 +104,23 @@
     display: none;
     font-size: 10px;
     fill: #000;
-        pointer-events: none;
-
-
+    pointer-events: none;
 }
 
 .focus rect {
-    fill: rgba(255,255,255,0.8);
+    fill: rgba(255, 255, 255, 0.8);
     stroke-width: 1;
     stroke: #000;
-        pointer-events: none;
-
+    pointer-events: none;
 }
 
-.height-focus-label {
-    pointer-events: none;
-    visibility: visible;
-    background-color: #888;
-    fill: #000;
-    font-size: 12px;
+.height-focus.label {
+    fill: #444;
 }
 
 .height-focus.line {
     stroke: #444;
     stroke-width: 1;
-    visibility: visible;
 }
 
 .height-focus.circle {
@@ -177,7 +134,7 @@
 
 .selection {
     position: absolute;
-    top : 7px;
+    top: 7px;
     left: 7px;
     z-index: 1;
     background: #FFF;
