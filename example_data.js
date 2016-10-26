@@ -1,6 +1,6 @@
 var geojson = [{
-        "type": "FeatureCollection",
-        "features": [{
+      "type": "FeatureCollection",
+       "features": [{
             "type": "Feature",
             "geometry": {
                 "type": "LineString",
