@@ -33,6 +33,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._svgSec = undefined;
     },
     addData: function(data) {
+        if (this._svgSec !== undefined) this._svgSec.selectAll("*").remove();
         this._findProfileTypes(data);
         this._selection(data);
         this._calcDistances();
