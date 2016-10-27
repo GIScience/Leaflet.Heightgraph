@@ -42,7 +42,7 @@
 
 .borderTop {
     stroke-width: 1;
-    stroke: #444;
+    stroke: #999;
     fill: none;
 }
 
@@ -80,24 +80,28 @@
 }
 
 .tick, .tick text {
-    fill: #000;
+    fill: #999;
 }
 
-.axisText {
+.axis .tick line{
+  visibility:hidden;
+}
+
+.AxisText {
     text-anchor: middle;
-    color: #fff;
-    fill: #fff;
+    color: #999;
+    fill: #999;
 }
 
 .axis path {
-    stroke: #000;
+    stroke: #999;
     fill: none;
     stroke-width: 1;
 }
 
 .axis line {
-    stroke: #000;
-    shape-rendering: crispEdges;
+    stroke: #999;
+    shape-rendering: auto;
 }
 
 .focus {
@@ -110,12 +114,17 @@
 .focus rect {
     fill: rgba(255, 255, 255, 0.8);
     stroke-width: 1;
-    stroke: #000;
+    stroke: #999;
     pointer-events: none;
+    shape-rendering: auto;
 }
 
-.height-focus.label {
-    fill: #444;
+.height-focus.label rect {
+    fill: rgba(255,255,255,0.5);
+    stroke-width: 1;
+    stroke: #999;
+    pointer-events: none;
+    shape-rendering: auto;
 }
 
 .height-focus.line {
@@ -140,4 +149,12 @@
     background: #FFF;
     color: #000;
     display: none;
+}
+
+.grid .tick {
+    stroke: #EEE;
+}
+
+.grid path {
+    stroke-width: 0;
 }

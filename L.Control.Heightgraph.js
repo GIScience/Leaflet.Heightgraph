@@ -95,43 +95,35 @@ L.Control.Heightgraph = L.Control.extend({
         this._updateAxis();
     },
     /*find all existing ProfileTypes of data for creating dynamic legend
-    */
-    _findProfileTypes: function(data){
+     */
+    _findProfileTypes: function(data) {
         var length = data.length;
-        var allProfileTypes=[];
-        for (var i=0; i< length; i++){
-            var type=data[i].properties.summary;
-            //allProfileTypes.push(type);
-            if(type=="WayType"){
-                allProfileTypes.push({                
+        var allProfileTypes = [];
+        for (var i = 0; i < length; i++) {
+            var type = data[i].properties.summary;
+            if (type == "WayType") {
+                allProfileTypes.push({
                     text: "Waytypes",
                     id: i
                 });
-            } else if(type=="WaySurface"){
+            } else if (type == "WaySurface") {
                 allProfileTypes.push({
                     text: "Surfacetypes",
                     id: i
                 });
-            } else if(type=="WaySteepness"){
+            } else if (type == "WaySteepness") {
                 allProfileTypes.push({
                     text: "Steepness",
                     id: i
                 });
-            } 
+            }
         }
         allProfileTypes.push({
             text: "None",
             id: -1
-
         });
-        this._allProfileTypes= allProfileTypes;
-        console.log(allProfileTypes);
+        this._allProfileTypes = allProfileTypes;
         this._profileType = allProfileTypes[0];
-        // this._calcDistances();
-        // this._calculateHeightType();
-        // this._updateLegend();
-        // this._updateBarData();
-        // this._createBarChart();
     },
     _selection: function(data) {
         this._selectedData = data[0];
@@ -141,14 +133,10 @@ L.Control.Heightgraph = L.Control.extend({
         d3.select(".selection").on("change", function() {
             self._svgSec.selectAll("*").remove();
             self._profileType = this.value;
-            console.log(this.value);
-            console.log(self._profileType);
             if (self._profileType == -1) {
-                console.log("none")
                 self._selectedData = data[0];
                 self._selectedOption = this.value;
             } else {
-                console.log("laeuft") 
                 self._selectedData = data[self._profileType];
                 self._selectedOption = this.value;
             }
@@ -159,7 +147,7 @@ L.Control.Heightgraph = L.Control.extend({
             self._createBarChart();
         }).selectAll("option").data(this._allProfileTypes).enter().append("option").attr("value", function(d) {
             return d.id;
-        }).text(function(d){
+        }).text(function(d) {
             return d.text;
         });
     },
@@ -229,13 +217,8 @@ L.Control.Heightgraph = L.Control.extend({
      * @returns {Array} list with steepness color and text as array
      */
     _updateLegend: function() {
-        console.log(this._allProfileTypes);
         var a = this._types;
-        console.log(this._selectedOption);
         var b = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
-
-        console.log(this._selectedOption);
-        console.log(a,b);
         var legendList = [];
         var text = [];
         var color = [];
@@ -274,7 +257,6 @@ L.Control.Heightgraph = L.Control.extend({
                 };
             }
         }
-        console.log(legendList)
         this._dynamicLegend = legendList;
     },
     /**
@@ -289,7 +271,7 @@ L.Control.Heightgraph = L.Control.extend({
         var types = this._types;
         var data = this._selectedData;
         var distances = this._distances;
-        var profileType = (this._selectedOption != -1)? this._allProfileTypes[this._selectedOption].text : "None";
+        var profileType = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
         var count = heightvalues.length;
         var color, text, wplist = [],
             list = [];
@@ -321,10 +303,10 @@ L.Control.Heightgraph = L.Control.extend({
                     y: heightvalues[(i + 1 == count) ? i : i + 1]
                 }, {
                     x: adddist[(i + 1 == count) ? i : i + 1],
-                    y: (d3.min(heightvalues) - (d3.max(heightvalues)/10))
+                    y: (d3.min(heightvalues) - (d3.max(heightvalues) / 10))
                 }, {
                     x: adddist[i],
-                    y: (d3.min(heightvalues) - (d3.max(heightvalues)/10))
+                    y: (d3.min(heightvalues) - (d3.max(heightvalues) / 10))
                 }],
                 type: types[i],
                 text: text,
@@ -349,8 +331,9 @@ L.Control.Heightgraph = L.Control.extend({
         this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY);
         this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").attr('fill', color);
         this._mouseHeightFocusLabel.selectAll("*").remove();
-        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 3).attr("y", normalizedY).text(height + " m");
-        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 3).attr("y", normalizedY + 11).text(text);
+        this._mouseHeightFocusLabel.append("rect").attr("x", layerpoint.x + 3).attr("y", normalizedY).attr("width", 75).attr("height", 30);
+        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 5).attr("y", normalizedY + 12).text(height + " m");
+        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 5).attr("y", normalizedY + 24).text(text);
     },
     /**
      erfljkdflgdf
@@ -364,30 +347,52 @@ L.Control.Heightgraph = L.Control.extend({
         var margin = this.options.margins,
             width = this.options.width - margin.left - margin.right,
             height = this.options.height - margin.top - margin.bottom;
-        var xHeight= d3.max(heightvalues) + (d3.max(heightvalues)/10);
-        var xHeightmin= d3.min(heightvalues) - (d3.max(heightvalues)/10);
-
+        var yHeight = d3.max(heightvalues) + (d3.max(heightvalues) / 10);
+        var yHeightmin = this._yHeightmin = d3.min(heightvalues) - (d3.max(heightvalues) / 10);
         var x = d3.scale.linear().range([0, width]).domain([0, distances.totaldistance]);
-       // var y = d3.scale.linear().range([height, 0]).domain([d3.min(heightvalues), d3.max(heightvalues)]);
-
-        var y = d3.scale.linear().range([height, 0]).domain([xHeightmin, d3.max(heightvalues)]);
-
-
-        var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(8).tickFormat(function(d) {
+        var y = d3.scale.linear().range([height, 0]).domain([yHeightmin, d3.max(heightvalues)]);
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(function(d) {
             return d / 1000;
             // var prefix = d3.formatPrefix(d);
             // return prefix.scale(d) //+ prefix.symbol;
         });
-        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(8);
+        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+        // gridlines in x axis function
+        function make_x_axis() {
+            return d3.svg.axis().scale(x).orient("bottom");
+        }
+
+        function make_y_axis() {
+            return d3.svg.axis().scale(y).orient("left");
+        }
         // if we switch options the svgSeg has already been generated
         var svgSec;
         if (this._svgSec === undefined) {
             svgSec = this._svgSec = d3.select(this._container).append("svg").attr("class", "background").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         } else {
-            console.log('ELSE')
             svgSec = this._svgSec;
         }
-        
+        // legend
+        var legendRectSize = 7;
+        var legendSpacing = 7;
+        //legendBox.append(legend);
+        var legend = svgSec.selectAll('.legend').data(dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
+            var height = legendRectSize + legendSpacing;
+            var offset = height * 2;
+            var horz = legendRectSize;
+            var vert = i * height - offset;
+            return 'translate(' + horz + ',' + vert + ')';
+        });
+        legend.append('rect').attr('class', 'legend-rect').attr('x', width + 20).attr('y', 8).attr('width', 6).attr('height', 6).style('fill', function(d, i) {
+            return d.color;
+        });
+        legend.append('text').attr('class', 'legend-text').attr('x', width + 30).attr('y', 15).text(function(d, i) {
+            return d.text;
+        });
+        // append x grid
+        svgSec.append("g").attr("class", "grid").attr("transform", "translate(0," + height + ")").call(make_x_axis().tickSize(-height, 0, 0).tickFormat(""));
+        // append y grid
+        svgSec.append("g").attr("class", "grid").call(make_y_axis().tickSize(-width, 0, 0).tickFormat(""));
         // axes and axes labels
         svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
             .attr('class', 'x axis') // specify classes
@@ -411,31 +416,6 @@ L.Control.Heightgraph = L.Control.extend({
         }).on('mouseover', handleMouseOver);
         svgSec.on('mouseleave', handleMouseLeave);
         svgSec.on('mouseenter', handleMouseEnter);
-        // focus line
-        var focus = svgSec.append("g").attr("class", "focus");
-        focus.append("rect").attr("x", 3).attr("y", -45).attr("width", 135).attr("height", 48);
-        focus.append("text").attr("x", 7).attr("id", "distance");
-        focus.append("text").attr("x", 7).attr("id", "height");
-        focus.append("text").attr("x", 7).attr("id", "blockdistance");
-        var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
-        var focusLine = focusLineGroup.append("line").attr("x1", 10).attr("x2", 10).attr("y1", y(d3.max(heightvalues))).attr("y2", y((d3.min(heightvalues)) - (d3.max(heightvalues)/10)));
-        // legend
-        var legendRectSize = 7;
-        var legendSpacing = 7;
-        //legendBox.append(legend);
-        var legend = svgSec.selectAll('.legend').data(dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
-            var height = legendRectSize + legendSpacing;
-            var offset = height * 2;
-            var horz = legendRectSize;
-            var vert = i * height - offset;
-            return 'translate(' + horz + ',' + vert + ')';
-        });
-        legend.append('rect').attr('class', 'legend-rect').attr('x', width + 20).attr('y', 8).attr('width', 6).attr('height', 6).style('fill', function(d, i) {
-            return d.color;
-        });
-        legend.append('text').attr('class', 'legend-text').attr('x', width + 30).attr('y', 15).text(function(d, i) {
-            return d.text;
-        });
         //line top border
         var borderTopLine = d3.svg.line().x(function(d) {
             return x(d.coords[0].x);
@@ -443,13 +423,14 @@ L.Control.Heightgraph = L.Control.extend({
             return y(d.coords[0].y);
         }).interpolate("basis");
         svgSec.append("svg:path").attr("d", borderTopLine(polygonData)).attr('class', 'borderTop');
-        // tick length
-        d3.selectAll("g.y.axis g.tick line").attr("x2", function(d) {
-            return -4;
-        });
-        d3.selectAll("g.x.axis g.tick line").attr("y2", function(d) {
-            return 4;
-        });
+        // focus line
+        var focus = svgSec.append("g").attr("class", "focus");
+        focus.append("rect").attr("x", 3).attr("y", -y(this._yHeightmin)).attr("width", 135).attr("height", 48);
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 10).attr("id", "distance");
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 25).attr("id", "height");
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 40).attr("id", "blockdistance");
+        var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
+        var focusLine = focusLineGroup.append("line").attr("y1", 0).attr("y2", y(d3.min(heightvalues) - (d3.max(heightvalues) / 10)));
         var self = this;
         // Create Event Handlers for mouse
         function handleMouseOver(d, i) {
@@ -464,10 +445,10 @@ L.Control.Heightgraph = L.Control.extend({
             var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
             self._showMarker(segmentCenter, y0, heightvalues, color, text);
             focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + (self.options.height - self.options.margins.top - self.options.margins.bottom - 5) + ")");
-            focus.select("#distance").text('Distance: ' + Math.round((x0 / 1000) * 100) / 100 + ' km').attr("y", -3);
-            focus.select("#height").text('Height: ' + y0.toFixed(0) + ' m').attr("y", -18);
-            if (d.text.length > 0) focus.select("#blockdistance").text('Length of segment: ' + (d.blockdist / 1000).toFixed(2) + ' km').attr("y", -33);
-            focusLine.style("display", "initial").attr('x1', x(x0)).attr('y1', y(y0)).attr('x2', x(x0));
+            focus.select("#distance").text('Distance: ' + Math.round((x0 / 1000) * 100) / 100 + ' km');
+            focus.select("#height").text('Height: ' + y0.toFixed(0) + ' m');
+            if (d.text.length > 0) focus.select("#blockdistance").text('Length of segment: ' + (d.blockdist / 1000).toFixed(2) + ' km');
+            focusLine.style("display", "initial").attr('x1', x(x0)).attr('x2', x(x0));
         }
 
         function handleMouseLeave() {
