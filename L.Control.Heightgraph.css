@@ -83,8 +83,9 @@
     fill: #999;
 }
 
-.axis .tick line{
-  visibility:hidden;
+.axis .tick line {
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .AxisText {
@@ -97,11 +98,13 @@
     stroke: #999;
     fill: none;
     stroke-width: 1;
+    pointer-events: none;
 }
 
 .axis line {
     stroke: #999;
     shape-rendering: auto;
+    pointer-events: none;
 }
 
 .focus {
@@ -120,7 +123,7 @@
 }
 
 .height-focus.label rect {
-    fill: rgba(255,255,255,0.5);
+    fill: rgba(255, 255, 255, 0.5);
     stroke-width: 1;
     stroke: #999;
     pointer-events: none;
@@ -153,8 +156,10 @@
 
 .grid .tick {
     stroke: #EEE;
+    pointer-events: none;
 }
 
 .grid path {
     stroke-width: 0;
+    pointer-events: none;
 }

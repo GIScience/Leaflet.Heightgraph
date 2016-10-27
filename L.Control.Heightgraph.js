@@ -33,7 +33,17 @@ L.Control.Heightgraph = L.Control.extend({
         this._svgSec = undefined;
     },
     addData: function(data) {
-        if (this._svgSec !== undefined) this._svgSec.selectAll("*").remove();
+        if (this._svgSec !== undefined) {
+            this._svgSec.selectAll("*").remove();
+            if (this._svgSec !== undefined) {
+                this._svgSec.selectAll("*").remove();
+                /** reset options */
+                var options = document.querySelectorAll('.selection option');
+                for (var i = 0, l = options.length; i < l; i++) {
+                    options[i].selected = options[i].defaultSelected;
+                }
+            }
+        }
         this._findProfileTypes(data);
         this._selection(data);
         this._calcDistances();
@@ -320,8 +330,7 @@ L.Control.Heightgraph = L.Control.extend({
     },
     _showMarker: function(ll, height, heightvalues, color, text) {
         var layerpoint = this._map.latLngToLayerPoint(ll);
-        var normalizedAlt = height / (d3.max(heightvalues) * 5) * height;
-        var normalizedY = layerpoint.y - normalizedAlt;
+        var normalizedY = layerpoint.y - 75;
         if (!this._mouseHeightFocus) {
             var heightG = d3.select(".leaflet-overlay-pane svg").append("g");
             this._mouseHeightFocus = heightG.append('svg:line').attr('class', 'height-focus line').attr('x2', '0').attr('y2', '0').attr('x1', '0').attr('y1', '0');
