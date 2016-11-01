@@ -38,6 +38,12 @@
 .bars {
     fill-opacity: 0.9;
     shape-rendering: crispEdges;
+    pointer-events: none;
+}
+
+.bars-overlay {
+    fill: none;
+    pointer-events: all;
 }
 
 .borderTop {

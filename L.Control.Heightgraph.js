@@ -287,6 +287,7 @@ L.Control.Heightgraph = L.Control.extend({
         var color, text, wplist = [],
             list = [];
         var adddist = [0];
+        var maxheight = d3.max(heightvalues);
         for (var i = 0; i < count; i++) {
             adddist[i + 1] = adddist[i] + distances.distance[i];
             if (profileType == "Steepness") {
@@ -318,6 +319,19 @@ L.Control.Heightgraph = L.Control.extend({
                 }, {
                     x: adddist[i],
                     y: (d3.min(heightvalues) - (d3.max(heightvalues) / 10))
+                }],
+                coords_maxheight: [{
+                    x: adddist[i],
+                    y: maxheight
+                }, {
+                    x: adddist[(i + 1 == count) ? i : i + 1],
+                    y: maxheight
+                }, {
+                    x: adddist[(i + 1 == count) ? i : i + 1],
+                    y: (d3.min(heightvalues) - maxheight / 10)
+                }, {
+                    x: adddist[i],
+                    y: (d3.min(heightvalues) - maxheight / 10)
                 }],
                 type: types[i],
                 text: text,
@@ -414,6 +428,7 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("x", -20).attr("y", height - height - 10).text("hm");
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
+            //if (maxheight) return 
             return x(d.x);
         }).y(function(d) {
             return y(d.y);
@@ -423,6 +438,10 @@ L.Control.Heightgraph = L.Control.extend({
             return polygon(d.coords);
         }).attr('fill', function(d) {
             return (d.color);
+        });
+        // bar chart invisible for hover as path
+        svgSec.selectAll('hpath').data(polygonData).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
+            return polygon(d.coords_maxheight);
         }).on('mouseover', handleMouseOver);
         svgSec.on('mouseleave', handleMouseLeave);
         svgSec.on('mouseenter', handleMouseEnter);
@@ -444,13 +463,13 @@ L.Control.Heightgraph = L.Control.extend({
         var self = this;
         // Create Event Handlers for mouse
         function handleMouseOver(d, i) {
-            var color = d.color;
-            var text = d.text;
             var x0 = x.invert(d3.mouse(this)[0]); //distance in m
             var d0 = d.coords[0].x,
                 d1 = d.coords[1].x;
             var d2 = d1 - x0 > x0 - d0 ? 0 : 1; // shortest distance between mouse and coords of polygon
             var y0 = (Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100); //height
+            var color = d.color;
+            var text = d.text;
             var LatLngCoords = d.LatLng;
             var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
             self._showMarker(segmentCenter, y0, heightvalues, color, text);
