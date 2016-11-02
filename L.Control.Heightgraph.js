@@ -133,7 +133,6 @@ L.Control.Heightgraph = L.Control.extend({
             type: "None",
             id: -1
         });
-        console.log(allProfileTypes);
         this._allProfileTypes = allProfileTypes;
         this._profileType = allProfileTypes[0];
     },
@@ -221,7 +220,6 @@ L.Control.Heightgraph = L.Control.extend({
         }
         this._heightvalues = heights;
         this._types = types;
-        console.log(this._types);
     },
     /**
      * Returns values of steepness as Array without duplicates 
@@ -233,7 +231,6 @@ L.Control.Heightgraph = L.Control.extend({
         var a = this._types;
         var b = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
         var c = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].type : "None";
-        console.log(c);
         var legendList = [];
         var text = [];
         var color = [];
