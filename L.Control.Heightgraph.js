@@ -286,6 +286,7 @@ L.Control.Heightgraph = L.Control.extend({
         var color, text, wplist = [],
             list = [];
         var adddist = [0];
+        var maxheight = d3.max(heightvalues);
         for (var i = 0; i < count; i++) {
             adddist[i + 1] = adddist[i] + distances.distance[i];
             if (b == "Steepness" || b == "Waytypes" || b == "Surfacetypes"){
@@ -311,6 +312,19 @@ L.Control.Heightgraph = L.Control.extend({
                 }, {
                     x: adddist[i],
                     y: (d3.min(heightvalues) - (d3.max(heightvalues) / 10))
+                }],
+                coords_maxheight: [{
+                    x: adddist[i],
+                    y: maxheight
+                }, {
+                    x: adddist[(i + 1 == count) ? i : i + 1],
+                    y: maxheight
+                }, {
+                    x: adddist[(i + 1 == count) ? i : i + 1],
+                    y: (d3.min(heightvalues) - maxheight / 10)
+                }, {
+                    x: adddist[i],
+                    y: (d3.min(heightvalues) - maxheight / 10)
                 }],
                 type: types[i],
                 text: text,
@@ -395,9 +409,9 @@ L.Control.Heightgraph = L.Control.extend({
             return d.text;
         });
         // append x grid
-        svgSec.append("g").attr("class", "grid").attr("transform", "translate(0," + height + ")").call(make_x_axis().tickSize(-height, 0, 0).tickFormat("")).on('mouseover', handleMouseOverGrid);
+        svgSec.append("g").attr("class", "grid").attr("transform", "translate(0," + height + ")").call(make_x_axis().tickSize(-height, 0, 0).tickFormat(""));
         // append y grid
-        svgSec.append("g").attr("class", "grid").call(make_y_axis().tickSize(-width, 0, 0).tickFormat("")).on('mouseover', handleMouseOverGrid);
+        svgSec.append("g").attr("class", "grid").call(make_y_axis().tickSize(-width, 0, 0).tickFormat(""));
         // axes and axes labels
         svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
             .attr('class', 'x axis') // specify classes
@@ -405,6 +419,7 @@ L.Control.Heightgraph = L.Control.extend({
         svgSec.append('g').attr('class', 'y axis').call(yAxis);
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
+            //if (maxheight) return 
             return x(d.x);
         }).y(function(d) {
             return y(d.y);
@@ -415,7 +430,10 @@ L.Control.Heightgraph = L.Control.extend({
         }).attr('fill', function(d) {
             return (d.color);
         });
-        //.on('mouseover', handleMouseOver);
+        // bar chart invisible for hover as path
+        svgSec.selectAll('hpath').data(polygonData).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
+            return polygon(d.coords_maxheight);
+        }).on('mouseover', handleMouseOver);
         svgSec.on('mouseleave', handleMouseLeave);
         svgSec.on('mouseenter', handleMouseEnter);
         //line top border
@@ -434,33 +452,14 @@ L.Control.Heightgraph = L.Control.extend({
         var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
         var focusLine = focusLineGroup.append("line").attr("y1", 0).attr("y2", y(d3.min(heightvalues) - (d3.max(heightvalues) / 10)));
         var self = this;
-        // Create Event Handlers for mouse
-        function handleMouseOverGrid (d) {
-            console.log(d3.mouse(this));
-            // var x0 = x.invert(d3.mouse(this)[0]); //distance in m
-            // var d0 = d.coords[0].x,
-            //     d1 = d.coords[1].x;
-            // var d2 = d1 - x0 > x0 - d0 ? 0 : 1; // shortest distance between mouse and coords of polygon
-            // var y0 = (Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100); //height
-            // var LatLngCoords = d.LatLng;
-            // var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
-            // focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + (self.options.height - self.options.margins.top - self.options.margins.bottom - 5) + ")");
-            // focus.select("#distance").text('Distance: ' + Math.round((x0 / 1000) * 100) / 100 + ' km');
-            // focus.select("#height").text('Height: ' + y0.toFixed(0) + ' m');
-            // if (d.text.length > 0) focus.select("#blockdistance").text('Length of segment: ' + (d.blockdist / 1000).toFixed(2) + ' km');
-            // focusLine.style("display", "initial").attr('x1', x(x0)).attr('x2', x(x0));
-
-
-        }
-
         function handleMouseOver(d, i) {
-            var color = d.color;
-            var text = d.text;
             var x0 = x.invert(d3.mouse(this)[0]); //distance in m
             var d0 = d.coords[0].x,
                 d1 = d.coords[1].x;
             var d2 = d1 - x0 > x0 - d0 ? 0 : 1; // shortest distance between mouse and coords of polygon
             var y0 = (Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100); //height
+            var color = d.color;
+            var text = d.text;
             var LatLngCoords = d.LatLng;
             var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
             self._showMarker(segmentCenter, y0, heightvalues, color, text);
