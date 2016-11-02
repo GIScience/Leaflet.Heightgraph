@@ -101,15 +101,17 @@
 }
 
 .axis path {
-    stroke: #999;
+    stroke: black;
     fill: none;
-    stroke-width: 1;
+    stroke-width: 2px;
+    shape-rendering: crispEdges;
+    stroke: lightgrey;
     pointer-events: none;
 }
 
 .axis line {
     stroke: #999;
-    shape-rendering: auto;
+    -shape-rendering: auto;
     pointer-events: none;
 }
 
@@ -133,7 +135,7 @@
     stroke-width: 1;
     stroke: #999;
     pointer-events: none;
-    shape-rendering: auto;
+    - shape-rendering: auto;
 }
 
 .height-focus.line {
@@ -168,4 +170,10 @@
 .grid path {
     stroke-width: 0;
     pointer-events: none;
+}
+
+.border-line {
+    stroke-width: 2px;
+    shape-rendering: crispEdges;
+    stroke: lightgrey;
 }

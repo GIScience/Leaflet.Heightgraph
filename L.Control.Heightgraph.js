@@ -113,19 +113,19 @@ L.Control.Heightgraph = L.Control.extend({
         var shownText;
         for (var i = 0; i < length; i++) {
             var type = data[i].properties.summary;
-            if(type == "WayType"){
+            if (type == "WayType") {
                 shownText = "Waytypes";
-            } else if (type == "WaySurface"){
-                shownText= "Surfacetypes";
-            } else if (type == "WaySteepness"){
-                shownText= "Steepness";
+            } else if (type == "WaySurface") {
+                shownText = "Surfacetypes";
+            } else if (type == "WaySteepness") {
+                shownText = "Steepness";
             } else {
                 shownText = type;
             }
             allProfileTypes.push({
-                    text: shownText,
-                    type: type,
-                    id: i
+                text: shownText,
+                type: type,
+                id: i
             });
         }
         allProfileTypes.push({
@@ -245,21 +245,19 @@ L.Control.Heightgraph = L.Control.extend({
         function sortNumber(a, b) {
             return a - b;
         }
-
         cleanList.sort(sortNumber);
         for (var i = 0; i < cleanList.length; i++) {
-            if (b == "Steepness" || b == "Waytypes" || b == "Surfacetypes"){
+            if (b == "Steepness" || b == "Waytypes" || b == "Surfacetypes") {
                 legendList[i] = {
                     text: mappings[c][cleanList[i]].text,
                     color: mappings[c][cleanList[i]].color
                 };
-            } else if(b == "None"){
+            } else if (b == "None") {
                 legendList[i] = {
                     text: "",
                     color: "none"
                 };
-            }
-            else {
+            } else {
                 legendList[i] = {
                     text: cleanList[i],
                     color: "blue"
@@ -289,15 +287,15 @@ L.Control.Heightgraph = L.Control.extend({
         var maxheight = d3.max(heightvalues);
         for (var i = 0; i < count; i++) {
             adddist[i + 1] = adddist[i] + distances.distance[i];
-            if (b == "Steepness" || b == "Waytypes" || b == "Surfacetypes"){
-                text= mappings[c][types[i]].text;
-                color= mappings[c][types[i]].color;
-            } else if(b == "None"){
-                text= "";
-                color= "lightgrey";
-            } else{
-                text= cleanList[i];
-                color= "lightgrey"; //chroma.js
+            if (b == "Steepness" || b == "Waytypes" || b == "Surfacetypes") {
+                text = mappings[c][types[i]].text;
+                color = mappings[c][types[i]].color;
+            } else if (b == "None") {
+                text = "";
+                color = "lightgrey";
+            } else {
+                text = cleanList[i];
+                color = "lightgrey"; //chroma.js
             }
             list.push({
                 coords: [{
@@ -402,16 +400,16 @@ L.Control.Heightgraph = L.Control.extend({
             var vert = i * height - offset;
             return 'translate(' + horz + ',' + vert + ')';
         });
-        legend.append('rect').attr('class', 'legend-rect').attr('x', width + 20).attr('y', 8).attr('width', 6).attr('height', 6).style('fill', function(d, i) {
+        legend.append('rect').attr('class', 'legend-rect').attr('x', width + 20).attr('y', 53).attr('width', 6).attr('height', 6).style('fill', function(d, i) {
             return d.color;
         });
-        legend.append('text').attr('class', 'legend-text').attr('x', width + 30).attr('y', 15).text(function(d, i) {
+        legend.append('text').attr('class', 'legend-text').attr('x', width + 30).attr('y', 60).text(function(d, i) {
             return d.text;
         });
         // append x grid
         svgSec.append("g").attr("class", "grid").attr("transform", "translate(0," + height + ")").call(make_x_axis().tickSize(-height, 0, 0).tickFormat(""));
         // append y grid
-        svgSec.append("g").attr("class", "grid").call(make_y_axis().tickSize(-width, 0, 0).tickFormat(""));
+        svgSec.append("g").attr("class", "grid").call(make_y_axis().tickSize(-width, 0, 0).ticks(5).tickFormat(""));
         // axes and axes labels
         svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
             .attr('class', 'x axis') // specify classes
@@ -452,6 +450,7 @@ L.Control.Heightgraph = L.Control.extend({
         var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
         var focusLine = focusLineGroup.append("line").attr("y1", 0).attr("y2", y(d3.min(heightvalues) - (d3.max(heightvalues) / 10)));
         var self = this;
+
         function handleMouseOver(d, i) {
             var x0 = x.invert(d3.mouse(this)[0]); //distance in m
             var d0 = d.coords[0].x,
