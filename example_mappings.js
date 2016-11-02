@@ -1,5 +1,5 @@
 var mappings = {};
-        mappings.steepnessTypes = {
+        mappings.WaySteepness = {
             '0': {
                 text: '16%+',
                 color: '#028306'
@@ -46,7 +46,7 @@ var mappings = {};
             }
         };
 
-        mappings.wayTypes = {
+        mappings.WayType = {
             '0': {
                 text: 'Other',
                 color: '#800080'
@@ -92,7 +92,7 @@ var mappings = {};
                 color: '#ffd700'
             }
         };
-        mappings.surfaceTypes = {
+        mappings.WaySurface = {
             '0': {
                 text: 'Other',
                 color: '#31276f'
@@ -126,11 +126,11 @@ var mappings = {};
                 color: '#685ac5'
             },
             '8': {
-                text: 'CompactedGravel',
+                text: 'Compacted Gravel',
                 color: '#7568ca'
             },
             '9': {
-                text: 'FineGravel',
+                text: 'Fine Gravel',
                 color: '#8377cf'
             },
             '10': {
@@ -166,7 +166,7 @@ var mappings = {};
                 color: '#edebf8'
             },
             '18': {
-                text: 'GrassPaver',
+                text: 'Grass Paver',
                 color: '#faf9fd'
             }
         };

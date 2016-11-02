@@ -110,29 +110,30 @@ L.Control.Heightgraph = L.Control.extend({
     _findProfileTypes: function(data) {
         var length = data.length;
         var allProfileTypes = [];
+        var shownText;
         for (var i = 0; i < length; i++) {
             var type = data[i].properties.summary;
-            if (type == "WayType") {
-                allProfileTypes.push({
-                    text: "Waytypes",
-                    id: i
-                });
-            } else if (type == "WaySurface") {
-                allProfileTypes.push({
-                    text: "Surfacetypes",
-                    id: i
-                });
-            } else if (type == "WaySteepness") {
-                allProfileTypes.push({
-                    text: "Steepness",
-                    id: i
-                });
+            if(type == "WayType"){
+                shownText = "Waytypes";
+            } else if (type == "WaySurface"){
+                shownText= "Surfacetypes";
+            } else if (type == "WaySteepness"){
+                shownText= "Steepness";
+            } else {
+                shownText = type;
             }
+            allProfileTypes.push({
+                    text: shownText,
+                    type: type,
+                    id: i
+            });
         }
         allProfileTypes.push({
             text: "None",
+            type: "None",
             id: -1
         });
+        console.log(allProfileTypes);
         this._allProfileTypes = allProfileTypes;
         this._profileType = allProfileTypes[0];
     },
@@ -220,6 +221,7 @@ L.Control.Heightgraph = L.Control.extend({
         }
         this._heightvalues = heights;
         this._types = types;
+        console.log(this._types);
     },
     /**
      * Returns values of steepness as Array without duplicates 
@@ -230,6 +232,8 @@ L.Control.Heightgraph = L.Control.extend({
     _updateLegend: function() {
         var a = this._types;
         var b = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
+        var c = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].type : "None";
+        console.log(c);
         var legendList = [];
         var text = [];
         var color = [];
@@ -241,30 +245,24 @@ L.Control.Heightgraph = L.Control.extend({
         function sortNumber(a, b) {
             return a - b;
         }
+
         cleanList.sort(sortNumber);
         for (var i = 0; i < cleanList.length; i++) {
-            if (b == "Steepness") {
+            if (b == "Steepness" || b == "Waytypes" || b == "Surfacetypes"){
                 legendList[i] = {
-                    text: mappings.steepnessTypes[cleanList[i]].text,
-                    color: mappings.steepnessTypes[cleanList[i]].color
+                    text: mappings[c][cleanList[i]].text,
+                    color: mappings[c][cleanList[i]].color
                 };
-            }
-            if (b == "None") {
+            } else if(b == "None"){
                 legendList[i] = {
                     text: "",
                     color: "none"
                 };
             }
-            if (b == "Waytypes") {
+            else {
                 legendList[i] = {
-                    text: mappings.wayTypes[cleanList[i]].text,
-                    color: mappings.wayTypes[cleanList[i]].color
-                };
-            }
-            if (b == "Surfacetypes") {
-                legendList[i] = {
-                    text: mappings.surfaceTypes[cleanList[i]].text,
-                    color: mappings.surfaceTypes[cleanList[i]].color
+                    text: cleanList[i],
+                    color: "blue"
                 };
             }
         }
@@ -282,28 +280,23 @@ L.Control.Heightgraph = L.Control.extend({
         var types = this._types;
         var data = this._selectedData;
         var distances = this._distances;
-        var profileType = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
+        var b = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
+        var c = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].type : "None";
         var count = heightvalues.length;
         var color, text, wplist = [],
             list = [];
         var adddist = [0];
         for (var i = 0; i < count; i++) {
             adddist[i + 1] = adddist[i] + distances.distance[i];
-            if (profileType == "Steepness") {
-                color = mappings.steepnessTypes[types[i]].color;
-                text = mappings.steepnessTypes[types[i]].text;
-            }
-            if (profileType == "None") {
-                color = "gray";
-                text = "";
-            }
-            if (profileType == "Waytypes") {
-                color = mappings.wayTypes[types[i]].color;
-                text = mappings.wayTypes[types[i]].text;
-            }
-            if (profileType == "Surfacetypes") {
-                color = mappings.surfaceTypes[types[i]].color;
-                text = mappings.surfaceTypes[types[i]].text;
+            if (b == "Steepness" || b == "Waytypes" || b == "Surfacetypes"){
+                text= mappings[c][types[i]].text;
+                color= mappings[c][types[i]].color;
+            } else if(b == "None"){
+                text= "";
+                color= "lightgrey";
+            } else{
+                text= cleanList[i];
+                color= "lightgrey"; //chroma.js
             }
             list.push({
                 coords: [{
@@ -362,11 +355,13 @@ L.Control.Heightgraph = L.Control.extend({
         var x = d3.scale.linear().range([0, width]).domain([0, distances.totaldistance]);
         var y = d3.scale.linear().range([height, 0]).domain([yHeightmin, d3.max(heightvalues)]);
         var xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(function(d) {
-            return d / 1000;
+            return d / 1000 + " km";
             // var prefix = d3.formatPrefix(d);
             // return prefix.scale(d) //+ prefix.symbol;
         });
-        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5).tickFormat(function(d) {
+            return d + " m";
+        });
         // gridlines in x axis function
         function make_x_axis() {
             return d3.svg.axis().scale(x).orient("bottom");
@@ -400,18 +395,14 @@ L.Control.Heightgraph = L.Control.extend({
             return d.text;
         });
         // append x grid
-        svgSec.append("g").attr("class", "grid").attr("transform", "translate(0," + height + ")").call(make_x_axis().tickSize(-height, 0, 0).tickFormat(""));
+        svgSec.append("g").attr("class", "grid").attr("transform", "translate(0," + height + ")").call(make_x_axis().tickSize(-height, 0, 0).tickFormat("")).on('mouseover', handleMouseOverGrid);
         // append y grid
-        svgSec.append("g").attr("class", "grid").call(make_y_axis().tickSize(-width, 0, 0).tickFormat(""));
+        svgSec.append("g").attr("class", "grid").call(make_y_axis().tickSize(-width, 0, 0).tickFormat("")).on('mouseover', handleMouseOverGrid);
         // axes and axes labels
         svgSec.append('g').attr("transform", "translate(0," + height + ")") // create a <g> element
             .attr('class', 'x axis') // specify classes
             .call(xAxis);
         svgSec.append('g').attr('class', 'y axis').call(yAxis);
-        var xAxisText = svgSec.append("text").attr('class', 'AxisText') // text label for the x axis
-            .attr("x", width / 2).attr("y", height + 27).text("km");
-        var yAxisText = svgSec.append("text").attr('class', 'AxisText') // text label for the y axis
-            .attr("x", -20).attr("y", height - height - 10).text("hm");
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
             return x(d.x);
@@ -423,7 +414,8 @@ L.Control.Heightgraph = L.Control.extend({
             return polygon(d.coords);
         }).attr('fill', function(d) {
             return (d.color);
-        }).on('mouseover', handleMouseOver);
+        });
+        //.on('mouseover', handleMouseOver);
         svgSec.on('mouseleave', handleMouseLeave);
         svgSec.on('mouseenter', handleMouseEnter);
         //line top border
@@ -443,6 +435,24 @@ L.Control.Heightgraph = L.Control.extend({
         var focusLine = focusLineGroup.append("line").attr("y1", 0).attr("y2", y(d3.min(heightvalues) - (d3.max(heightvalues) / 10)));
         var self = this;
         // Create Event Handlers for mouse
+        function handleMouseOverGrid (d) {
+            console.log(d3.mouse(this));
+            // var x0 = x.invert(d3.mouse(this)[0]); //distance in m
+            // var d0 = d.coords[0].x,
+            //     d1 = d.coords[1].x;
+            // var d2 = d1 - x0 > x0 - d0 ? 0 : 1; // shortest distance between mouse and coords of polygon
+            // var y0 = (Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100); //height
+            // var LatLngCoords = d.LatLng;
+            // var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
+            // focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + (self.options.height - self.options.margins.top - self.options.margins.bottom - 5) + ")");
+            // focus.select("#distance").text('Distance: ' + Math.round((x0 / 1000) * 100) / 100 + ' km');
+            // focus.select("#height").text('Height: ' + y0.toFixed(0) + ' m');
+            // if (d.text.length > 0) focus.select("#blockdistance").text('Length of segment: ' + (d.blockdist / 1000).toFixed(2) + ' km');
+            // focusLine.style("display", "initial").attr('x1', x(x0)).attr('x2', x(x0));
+
+
+        }
+
         function handleMouseOver(d, i) {
             var color = d.color;
             var text = d.text;

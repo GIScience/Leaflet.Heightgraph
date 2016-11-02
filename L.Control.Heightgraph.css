@@ -146,8 +146,8 @@
 
 .selection {
     position: absolute;
-    top: 7px;
-    left: 7px;
+    top: 8px;
+    right: 25px;
     z-index: 1;
     background: #FFF;
     color: #000;
