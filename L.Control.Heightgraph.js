@@ -364,7 +364,7 @@ L.Control.Heightgraph = L.Control.extend({
         var legend = svgSec.selectAll('.legend').data(dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
             var offset = height * 2;
-            var horz = legendRectSize;
+            var horz = legendRectSize - 15;
             var vert = i * height - offset;
             return 'translate(' + horz + ',' + vert + ')';
         });
@@ -411,20 +411,11 @@ L.Control.Heightgraph = L.Control.extend({
         svgSec.append("svg:path").attr("d", borderTopLine(polygonData)).attr('class', 'borderTop');
         // focus line
         var focus = svgSec.append("g").attr("class", "focus");
-
-        focus.append("rect").attr("x", 3).attr("y", -y(this._yHeightmin)).attr("width", 150).attr("height", 48);
-        // focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 13).attr("id", "distance");
-        // focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 28).attr("id", "height");
-        // focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 43).attr("id", "blockdistance");
-        focus.append("rect").attr("x", 3).attr("y", -y(this._yHeightmin)).attr("width", 135).attr("height", 48);
-        focus.append("rect").attr("x", 7).attr("y", -y(this._yHeightmin)).attr("width", 60).attr("height", 45).attr('class', 'box').attr('id', 'textBox');
-        focus.append("rect").attr("x", 70).attr("y", -y(this._yHeightmin)).attr("width", 60).attr("height", 45).attr('class', 'box').attr('id', 'valueBox');
-        //focus.select("#textBox").attr("x", 7).attr("y", -y(this._yHeightmin)).attr("width", 60).attr("height", 45).attr('class', 'box');
-        //focus.select("#valueBox").attr("x", 70).attr("y", -y(this._yHeightmin) + 10).attr("id", "distance").attr('id', 'valueInBox');
-        //focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 25).attr("id", "height");
-        //focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 40).attr("id", "blockdistance");
-
-
+        focus.append("rect").attr("x", 3).attr("y", -y(this._yHeightmin)).attr("width", 150).attr("height", 62);
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 13).attr("id", "distance");
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 28).attr("id", "height");
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 43).attr("id", "blockdistance");
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 58).attr("id", "type");
         var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
         var focusLine = focusLineGroup.append("line").attr("y1", 0).attr("y2", y(d3.min(heightvalues) - (d3.max(heightvalues) / 10)));
         var self = this;
@@ -440,20 +431,12 @@ L.Control.Heightgraph = L.Control.extend({
             var LatLngCoords = d.LatLng;
             var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
             self._showMarker(segmentCenter, y0, heightvalues, color, text);
-            var boxText = ["Distance", "Height", "Segment length", "Value"];
-            var value = [Math.round((x0 / 1000) * 100) / 100 + ' km', y0.toFixed(0) + ' m', (d.blockdist / 1000).toFixed(2) + ' km', text];
-            var dynBox = [];
-            for (var k = 0; k < boxText.length; k++) {
-                dynBox.push({
-                    text: boxText[k],
-                    value: value[k]
-                });
-            }
-            focus.select("#textBox").data(dynBox).enter().append('text').attr('class', 'focusText').text(function(d, i) {
-                return d.text;
-            });
-            // console.log(focus.select('#textBox'));
             focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + (self.options.height - self.options.margins.top - self.options.margins.bottom - 5) + ")");
+            focus.select("#distance").text('Distance: ' + Math.round((x0 / 1000) * 100) / 100 + ' km');
+            focus.select("#height").text('Height: ' + y0.toFixed(0) + ' m');
+            focus.select("#type").text('Value: ' + d.text);
+            if (d.text.length > 0) focus.select("#blockdistance").text('Segment length: ' + (d.blockdist / 1000).toFixed(2) + ' km');
+            focusLine.style("display", "initial").attr('x1', x(x0)).attr('x2', x(x0));
         }
 
         function handleMouseLeave() {
