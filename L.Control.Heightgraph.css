@@ -104,15 +104,23 @@
 
 .focus rect {
     fill: rgba(255, 255, 255, 0.8);
-    stroke-width: 2px;
+    stroke-width: 1px;
     shape-rendering: crispEdges;
     stroke: #888;
     pointer-events: none;
 }
 
+.focus text {
+    font-size: 12px;
+}
+
+.height-focus.label text {
+    font-size: 12px;
+}
+
 .focusLine line {
-    stroke-width: 2px;
-    stroke: #888;
+    stroke-width: 1px;
+    stroke: rgb(20, 20, 20);
     display: none;
     cursor: default;
     shape-rendering: crispEdges;
@@ -120,15 +128,15 @@
 
 .height-focus.label rect {
     fill: rgba(255, 255, 255, 0.5);
-    stroke-width: 2px;
+    stroke-width: 1px;
     stroke: #888;
     pointer-events: none;
     shape-rendering: crispEdges;
 }
 
 .height-focus.line {
-    stroke: #888;
-    stroke-width: 2px;
+    stroke: rgb(20, 20, 20);
+    stroke-width: 1px;
     shape-rendering: crispEdges;
 }
 
@@ -154,6 +162,8 @@
 .grid .tick {
     stroke: #EEE;
     pointer-events: none;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
 }
 
 .grid path {

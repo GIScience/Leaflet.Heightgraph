@@ -113,17 +113,8 @@ L.Control.Heightgraph = L.Control.extend({
         var shownText;
         for (var i = 0; i < length; i++) {
             var type = data[i].properties.summary;
-            if (type == "WayType") {
-                shownText = "Waytypes";
-            } else if (type == "WaySurface") {
-                shownText = "Surfacetypes";
-            } else if (type == "WaySteepness") {
-                shownText = "Steepness";
-            } else {
-                shownText = type;
-            }
             allProfileTypes.push({
-                text: shownText,
+                text: type,
                 type: type,
                 id: i
             });
@@ -244,22 +235,10 @@ L.Control.Heightgraph = L.Control.extend({
         }
         cleanList.sort(sortNumber);
         for (var i = 0; i < cleanList.length; i++) {
-            if (b == "Steepness" || b == "Waytypes" || b == "Surfacetypes") {
-                legendList[i] = {
-                    text: mappings[c][cleanList[i]].text,
-                    color: mappings[c][cleanList[i]].color
-                };
-            } else if (b == "None") {
-                legendList[i] = {
-                    text: "",
-                    color: "none"
-                };
-            } else {
-                legendList[i] = {
-                    text: cleanList[i],
-                    color: "blue"
-                };
-            }
+            legendList[i] = {
+                text: mappings[c] == undefined ? "" : mappings[c][cleanList[i]].text,
+                color: mappings[c] == undefined ? "none" : mappings[c][cleanList[i]].color
+            };
         }
         this._dynamicLegend = legendList;
     },
@@ -284,16 +263,8 @@ L.Control.Heightgraph = L.Control.extend({
         var maxheight = d3.max(heightvalues);
         for (var i = 0; i < count; i++) {
             adddist[i + 1] = adddist[i] + distances.distance[i];
-            if (b == "Steepness" || b == "Waytypes" || b == "Surfacetypes") {
-                text = mappings[c][types[i]].text;
-                color = mappings[c][types[i]].color;
-            } else if (b == "None") {
-                text = "";
-                color = "lightgrey";
-            } else {
-                text = cleanList[i];
-                color = "lightgrey"; //chroma.js
-            }
+            text = mappings[c] == undefined ? "" : mappings[c][types[i]].text;
+            color = mappings[c] == undefined ? "lightgrey" : mappings[c][types[i]].color;
             list.push({
                 coords: [{
                     x: adddist[i],
@@ -440,10 +411,10 @@ L.Control.Heightgraph = L.Control.extend({
         svgSec.append("svg:path").attr("d", borderTopLine(polygonData)).attr('class', 'borderTop');
         // focus line
         var focus = svgSec.append("g").attr("class", "focus");
-        focus.append("rect").attr("x", 3).attr("y", -y(this._yHeightmin)).attr("width", 135).attr("height", 48);
-        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 10).attr("id", "distance");
-        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 25).attr("id", "height");
-        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 40).attr("id", "blockdistance");
+        focus.append("rect").attr("x", 3).attr("y", -y(this._yHeightmin)).attr("width", 150).attr("height", 48);
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 13).attr("id", "distance");
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 28).attr("id", "height");
+        focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 43).attr("id", "blockdistance");
         var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
         var focusLine = focusLineGroup.append("line").attr("y1", 0).attr("y2", y(d3.min(heightvalues) - (d3.max(heightvalues) / 10)));
         var self = this;
@@ -462,7 +433,7 @@ L.Control.Heightgraph = L.Control.extend({
             focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + (self.options.height - self.options.margins.top - self.options.margins.bottom - 5) + ")");
             focus.select("#distance").text('Distance: ' + Math.round((x0 / 1000) * 100) / 100 + ' km');
             focus.select("#height").text('Height: ' + y0.toFixed(0) + ' m');
-            if (d.text.length > 0) focus.select("#blockdistance").text('Length of segment: ' + (d.blockdist / 1000).toFixed(2) + ' km');
+            if (d.text.length > 0) focus.select("#blockdistance").text('Segment length: ' + (d.blockdist / 1000).toFixed(2) + ' km');
             focusLine.style("display", "initial").attr('x1', x(x0)).attr('x2', x(x0));
         }
 
