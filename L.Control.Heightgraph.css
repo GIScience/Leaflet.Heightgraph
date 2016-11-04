@@ -55,25 +55,6 @@
 
 /* d3 styles */
 
-.focusLine line {
-    stroke-width: 1;
-    stroke: #444;
-    display: none;
-    cursor: default;
-}
-
-.wpLine {
-    pointer-events: none;
-    stroke-width: 2;
-    stroke: black;
-}
-
-.wp-text {
-    pointer-events: none;
-    fill: white;
-    font-size: 12px;
-}
-
 .legend-rect {
     pointer-events: none;
 }
@@ -111,7 +92,6 @@
 
 .axis line {
     stroke: #999;
-    -shape-rendering: auto;
     pointer-events: none;
 }
 
@@ -124,23 +104,32 @@
 
 .focus rect {
     fill: rgba(255, 255, 255, 0.8);
-    stroke-width: 1;
-    stroke: #999;
+    stroke-width: 2px;
+    shape-rendering: crispEdges;
+    stroke: #888;
     pointer-events: none;
-    shape-rendering: auto;
+}
+
+.focusLine line {
+    stroke-width: 2px;
+    stroke: #888;
+    display: none;
+    cursor: default;
+    shape-rendering: crispEdges;
 }
 
 .height-focus.label rect {
     fill: rgba(255, 255, 255, 0.5);
-    stroke-width: 1;
-    stroke: #999;
+    stroke-width: 2px;
+    stroke: #888;
     pointer-events: none;
-    - shape-rendering: auto;
+    shape-rendering: crispEdges;
 }
 
 .height-focus.line {
-    stroke: #444;
-    stroke-width: 1;
+    stroke: #888;
+    stroke-width: 2px;
+    shape-rendering: crispEdges;
 }
 
 .height-focus.circle {
