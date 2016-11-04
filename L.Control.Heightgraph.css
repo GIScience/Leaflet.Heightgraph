@@ -171,9 +171,3 @@
     stroke-width: 0;
     pointer-events: none;
 }
-
-.border-line {
-    stroke-width: 2px;
-    shape-rendering: crispEdges;
-    stroke: lightgrey;
-}
