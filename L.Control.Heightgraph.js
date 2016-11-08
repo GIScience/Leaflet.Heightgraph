@@ -21,6 +21,10 @@ L.Control.Heightgraph = L.Control.extend({
         this._map = map;
         this._initToggle();
         this._cont = d3.select(controlDiv);
+        // size for heightgraph box (svg)
+        this._margin = this.options.margins;
+        this._width = this.options.width - this._margin.left - this._margin.right;
+        this._height = this.options.height - this._margin.top - this._margin.bottom;
         // create combobox for selection
         var selection = document.createElement("select");
         selection.setAttribute("class", "selection");
@@ -53,12 +57,11 @@ L.Control.Heightgraph = L.Control.extend({
     },
     _initToggle: function() {
         /* inspired by L.Control.Layers */
-        var container = this._container;
         if (!L.Browser.touch) {
-            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.disableClickPropagation(this._container);
             //.disableScrollPropagation(container);
         } else {
-            L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation);
+            L.DomEvent.on(this._container, 'click', L.DomEvent.stopPropagation);
         }
         if (!L.Browser.android) {
             L.DomEvent.on(this._button, 'click', this._expand, this);
@@ -245,53 +248,49 @@ L.Control.Heightgraph = L.Control.extend({
      * @returns {Number|Array|Object} list with coordinates and other informtions as array
      */
     _updateBarData: function() {
-        var heightvalues = this._heightvalues;
-        var values = this._values;
-        var data = this._selectedData;
-        var distances = this._distances;
-        var b = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
+        //var b = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
         var c = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].type : "None";
-        var count = heightvalues.length;
-        var color, text, wplist = [],
-            list = [];
+        var count = this._heightvalues.length;
+        var color, text, list = [];
         var adddist = [0];
-        var maxheight = d3.max(heightvalues);
+        this._maxHeight = d3.max(this._heightvalues);
+        this._minHeight = d3.min(this._heightvalues);
         for (var i = 0; i < count; i++) {
-            adddist[i + 1] = adddist[i] + distances.distance[i];
-            text = mappings[c] == undefined ? "" : mappings[c][values[i]].text;
-            color = mappings[c] == undefined ? "lightgrey" : mappings[c][values[i]].color;
+            adddist[i + 1] = adddist[i] + this._distances.distance[i];
+            text = mappings[c] === undefined ? "" : mappings[c][this._values[i]].text;
+            color = mappings[c] === undefined ? "lightgrey" : mappings[c][this._values[i]].color;
             list.push({
                 coords: [{
                     x: adddist[i],
-                    y: heightvalues[i]
+                    y: this._heightvalues[i]
                 }, {
                     x: adddist[(i + 1 == count) ? i : i + 1],
-                    y: heightvalues[(i + 1 == count) ? i : i + 1]
+                    y: this._heightvalues[(i + 1 == count) ? i : i + 1]
                 }, {
                     x: adddist[(i + 1 == count) ? i : i + 1],
-                    y: (d3.min(heightvalues) - (d3.max(heightvalues) / 10))
+                    y: (this._minHeight - (this._maxHeight / 10))
                 }, {
                     x: adddist[i],
-                    y: (d3.min(heightvalues) - (d3.max(heightvalues) / 10))
+                    y: (this._minHeight - (this._maxHeight / 10))
                 }],
                 coords_maxheight: [{
                     x: adddist[i],
-                    y: maxheight
+                    y: this._maxHeight
                 }, {
                     x: adddist[(i + 1 == count) ? i : i + 1],
-                    y: maxheight
+                    y: this._maxHeight
                 }, {
                     x: adddist[(i + 1 == count) ? i : i + 1],
-                    y: (d3.min(heightvalues) - maxheight / 10)
+                    y: (this._minHeight - this._maxHeight / 10)
                 }, {
                     x: adddist[i],
-                    y: (d3.min(heightvalues) - maxheight / 10)
+                    y: (this._minHeight - this._maxHeight / 10)
                 }],
-                type: values[i],
+                type: this._values[i],
                 text: text,
-                blockdist: distances.blockDistances[i],
+                blockdist: this._distances.blockDistances[i],
                 color: color,
-                LatLng: distances.coordsOfDist[i]
+                LatLng: this._distances.coordsOfDist[i]
             });
         }
         this._polygonData = list;
@@ -304,7 +303,7 @@ L.Control.Heightgraph = L.Control.extend({
      * @param {string} color: color of graph-segment
      * @param {string} text: value of graph-segment
      */
-    _showMarker: function(ll, height, heightvalues, color, text) {
+    _showMarker: function(ll, height, color, text) {
         var layerpoint = this._map.latLngToLayerPoint(ll);
         var normalizedY = layerpoint.y - 75;
         if (!this._mouseHeightFocus) {
@@ -325,24 +324,24 @@ L.Control.Heightgraph = L.Control.extend({
      * Creates the height profile with SVG
      */
     _createBarChart: function() {
-        var polygonData = this._polygonData;
-        var container = this._cont;
-        var heightvalues = this._heightvalues;
-        var dynamicLegend = this._dynamicLegend;
+        var polygonData = this._polygonData; // this._polygonData ist in createBorderTopLine undefined... warum?
+        var dynamicLegend = this._dynamicLegend; // this._dynamicLegend ist in createLegend undefined... warum?
         //SVG area
-        var margin = this.options.margins,
-            width = this.options.width - margin.left - margin.right,
-            height = this.options.height - margin.top - margin.bottom;
-        var yHeight = d3.max(heightvalues) + (d3.max(heightvalues) / 10);
-        var yHeightmin = this._yHeightmin = d3.min(heightvalues) - (d3.max(heightvalues) / 10);
+        var margin = this._margins,
+            width = this._width - this._margin.left - this._margin.right,
+            height = this._height - this._margin.top - this._margin.bottom;
+        //Max and Min of heightvalues of graph
+        var min = this._minHeight;
+        var max = this._maxHeight;
+        var yHeightmin = this._yHeightmin = this._minHeight - (this._maxHeight / 10);
         var x, y, xAxis, yAxis;
-        createScales(width, height, yHeightmin);
+        createScales();
         /**
          * defines the ranges and format of x- and y- scales
          */
-        function createScales(width, height, yHeightmin) {
+        function createScales() {
             x = d3.scale.linear().range([0, width]).domain([0, distances.totaldistance]);
-            y = d3.scale.linear().range([height, 0]).domain([yHeightmin, d3.max(heightvalues)]);
+            y = d3.scale.linear().range([height, 0]).domain([yHeightmin, max]);
             xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(function(d) {
                 return d / 1000 + " km";
                 // var prefix = d3.formatPrefix(d);
@@ -363,7 +362,7 @@ L.Control.Heightgraph = L.Control.extend({
         //create SVG area with all appended functions
         // if we switch options the svgSeg has already been generated
         if (this._svgSec === undefined) {
-            svgSec = this._svgSec = d3.select(this._container).append("svg").attr("class", "background").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            svgSec = this._svgSec = d3.select(this._container).append("svg").attr("class", "background").attr("width", width + this._margin.left + this._margin.right).attr("height", height + this._margin.top + this._margin.bottom).append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
         } else {
             svgSec = this._svgSec;
         }
@@ -384,13 +383,13 @@ L.Control.Heightgraph = L.Control.extend({
             return y(d.y);
         });
         // bar chart as path
-        svgSec.selectAll('hpath').data(polygonData).enter().append('path').attr('class', 'bars').attr('d', function(d) {
+        svgSec.selectAll('hpath').data(this._polygonData).enter().append('path').attr('class', 'bars').attr('d', function(d) {
             return polygon(d.coords);
         }).attr('fill', function(d) {
             return (d.color);
         });
         // bar chart invisible for hover as path
-        svgSec.selectAll('hpath').data(polygonData).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
+        svgSec.selectAll('hpath').data(this._polygonData).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
             return polygon(d.coords_maxheight);
         }).on('mouseover', handleMouseOver);
         svgSec.on('mouseleave', handleMouseLeave);
@@ -403,12 +402,13 @@ L.Control.Heightgraph = L.Control.extend({
         focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 43).attr("id", "blockdistance");
         focus.append("text").attr("x", 7).attr("y", -y(this._yHeightmin) + 58).attr("id", "type");
         var focusLineGroup = svgSec.append("g").attr("class", "focusLine");
-        var focusLine = focusLineGroup.append("line").attr("y1", 0).attr("y2", y(d3.min(heightvalues) - (d3.max(heightvalues) / 10)));
+        var focusLine = focusLineGroup.append("line").attr("y1", 0).attr("y2", y(this._minHeight - (this._maxHeight / 10)));
         var self = this;
-        // create dynamic legend
-        createLegend(dynamicLegend);
-
-        function createLegend(dynamicLegend) {
+        createLegend();
+        createBorderTopLine(polygonData);
+        /* create dynamic legend
+         */
+        function createLegend() {
             var legendRectSize = 7;
             var legendSpacing = 7;
             //legendBox.append(legend);
@@ -426,7 +426,6 @@ L.Control.Heightgraph = L.Control.extend({
                 return d.text;
             });
         }
-        createBorderTopLine(polygonData);
         //create top border line on graph
         function createBorderTopLine(polygonData) {
             var borderTopLine = d3.svg.line().x(function(d) {
@@ -447,7 +446,7 @@ L.Control.Heightgraph = L.Control.extend({
             var text = d.text;
             var LatLngCoords = d.LatLng;
             var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
-            self._showMarker(segmentCenter, y0, heightvalues, color, text);
+            self._showMarker(segmentCenter, y0, color, text);
             focus.style("display", "initial").attr("transform", "translate(" + x(x0) + "," + (self.options.height - self.options.margins.top - self.options.margins.bottom - 5) + ")");
             focus.select("#distance").text('Distance: ' + Math.round((x0 / 1000) * 100) / 100 + ' km');
             focus.select("#height").text('Height: ' + y0.toFixed(0) + ' m');
