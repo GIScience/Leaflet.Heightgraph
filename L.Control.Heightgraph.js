@@ -69,19 +69,14 @@ L.Control.Heightgraph = L.Control.extend({
         }
     },
     _expand: function() {
-        if (!this._showState) {
-            document.getElementsByClassName("background")[0].style.display = "block";
-            document.getElementsByClassName("selection")[0].style.display = "block";
-            document.getElementsByClassName("heightgraph-toggle")[0].style.display = "none";
-            document.getElementsByClassName("heightgraph-close-icon")[0].style.display = "block";
-            this._showState = !this._showState;
-        } else {
-            document.getElementsByClassName("selection")[0].style.display = 'none';
-            document.getElementsByClassName("background")[0].style.display = "none";
-            document.getElementsByClassName("heightgraph-toggle")[0].style.display = "block";
-            document.getElementsByClassName("heightgraph-close-icon")[0].style.display = "none";
-            this._showState = !this._showState;
+        for (var i = 0; i < this._container.children.length; i++) {
+            if (!this._showState) {
+                i == 0 ? this._container.children[i].style.display = "none" : this._container.children[i].style.display = "block";
+            } else {
+                i == 0 ? this._container.children[i].style.display = "block" : this._container.children[i].style.display = "none";
+            }
         }
+        this._showState = !this._showState;
     },
     /*
      * Reset data
