@@ -170,3 +170,7 @@
     stroke-width: 0;
     pointer-events: none;
 }
+
+.tspan {
+    font-weight: bold;
+}
