@@ -151,7 +151,7 @@
 .selection {
     position: absolute;
     top: 8px;
-    right: 40px;
+    right: 20px;
     z-index: 1;
     background: #FFF;
     color: #000;

@@ -4,9 +4,9 @@ L.Control.Heightgraph = L.Control.extend({
         width: 800,
         height: 125,
         margins: {
-            top: 45,
-            right: 20,
-            bottom: 30,
+            top: 20,
+            right: 130,
+            bottom: 25,
             left: 50
         },
         mappings: undefined
@@ -324,10 +324,8 @@ L.Control.Heightgraph = L.Control.extend({
         this._polygonData = list;
     },
     /**
-     * Creates a marker on heightgraph while hovering
-     * @param {Object} ll: coordinates of point on map
+     * Creates a marker on the map while hovering
      * @param {float} height: actual height
-     * @param {array} heightvalues: all heightvalues
      * @param {string} color: color of graph-segment
      * @param {string} text: value of graph-segment
      */
@@ -409,8 +407,8 @@ L.Control.Heightgraph = L.Control.extend({
     // create focus Line and focus InfoBox while hovering
     _createFocus: function() {
         var self = this;
-        var boxPosition = self._yHeightmin - 140;
-        var textPosition = boxPosition + 45;
+        var boxPosition = self._yHeightmin - 88;
+        var textPosition = boxPosition + 27;
         var textDistance = 35;
         this._focusWidth = 150;
         self._focus = self._svg.append("g").attr("class", "focus");
