@@ -161,6 +161,7 @@ L.Control.Heightgraph = L.Control.extend({
         distances.distance = [];
         distances.wpDistance = [];
         distances.blockDistances = [];
+        distances.blockTypes = [];
         var featureLength = this._featureLength = a.features.length;
         distances.coordsOfDist = [];
         for (var i = 0; i < featureLength; i++) {
@@ -171,6 +172,9 @@ L.Control.Heightgraph = L.Control.extend({
                 var h = new L.LatLng(a.features[i].geometry.coordinates[j + 1][1], a.features[i].geometry.coordinates[j + 1][0]);
                 calc = g.distanceTo(h);
                 distances.distance.push(calc);
+                //save types related to blockDistances
+                var t = a.features[i].properties.attributeType[0];
+                distances.blockTypes.push(t);
                 // calculate distances of specific block
                 blockDistance += calc;
                 distances.coordsOfDist.push([g, h]);
@@ -205,6 +209,26 @@ L.Control.Heightgraph = L.Control.extend({
         }
         this._heightvalues = heights;
         this._values = values;
+    },
+    /**
+     * Calculates the proportion of each Type to be displayed in the legend
+     * 
+     * @returns {Number|Array|Object} list with height values and steepness values as array
+     */
+    _calculateTypeRate: function() {
+        var a = this._distances.totaldistance;
+        var b = this._distances.blockDistances;
+        var c = this._distances.blockTypes;
+        this._blockList = [];
+        for (var i = 0; i < b.length; i++) {
+            for (var j = i; j > 0; j--) {
+                // if (this._blockList[j].type == this._blockList[i].type) {}
+            }
+        }
+        this._blockList.push({
+            type: c[i],
+            distance: b[i]
+        });
     },
     /**
      * Returns values of profileType-option as Array without duplicates 
@@ -247,6 +271,7 @@ L.Control.Heightgraph = L.Control.extend({
                 };
             }
         }
+        this._calculateTypeRate();
         this._dynamicLegend = legendList;
     },
     /**creates a range of different colors for highlighting the bar
@@ -379,6 +404,7 @@ L.Control.Heightgraph = L.Control.extend({
             .attr('class', 'x axis') // specify classes
             .call(this._xAxis);
         this._svg.append('g').attr('class', 'y axis').call(this._yAxis);
+        this._svg.append('g').attr('class', 'y axis').attr("transform", "translate(" + width + " ,0)").call(this._yEndAxis);
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
             //if (maxheight) return 
@@ -434,8 +460,9 @@ L.Control.Heightgraph = L.Control.extend({
         var margin = this._margins,
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;
-        this._x = d3.scale.linear().range([0, width]).domain([0, distances.totaldistance]);
-        this._y = d3.scale.linear().range([height, 0]).domain([yHeightmin, max]);
+        this._x = d3.scale.linear().range([0, width]).domain([-120, distances.totaldistance]);
+        this._y = d3.scale.linear().range([height, 0]).domain([yHeightmin - 4, max]);
+        this._yEnd = d3.scale.linear().range([height, 0]).domain([yHeightmin, max]);
         this._xAxis = d3.svg.axis().scale(this._x).orient("bottom").tickFormat(function(d) {
             return d / 1000 + " km";
             // var prefix = d3.formatPrefix(d);
@@ -444,12 +471,13 @@ L.Control.Heightgraph = L.Control.extend({
         this._yAxis = d3.svg.axis().scale(this._y).orient("left").ticks(5).tickFormat(function(d) {
             return d + " m";
         });
+        this._yEndAxis = d3.svg.axis().scale(this._yEnd).orient("right").ticks(0);
     },
     // gridlines in x axis function
     _make_x_axis: function() {
         return d3.svg.axis().scale(this._x).orient("bottom");
     },
-    // gridlines in x axis function
+    // gridlines in y axis function
     _make_y_axis: function() {
         return d3.svg.axis().scale(this._y).orient("left");
     },
