@@ -161,7 +161,10 @@ L.Control.Heightgraph = L.Control.extend({
         distances.distance = [];
         distances.wpDistance = [];
         distances.blockDistances = [];
+        distances.blockDistancesOnce = [];
         distances.blockTypes = [];
+        distances.blockTypesOnce = [];
+        distances.blocks = []
         var featureLength = this._featureLength = a.features.length;
         distances.coordsOfDist = [];
         for (var i = 0; i < featureLength; i++) {
@@ -182,9 +185,20 @@ L.Control.Heightgraph = L.Control.extend({
             distances.blockDistances.push(Array.apply(null, Array(coordLength - 1)).map(function() {
                 return blockDistance;
             }));
+            distances.blockTypesOnce.push(t);
+        }
+        //save block types and
+        for (var g = 0; g < distances.blockDistances.length; g++) {
+            distances.blocks.push({
+                blockType: distances.blockTypesOnce[g],
+                distance: distances.blockDistances[g][0]
+            });
         }
         // flatten again
         distances.blockDistances = [].concat.apply([], distances.blockDistances);
+        distances.blockDistancesOnce = distances.blockDistances.filter(function(elem, index) {
+            return index == distances.blockDistances.indexOf(elem);
+        });
         distances.totaldistance = distances.distance.reduce(function(pv, cv) {
             return pv + cv;
         }, 0);
@@ -213,22 +227,34 @@ L.Control.Heightgraph = L.Control.extend({
     /**
      * Calculates the proportion of each Type to be displayed in the legend
      * 
-     * @returns {Number|Array|Object} list with height values and steepness values as array
+     * @returns {Number|Array|Object} list with
      */
     _calculateTypeRate: function() {
-        var a = this._distances.totaldistance;
-        var b = this._distances.blockDistances;
-        var c = this._distances.blockTypes;
+        //doppelte typen zusammenrechnen --> in propfunct
+        var typesString = this._cleanList;
+        //console.log(typesString);
+        var types = typesString.map(Number);
+        var maxTypes = d3.max(types)
+        var totaldistance = this._distances.totaldistance;
+        var a = this._distances.blocks;
+        var distances = Array(maxTypes + 1).fill(0);
         this._blockList = [];
-        for (var i = 0; i < b.length; i++) {
-            for (var j = i; j > 0; j--) {
-                // if (this._blockList[j].type == this._blockList[i].type) {}
-            }
+        for (var i = 0; i < a.length; i++) {
+            type = parseInt(a[i].blockType);
+            //console.log(a[i].distance)
+            distances[type] = distances[type] + a[i].distance;
+            //console.log(type, distances[type])
         }
-        this._blockList.push({
-            type: c[i],
-            distance: b[i]
-        });
+        for (var j in distances) {
+            this._blockList.push({
+                type: j,
+                blockDistanceSum: distances[j],
+                proportion: "(" + Math.round(distances[j] / totaldistance * 100) + "%)"
+            });
+        }
+        //console.log(distances)
+        //proportion: (b[i] / a) * 100
+        //console.log(this._blockList);
     },
     /**
      * Returns values of profileType-option as Array without duplicates 
@@ -238,6 +264,7 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _updateLegend: function() {
         var a = this._values;
+        console.log(a);
         var b = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
         var c = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].type : "None";
         var legendList = [];
@@ -246,13 +273,17 @@ L.Control.Heightgraph = L.Control.extend({
         var self = this;
         //remove duplicates
         this._cleanList = a.filter(function(elem, index) {
+            console.log(a.indexOf(elem))
             return index == a.indexOf(elem);
         });
 
         function sortNumber(a, b) {
             return a - b;
         }
-        this._cleanList.sort(sortNumber);
+        //Calculate Proportion of each Block in relation to totaldistance
+        self._calculateTypeRate();
+        console.log(this._cleanList);
+        //console.log(this._blockList);
         //create random colors for undefined types
         if (mappings[c] === undefined) {
             this._colorList = self._createRandomColors();
@@ -267,11 +298,12 @@ L.Control.Heightgraph = L.Control.extend({
             } else {
                 legendList[i] = {
                     text: (mappings[c] === undefined) ? this._colorList[this._cleanList[i]].text : mappings[c][this._cleanList[i]].text,
-                    color: (mappings[c] === undefined) ? this._colorList[this._cleanList[i]].color : mappings[c][this._cleanList[i]].color
+                    color: (mappings[c] === undefined) ? this._colorList[this._cleanList[i]].color : mappings[c][this._cleanList[i]].color,
+                    type: this._cleanList[i],
+                    proportion: self._blockList[i].proportion
                 };
             }
         }
-        this._calculateTypeRate();
         this._dynamicLegend = legendList;
     },
     /**creates a range of different colors for highlighting the bar
@@ -502,6 +534,9 @@ L.Control.Heightgraph = L.Control.extend({
         });
         legend.append('text').attr('class', 'legend-text').attr('x', width + 30).attr('y', 60).text(function(d, i) {
             return d.text;
+        });
+        legend.append('text').attr('class', 'legend-text').attr('x', width + 90).attr('y', 60).text(function(d, i) {
+            return d.proportion;
         });
     },
     /*create top border line on graph
