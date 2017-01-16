@@ -3104,7 +3104,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 5
+            "attributeType": "5"
         }
     }, {
         "type": "Feature",
@@ -3143,7 +3143,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 6
+            "attributeType": "6"
         }
     }, {
         "type": "Feature",
@@ -3161,7 +3161,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 9
+            "attributeType": "9"
         }
     }, {
         "type": "Feature",
@@ -3182,7 +3182,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 8
+            "attributeType": "8"
         }
     }, {
         "type": "Feature",
@@ -3222,7 +3222,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 4
+            "attributeType": "4"
         }
     }, {
         "type": "Feature",
@@ -3241,7 +3241,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 2
+            "attributeType": "2"
         }
     }, {
         "type": "Feature",
@@ -3265,7 +3265,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 3
+            "attributeType": "3"
         }
     }, {
         "type": "Feature",
@@ -3343,7 +3343,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 5
+            "attributeType": "5"
         }
     }, {
         "type": "Feature",
@@ -3369,7 +3369,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 4
+            "attributeType": "4"
         }
     }, {
         "type": "Feature",
@@ -3427,7 +3427,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 5
+            "attributeType": "5"
         }
     }, {
         "type": "Feature",
@@ -3444,7 +3444,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 9
+            "attributeType": "9"
         }
     }, {
         "type": "Feature",
@@ -3466,7 +3466,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 7
+            "attributeType": "7"
         }
     }, {
         "type": "Feature",
@@ -3492,7 +3492,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 8
+            "attributeType": "8"
         }
     }, {
         "type": "Feature",
@@ -3525,7 +3525,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 4
+            "attributeType": "4"
         }
     }, {
         "type": "Feature",
@@ -3546,7 +3546,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 3
+            "attributeType": "3"
         }
     }, {
         "type": "Feature",
@@ -3587,7 +3587,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 4
+            "attributeType": "4"
         }
     }, {
         "type": "Feature",
@@ -3698,7 +3698,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 5
+            "attributeType": "5"
         }
     }, {
         "type": "Feature",
@@ -3715,7 +3715,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 8
+            "attributeType": "8"
         }
     }, {
         "type": "Feature",
@@ -3743,7 +3743,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 7
+            "attributeType": "7"
         }
     }, {
         "type": "Feature",
@@ -3810,7 +3810,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 5
+            "attributeType": "5"
         }
     }, {
         "type": "Feature",
@@ -3836,7 +3836,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 6
+            "attributeType": "6"
         }
     }, {
         "type": "Feature",
@@ -3852,7 +3852,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 9
+            "attributeType": "9"
         }
     }, {
         "type": "Feature",
@@ -3871,7 +3871,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 10
+            "attributeType": "10"
         }
     }, {
         "type": "Feature",
@@ -3887,7 +3887,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 7
+            "attributeType": "7"
         }
     }, {
         "type": "Feature",
@@ -3901,7 +3901,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 9
+            "attributeType": "9"
         }
     }, {
         "type": "Feature",
@@ -3915,7 +3915,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 8
+            "attributeType": "8"
         }
     }, {
         "type": "Feature",
@@ -3935,7 +3935,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 9
+            "attributeType": "9"
         }
     }, {
         "type": "Feature",
@@ -3949,7 +3949,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 8
+            "attributeType": "8"
         }
     }, {
         "type": "Feature",
@@ -3991,7 +3991,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 6
+            "attributeType": "6"
         }
     }, {
         "type": "Feature",
@@ -4052,7 +4052,7 @@ var geojson = [{
             ]
         },
         "properties": {
-            "attributeType": 5
+            "attributeType": "5"
         }
     }],
     "properties": {
