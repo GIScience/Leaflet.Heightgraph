@@ -144,9 +144,7 @@ L.Control.Heightgraph = L.Control.extend({
             this._updateLegend();
             this._updateBarData();
             this._createBarChart();
-            console.log("doit")
             this._createLegend(this._svg);
-            console.log(this._svg)
         }
     },
     /**
@@ -253,7 +251,6 @@ L.Control.Heightgraph = L.Control.extend({
                 proportion: "(" + Math.round(distances[j] / totaldistance * 100) + "%)"
             });
         }
-        //console.log(distances)
         //proportion: (b[i] / a) * 100
         //console.log(this._blockList);
     },
@@ -281,7 +278,6 @@ L.Control.Heightgraph = L.Control.extend({
         }
         //Calculate Proportion of each Block in relation to totaldistance
         self._calculateTypeRate();
-        //console.log(this._blockList);
         //create random colors for undefined types
         if (mappings[c] === undefined) {
             this._colorList = self._createRandomColors();
@@ -456,12 +452,6 @@ L.Control.Heightgraph = L.Control.extend({
         }).on('mouseover', self._handleMouseOver);
         this._svg.on('mouseleave', self._handleMouseLeave);
         this._svg.on('mouseenter', self._handleMouseEnter);
-        /*this._selectBox;
-        var selectionBox = this._svg.append('g').attr('class', 'selectBox').attr("transform", "translate(40, " + height + 30 + " )");
-        //var arrowG = this._svg.append("g").attr("class", "selectBox");
-        this._selectPath = selectionBox.append('path').attr('class', 'arrow').attr('d', "M 50,0 L 60,10 L 20,50 L 60,90 L 50,100 L 0,50 Z");
-        console.log(this._selectPath);*/
-        //self._createLegend(svg);
         self._createSelectionBox(svg);
         self._createLegendHoverBox(svg);
         self._createBorderTopLine(polygonData, svg);
@@ -540,7 +530,8 @@ L.Control.Heightgraph = L.Control.extend({
         }).style("fill", function(d) {
             return d.color;
         });
-        var self = this
+        var self = this;
+        self._length = this._allProfileTypes.length;
         selectionSign[0][0].id = "leftArrowSelection";
         selectionSign[0][1].id = "rightArrowSelection";
         var right = document.getElementById("rightArrowSelection").onclick = arrowRight;
@@ -550,12 +541,20 @@ L.Control.Heightgraph = L.Control.extend({
 
         function arrowRight() {
             var counter = self._selectedOption += 1;
-            chooseSelection(counter);
+            if (counter== self._length){
+                counter =0;
+                self._selectedOption =0;
+            }
             self._selection(self._selectedOption);
+            chooseSelection(counter);
         }
 
         function arrowLeft() {
             var counter = self._selectedOption -= 1;
+            if(counter== -1){
+                counter =self._length-1;
+                self._selectedOption =self._length-1;
+            }
             chooseSelection(counter);
             self._selection(self._selectedOption);
         }
@@ -579,18 +578,10 @@ L.Control.Heightgraph = L.Control.extend({
             "text": "Legend"
         }];
         var self = this;
-        console.log(svg)
         legendHover = svg.selectAll('.legend-hover').data(leg).enter().append('g').attr('class', 'legend-hover');
-        //legendHover.on('mouseover', console.log(this))   ;
-        //this._svg.on('mouseleave', self._handleMouseLeave);
-        //this._svg.on('mouseenter', self._handleMouseEnter);
-        //document.getElementById("legendText").textContent=leg.text;
         legendHover.append('text').attr('class', 'legend-menu').attr('x', width / 10 + 120).attr('y', height + 40).text(function(d, i) {
             return d.text;
         }).on('mouseover',function(){
-            //var box = legendHover.append('g').attr('class', 'legendHoverBox');
-            //var backgroundbox = box.append('rect').attr('class', 'legendHoverBox').attr('x', width / 10 + 160).attr('y', height-(5*height/6)).attr('width', width/4).attr('height', height).attr('fill','lightgrey');
-            //self._createLegend(svg);
             var legend = document.getElementsByClassName('legend');
             if(legend) {
                 for(var i=0; i<legend.length;i++){
@@ -612,27 +603,11 @@ L.Control.Heightgraph = L.Control.extend({
                         }
 
                 }
-            
-            //self._mouseHeightFocusLabel.style("display", "none");
-            //self._pointG.style("display", "none");
-            //self._focus.style('display', 'none');
-            //self._focusLine.style('display', 'none');
             }
         });
-        /*        console.log(this._legendHover)
-                this._legendHover.on('mouseenter', function() {
-                    console.log("hola");
-                });*/
-        //legendHover.onmouseover = console.log('ciao');
-        //self._createLegend(svg)
-        /*legendHover.on('mouseleave', function(self) {
-            if (self._legend) {
-                self._legend.style("display", "none");
-            }
-        });*/
     },
-        /* create dynamic legend
-     */
+     /* create dynamic legend
+      */
     _createLegend: function(svg) {
         //console.log(box)
         var margin = this._margins,
