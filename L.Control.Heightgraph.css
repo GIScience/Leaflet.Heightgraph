@@ -31,6 +31,15 @@
     width: 26px;
     height: 26px;
     position: absolute;
+    right: 0;
+    display: none;
+}
+
+.extent-container {
+    background: red;
+    width: 30px;
+    height: 26px;
+    position: absolute;
     left: 0;
     display: none;
 }
@@ -55,14 +64,24 @@
 
 /* d3 styles */
 
+.legendBox {
+    position: relative;
+    left: 20px;
+}
+
 .legend-rect {
     pointer-events: none;
+    display: none;
+}
+.legend-hover {
+    cursor: pointer;
 }
 
 .legend-text {
     fill: #000;
     font-size: 10;
-    pointer-events: none;
+    cursor: pointer;
+    display: none;
 }
 
 .tick, .tick text {
@@ -150,8 +169,8 @@
 
 .selection {
     position: absolute;
-    top: 8px;
-    right: 20px;
+    top: 20px;
+    right: 40px;
     z-index: 1;
     background: #FFF;
     color: #000;
@@ -174,3 +193,19 @@
 .tspan {
     font-weight: bold;
 }
+
+.selectSign {
+    cursor: pointer;
+}
+
+
+/*
+.selectBox {
+    width: 200px;
+    height: 100px;
+    left: 100px;
+    bottom: 20px;
+    display: block;
+    background: #333;
+    fill: #333;
+}*/
