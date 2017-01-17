@@ -54,7 +54,6 @@ L.Control.Heightgraph = L.Control.extend({
         this._updateBarData();
         this._createBarChart();
         this._createLegend(this._svg);
-        
     },
     _initToggle: function() {
         /* inspired by L.Control.Layers */
@@ -248,7 +247,7 @@ L.Control.Heightgraph = L.Control.extend({
             distances[type] = distances[type] + a[i].distance;
         }
         //console.log(distances)
-        for (var j in distances){
+        for (var j in distances) {
             this._blockList.push({
                 type: j,
                 blockDistanceSum: distances[j],
@@ -521,50 +520,51 @@ L.Control.Heightgraph = L.Control.extend({
             "x": 0,
             "y": height + 35,
             "color": "grey",
-            "type": "triangle-up"
+            "type": "triangle-up",
+            "id": "leftArrowSelection"
         }, {
             "x": 80,
             "y": height + 35,
             "color": "grey",
-            "type": "triangle-down"
+            "type": "triangle-down",
+            "id": "rightArrowSelection"
         }];
         var selectionSign = svg.selectAll('.selectSign').data(jsonCircles).enter().append('path').attr("class", "selectSign").attr("d", d3.svg.symbol().type(function(d) {
             return d.type;
         })).attr("transform", function(d) {
             return "translate(" + d.x + "," + d.y + ")";
+        }).attr("id", function(d) {
+            return d.id;
         }).style("fill", function(d) {
             return d.color;
+        }).
+        on("click", function(d) {
+            if (d.id == "rightArrowSelection") arrowRight();
+            if (d.id == "leftArrowSelection") arrowLeft();
         });
         var self = this;
         self._length = this._allProfileTypes.length;
-        selectionSign[0][0].id = "leftArrowSelection";
-        selectionSign[0][1].id = "rightArrowSelection";
-        var right = document.getElementById("rightArrowSelection").onclick = arrowRight;
-        var left = document.getElementById("leftArrowSelection").onclick = arrowLeft;
-        //this._selectedOption = self._selectedOption;
-        var id;
-        this._selectedOption == -1? id = this._allProfileTypes.length-1: id = this._selectedOption;
+        var id = this._selectedOption == -1 ? this._allProfileTypes.length - 1 : this._selectedOption;
         chooseSelection(id);
 
         function arrowRight() {
             var counter = self._selectedOption += 1;
-            if (counter== self._allProfileTypes.length-1){
-                self._selectedOption =-1;
+            if (counter == self._allProfileTypes.length - 1) {
+                self._selectedOption = -1;
             }
             self._selection(self._selectedOption);
             chooseSelection(counter);
-
         }
 
         function arrowLeft() {
             var counter = self._selectedOption -= 1;
-            if(counter== -1){
-                counter =self._allProfileTypes.length-1;
-                self._selectedOption =-1;
+            if (counter == -1) {
+                counter = self._allProfileTypes.length - 1;
+                self._selectedOption = -1;
             }
-            if(counter< -1){
-                counter =self._allProfileTypes.length-2;
-                self._selectedOption =self._allProfileTypes.length-2;
+            if (counter < -1) {
+                counter = self._allProfileTypes.length - 2;
+                self._selectedOption = self._allProfileTypes.length - 2;
             }
             chooseSelection(counter);
             self._selection(self._selectedOption);
@@ -573,14 +573,13 @@ L.Control.Heightgraph = L.Control.extend({
         function chooseSelection(id) {
             var type = self._allProfileTypes[id];
             var data = [{
-                "selection": id.text
+                "selection": type.text
             }];
             svg.selectAll('.text').data(data).enter().append('text').attr("x", 15).attr("y", height + 40).text(function(d) {
                 return d.selection;
             }).attr("class", "legend-menu").attr("id", "selectionText");
-            document.getElementById("selectionText").textContent = type.text;
         }
-        this._selectedOption= self._selectedOption;
+        this._selectedOption = self._selectedOption;
     },
     _createLegendHoverBox: function(svg) {
         var margin = this._margins,
@@ -591,37 +590,30 @@ L.Control.Heightgraph = L.Control.extend({
         }];
         var self = this;
         legendHover = svg.selectAll('.legend-hover').data(leg).enter().append('g').attr('class', 'legend-hover');
-        legendHover.append('text').attr('class', 'legend-menu').attr('x', width -50).attr('y', height + 40).text(function(d, i) {
+        legendHover.append('text').attr('class', 'legend-menu').attr('x', width - 50).attr('y', height + 40).text(function(d, i) {
             return d.text;
-        }).on('mouseover',function(){
-            d3.select('.legend-box').display = "block";
-            document.getElementsByClassName('legend-box')[0].style.display = "block";
-            var legend = document.getElementsByClassName('legend');
-            if(legend) {
-                for(var i=0; i<legend.length;i++){
-                    for(var j=0; j<legend[i].children.length; j++)
-                        {
-                            legend[i].children[j].style.display = "block";
-                        }
-
+        }).on('mouseover', function() {
+            var legend = d3.selectAll('.legend')[0];
+            if (legend) {
+                for (var i = 0; i < legend.length; i++) {
+                    for (var j = 0; j < legend[i].children.length; j++) {
+                        legend[i].children[j].style.display = "block";
+                    }
                 }
             }
-        }).on('mouseleave', function(){
-            //var elements = document.getElementsByClassName(names)
-            var legend = document.getElementsByClassName('legend');
-            if(legend) {
-                for(var i=0; i<legend.length;i++){
-                    for(var j=0; j<legend[i].children.length; j++)
-                        {
-                            legend[i].children[j].style.display = "none";
-                        }
-
+        }).on('mouseleave', function() {
+            var legend = d3.selectAll('.legend')[0];
+            if (legend) {
+                for (var i = 0; i < legend.length; i++) {
+                    for (var j = 0; j < legend[i].children.length; j++) {
+                        legend[i].children[j].style.display = "none";
+                    }
                 }
             }
         });
     },
-     /* create dynamic legend
-      */
+    /* create dynamic legend
+     */
     _createLegend: function(svg) {
         //console.log(box)
         var margin = this._margins,
@@ -629,26 +621,23 @@ L.Control.Heightgraph = L.Control.extend({
             height = this._height - this._margin.top - this._margin.bottom;
         var legendRectSize = 7;
         var legendSpacing = 7;
-        var box = d3.select(".legend-hover").append("g");
-        var backgroundbox = box.append('rect').attr("x", 459).attr("y", 0).attr("width", 170).attr("height", 150).attr("fill", "white").attr('class','legend-box');
-        var legend = d3.selelect('.legend-box').data(this._dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
+        var legend = svg.selectAll('.g').data(this._dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
             var offset = height * 2;
             var horz = legendRectSize - 15;
             var vert = i * height - offset;
             return 'translate(' + horz + ',' + vert + ')';
         });
-        legend.append('rect').attr('class', 'legend-rect').attr('x', width/10 +160).attr('y', height-(2*height/3)).attr('width', 6).attr('height', 6).style('fill', function(d, i) {
+        legend.append('rect').attr('class', 'legend-rect').attr('x', width / 10 + 160).attr('y', height - (2 * height / 3)).attr('width', 6).attr('height', 6).style('fill', function(d, i) {
             return d.color;
         });
-        legend.append('text').attr('class', 'legend-text').attr('x', width/10 +170).attr('y', height-(2*height/3)+7).text(function(d, i) {
+        legend.append('text').attr('class', 'legend-text').attr('x', width / 10 + 170).attr('y', height - (2 * height / 3) + 7).text(function(d, i) {
             return d.text;
         });
-        legend.append('text').attr('class', 'legend-text').attr('x', width/10 +270).attr('y', height-(2*height/3)+7).text(function(d, i) {
+        legend.append('text').attr('class', 'legend-text').attr('x', width / 10 + 270).attr('y', height - (2 * height / 3) + 7).text(function(d, i) {
             return d.proportion;
         });
     },
-
     /*create top border line on graph
      */
     _createBorderTopLine: function(polygonData, svg) {
