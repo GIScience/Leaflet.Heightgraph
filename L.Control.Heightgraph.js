@@ -181,6 +181,7 @@ L.Control.Heightgraph = L.Control.extend({
                 blockDistance += calc;
                 distances.coordsOfDist.push([g, h]);
             }
+            console.log(distances.blockTypes)
             distances.blockDistances.push(Array.apply(null, Array(coordLength - 1)).map(function() {
                 return blockDistance;
             }));
@@ -202,6 +203,7 @@ L.Control.Heightgraph = L.Control.extend({
             return pv + cv;
         }, 0);
         this._distances = distances;
+        //console.log(distances.blockDistances);
     },
     /**
      * Returns the values (height, profileType-option(steepness, speed,...)) of the FeatureCollection as Array in list
@@ -235,7 +237,7 @@ L.Control.Heightgraph = L.Control.extend({
         var types = typesString.map(Number);
         var maxTypes = d3.max(types);
         var totaldistance = this._distances.totaldistance;
-        console.log(totaldistance)
+        //console.log(totaldistance)
         var a = this._distances.blocks;
         console.log(a)
         var distances = Array(maxTypes + 1).fill(0);
@@ -292,7 +294,6 @@ L.Control.Heightgraph = L.Control.extend({
                     color: "None"
                 };
             } else {
-                console.log(self._blockList);
                 legendList[i] = {
                     text: (mappings[c] === undefined) ? this._colorList[this._cleanList[i]].text : mappings[c][this._cleanList[i]].text,
                     color: (mappings[c] === undefined) ? this._colorList[this._cleanList[i]].color : mappings[c][this._cleanList[i]].color,
@@ -516,13 +517,13 @@ L.Control.Heightgraph = L.Control.extend({
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;
         var jsonCircles = [{
-            "x": width / 10,
+            "x": 0,
             "y": height + 35,
             "color": "grey",
             "type": "triangle-up",
             "id": "leftArrowSelection"
         }, {
-            "x": width / 10 + 80,
+            "x": 80,
             "y": height + 35,
             "color": "grey",
             "type": "triangle-down",
@@ -574,12 +575,9 @@ L.Control.Heightgraph = L.Control.extend({
             var data = [{
                 "selection": type.text
             }];
-            svg.selectAll('.text').data(data).enter().append('text').attr("x", width / 10 + 15).attr("y", height + 40).text(function(d) {
+            svg.selectAll('.text').data(data).enter().append('text').attr("x", 15).attr("y", height + 40).text(function(d) {
                 return d.selection;
-            })
-            .attr("class", "text")
-            .attr("id", "selectionText")
-            .attr("text", 'ROFL');
+            }).attr("class", "legend-menu").attr("id", "selectionText");
         }
         this._selectedOption = self._selectedOption;
     },
@@ -592,7 +590,7 @@ L.Control.Heightgraph = L.Control.extend({
         }];
         var self = this;
         legendHover = svg.selectAll('.legend-hover').data(leg).enter().append('g').attr('class', 'legend-hover');
-        legendHover.append('text').attr('class', 'legend-menu').attr('x', width / 10 + 120).attr('y', height + 40).text(function(d, i) {
+        legendHover.append('text').attr('class', 'legend-menu').attr('x', width - 50).attr('y', height + 40).text(function(d, i) {
             return d.text;
         }).on('mouseover', function() {
             var legend = d3.selectAll('.legend')[0];
