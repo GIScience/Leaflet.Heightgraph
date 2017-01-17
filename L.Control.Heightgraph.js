@@ -453,12 +453,11 @@ L.Control.Heightgraph = L.Control.extend({
         // bar chart invisible for hover as path
         this._svg.selectAll('hpath').data(this._polygonData).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
             return polygon(d.coords_maxheight);
-        }).on('mouseover', self._handleMouseOver);
-        this._svg.on('mouseleave', self._handleMouseLeave);
+        }).on('mouseover', self._handleMouseOver).on('mouseleave', self._handleMouseLeave);
         this._svg.on('mouseenter', self._handleMouseEnter);
+        self._createBorderTopLine(polygonData, svg);
         self._createSelectionBox(svg);
         self._createLegendHoverBox(svg);
-        self._createBorderTopLine(polygonData, svg);
         self._createFocus();
     },
     // create focus Line and focus InfoBox while hovering
@@ -593,6 +592,7 @@ L.Control.Heightgraph = L.Control.extend({
         legendHover.append('text').attr('class', 'legend-menu').attr('x', width - 50).attr('y', height + 40).text(function(d, i) {
             return d.text;
         }).on('mouseover', function() {
+            d3.selectAll('.legend-box')[0][0].style.display = "block";
             var legend = d3.selectAll('.legend')[0];
             if (legend) {
                 for (var i = 0; i < legend.length; i++) {
@@ -602,6 +602,7 @@ L.Control.Heightgraph = L.Control.extend({
                 }
             }
         }).on('mouseleave', function() {
+            d3.selectAll('.legend-box')[0][0].style.display = "none";
             var legend = d3.selectAll('.legend')[0];
             if (legend) {
                 for (var i = 0; i < legend.length; i++) {
@@ -621,20 +622,22 @@ L.Control.Heightgraph = L.Control.extend({
             height = this._height - this._margin.top - this._margin.bottom;
         var legendRectSize = 7;
         var legendSpacing = 7;
-        var legend = svg.selectAll('.g').data(this._dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
+        var backgroundbox = svg.selectAll('.legend-hover').append('rect').attr('x', 450).attr('y', 0).attr('height',150).attr('width',170).attr('class','legend-box');
+        //svg.selectAll('.legend-hover').append('text').text('hallo').attr('x', 450).attr('y', 20).attr('fill','white').attr('class','legend-newtext');
+        var legend = svg.selectAll('.legend-hover').data(this._dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
             var offset = height * 2;
             var horz = legendRectSize - 15;
             var vert = i * height - offset;
             return 'translate(' + horz + ',' + vert + ')';
         });
-        legend.append('rect').attr('class', 'legend-rect').attr('x', width / 10 + 160).attr('y', height - (2 * height / 3)).attr('width', 6).attr('height', 6).style('fill', function(d, i) {
+        legend.append('rect').attr('class', 'legend-rect').attr('x', 465).attr('y', height - (2 * height / 3)).attr('width', 6).attr('height', 6).style('fill', function(d, i) {
             return d.color;
         });
-        legend.append('text').attr('class', 'legend-text').attr('x', width / 10 + 170).attr('y', height - (2 * height / 3) + 7).text(function(d, i) {
+        legend.append('text').attr('class', 'legend-text').attr('x', 475).attr('y', height - (2 * height / 3) + 7).text(function(d, i) {
             return d.text;
         });
-        legend.append('text').attr('class', 'legend-text').attr('x', width / 10 + 270).attr('y', height - (2 * height / 3) + 7).text(function(d, i) {
+        legend.append('text').attr('class', 'legend-text').attr('x', 575).attr('y', height - (2 * height / 3) + 7).text(function(d, i) {
             return d.proportion;
         });
     },
@@ -681,9 +684,11 @@ L.Control.Heightgraph = L.Control.extend({
         //self._focus.select("#height").text('Height: ' + y0.toFixed(0) + ' m');
         //self._focus.select("#type").text('Value: ' + d.text);
         //if (d.text.length > 0) self._focus.select("#blockdistance").text('Segment length: ' + (d.blockdist / 1000).toFixed(2) + ' km');
-        self._focusLine.style("display", "initial").attr('x1', self._x(x0)).attr('x2', self._x(x0));
+        self._focusLine.style("display", "block").attr('x1', self._x(x0)).attr('x2', self._x(x0));
     },
     _handleMouseLeave: function() {
+        d3.select('.focus')[0][0].style.display = "none";
+        d3.select('.focusLine')[0][0].style.display = "none";
         if (self._mouseHeightFocus) {
             self._mouseHeightFocus.style("display", "none");
             self._mouseHeightFocusLabel.style("display", "none");
