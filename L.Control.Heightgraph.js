@@ -594,6 +594,8 @@ L.Control.Heightgraph = L.Control.extend({
         legendHover.append('text').attr('class', 'legend-menu').attr('x', width -50).attr('y', height + 40).text(function(d, i) {
             return d.text;
         }).on('mouseover',function(){
+            d3.select('.legend-box').display = "block";
+            document.getElementsByClassName('legend-box')[0].style.display = "block";
             var legend = document.getElementsByClassName('legend');
             if(legend) {
                 for(var i=0; i<legend.length;i++){
@@ -627,7 +629,9 @@ L.Control.Heightgraph = L.Control.extend({
             height = this._height - this._margin.top - this._margin.bottom;
         var legendRectSize = 7;
         var legendSpacing = 7;
-        var legend = svg.selectAll('.g').data(this._dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
+        var box = d3.select(".legend-hover").append("g");
+        var backgroundbox = box.append('rect').attr("x", 459).attr("y", 0).attr("width", 170).attr("height", 150).attr("fill", "white").attr('class','legend-box');
+        var legend = d3.selelect('.legend-box').data(this._dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
             var offset = height * 2;
             var horz = legendRectSize - 15;
