@@ -72,20 +72,34 @@
 .legend-rect {
     pointer-events: none;
     display: none;
+    border: 5px ;
 }
 .legend-hover {
     cursor: pointer;
 }
 .legend-menu {
-    font-weight: bold;
-    fill: grey;
+    fill: black;
+    pointer-events: none;
 }
 .legend-text {
     fill: #000;
     font-size: 10;
     cursor: pointer;
     display: none;
+  
+
 }
+
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Chrome/Safari/Opera */
+     -khtml-user-select: none; /* Konqueror */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
+
 .legend-box {
     fill:white;
     display: none;
@@ -93,6 +107,7 @@
 
 .tick, .tick text {
     fill: #999;
+    pointer-events: none;
 }
 
 .axis .tick line {
@@ -104,6 +119,7 @@
     text-anchor: middle;
     color: #999;
     fill: #999;
+    pointer-events: none;
 }
 
 .axis path {

@@ -14,6 +14,7 @@ L.Control.Heightgraph = L.Control.extend({
     onAdd: function(map) {
         var opts = this.options;
         var controlDiv = this._container = L.DomUtil.create('div', 'heightgraph');
+        L.DomEvent.disableClickPropagation(controlDiv);
         var buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", controlDiv);
         var link = L.DomUtil.create('a', "heightgraph-toggle-icon", buttonContainer);
         link.href = '#';
@@ -23,9 +24,8 @@ L.Control.Heightgraph = L.Control.extend({
                 this._extendButton.value = "<<";
                 this._extendButton.value = "waytypes";*/
         this._showState = false;
-        this._map = map;
         this._initToggle();
-        this._cont = d3.select(controlDiv);
+        //this._cont = d3.select(controlDiv);
         // size for heightgraph box (svg)
         this._margin = this.options.margins;
         this._width = this.options.width - this._margin.left - this._margin.right;
@@ -181,7 +181,6 @@ L.Control.Heightgraph = L.Control.extend({
                 blockDistance += calc;
                 distances.coordsOfDist.push([g, h]);
             }
-            console.log(distances.blockTypes)
             distances.blockDistances.push(Array.apply(null, Array(coordLength - 1)).map(function() {
                 return blockDistance;
             }));
@@ -233,29 +232,28 @@ L.Control.Heightgraph = L.Control.extend({
     _calculateTypeRate: function() {
         //doppelte typen zusammenrechnen --> in propfunct
         var typesString = this._cleanList;
-        //console.log(typesString);
         var types = typesString.map(Number);
         var maxTypes = d3.max(types);
         var totaldistance = this._distances.totaldistance;
-        //console.log(totaldistance)
         var a = this._distances.blocks;
-        console.log(a)
         var distances = Array(maxTypes + 1).fill(0);
         this._blockList = [];
         for (var i = 0; i < a.length; i++) {
             type = parseInt(a[i].blockType);
             distances[type] = distances[type] + a[i].distance;
         }
-        //console.log(distances)
         for (var j in distances) {
             this._blockList.push({
                 type: j,
                 blockDistanceSum: distances[j],
-                proportion: "(" + Math.round(distances[j] / totaldistance * 100) + "%)"
+                proportion:  Math.round(distances[j] / totaldistance * 100)
             });
         }
         //proportion: (b[i] / a) * 100
-        //console.log(this._blockList);
+
+        this._blockList.sort(function(a, b) { 
+            return a.blockDistanceSum - b.blockDistanceSum;
+        })
     },
     /**
      * Returns values of profileType-option as Array without duplicates 
@@ -276,10 +274,6 @@ L.Control.Heightgraph = L.Control.extend({
         this._cleanList = a.filter(function(elem, index) {
             return index == a.indexOf(elem);
         });
-
-        function sortNumber(a, b) {
-            return a - b;
-        }
         //Calculate Proportion of each Block in relation to totaldistance
         self._calculateTypeRate();
         //create random colors for undefined types
@@ -294,14 +288,26 @@ L.Control.Heightgraph = L.Control.extend({
                     color: "None"
                 };
             } else {
-                legendList[i] = {
-                    text: (mappings[c] === undefined) ? this._colorList[this._cleanList[i]].text : mappings[c][this._cleanList[i]].text,
-                    color: (mappings[c] === undefined) ? this._colorList[this._cleanList[i]].color : mappings[c][this._cleanList[i]].color,
-                    type: this._cleanList[i],
-                    proportion: self._blockList[this._cleanList[i]].proportion
-                };
+                for(var j=0; j<self._blockList.length; j++){
+                    if(self._blockList[j].type==this._cleanList[i]){
+                    legendList[i] = {
+                        text: (mappings[c] === undefined) ? this._colorList[this._cleanList[i]].text : mappings[c][this._cleanList[i]].text,
+                        color: (mappings[c] === undefined) ? this._colorList[this._cleanList[i]].color : mappings[c][this._cleanList[i]].color,
+                        type: this._cleanList[i],
+                        proportion: self._blockList[j].proportion
+                    };
+
+                    }
+                }
+                
+
             }
         }
+
+        legendList.sort(function(a, b) { 
+            return b.proportion - a.proportion;
+        })
+        console.log(legendList)
         this._dynamicLegend = legendList;
     },
     /**creates a range of different colors for highlighting the bar
@@ -453,12 +459,14 @@ L.Control.Heightgraph = L.Control.extend({
         // bar chart invisible for hover as path
         this._svg.selectAll('hpath').data(this._polygonData).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
             return polygon(d.coords_maxheight);
-        }).on('mouseover', self._handleMouseOver).on('mouseleave', self._handleMouseLeave);
-        this._svg.on('mouseenter', self._handleMouseEnter);
+        }).on('mouseover', self._handleMouseOver);
+        this._svg.on('mouseleave', self._handleMouseLeave);
         self._createBorderTopLine(polygonData, svg);
         self._createSelectionBox(svg);
         self._createLegendHoverBox(svg);
         self._createFocus();
+
+
     },
     // create focus Line and focus InfoBox while hovering
     _createFocus: function() {
@@ -536,8 +544,7 @@ L.Control.Heightgraph = L.Control.extend({
             return d.id;
         }).style("fill", function(d) {
             return d.color;
-        }).
-        on("click", function(d) {
+        }).on("click", function(d) {
             if (d.id == "rightArrowSelection") arrowRight();
             if (d.id == "leftArrowSelection") arrowLeft();
         });
@@ -589,10 +596,14 @@ L.Control.Heightgraph = L.Control.extend({
         }];
         var self = this;
         legendHover = svg.selectAll('.legend-hover').data(leg).enter().append('g').attr('class', 'legend-hover');
-        legendHover.append('text').attr('class', 'legend-menu').attr('x', width - 50).attr('y', height + 40).text(function(d, i) {
+        legendHover.append('text').attr('class', 'legend-menu').attr("class", "no-select").attr('x', width - 50).attr('y', height + 40).text(function(d, i) {
             return d.text;
         }).on('mouseover', function() {
             d3.selectAll('.legend-box')[0][0].style.display = "block";
+            d3.selectAll('.legend-box')[0][0].style.stroke = "#888";
+            console.log(d3.selectAll('.legend-box')[0][0].style);
+            d3.selectAll('.legend-box')[0][0].style.stroke.width = "5px";
+            d3.selectAll('.legend-box')[0][0].style.stroke.linejoin="round";
             var legend = d3.selectAll('.legend')[0];
             if (legend) {
                 for (var i = 0; i < legend.length; i++) {
@@ -616,7 +627,6 @@ L.Control.Heightgraph = L.Control.extend({
     /* create dynamic legend
      */
     _createLegend: function(svg) {
-        //console.log(box)
         var margin = this._margins,
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;
@@ -624,7 +634,7 @@ L.Control.Heightgraph = L.Control.extend({
         var legendSpacing = 7;
         var backgroundbox = svg.selectAll('.legend-hover').append('rect').attr('x', 450).attr('y', 0).attr('height',150).attr('width',170).attr('class','legend-box');
         //svg.selectAll('.legend-hover').append('text').text('hallo').attr('x', 450).attr('y', 20).attr('fill','white').attr('class','legend-newtext');
-        var legend = svg.selectAll('.legend-hover').data(this._dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
+        var legend = svg.selectAll('.hlegend-hover').data(this._dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
             var offset = height * 2;
             var horz = legendRectSize - 15;
@@ -638,7 +648,8 @@ L.Control.Heightgraph = L.Control.extend({
             return d.text;
         });
         legend.append('text').attr('class', 'legend-text').attr('x', 575).attr('y', height - (2 * height / 3) + 7).text(function(d, i) {
-            return d.proportion;
+            var textAdd= "(" + d.proportion + "%)"
+            return textAdd;
         });
     },
     /*create top border line on graph
@@ -657,7 +668,7 @@ L.Control.Heightgraph = L.Control.extend({
     /*creates Info-Boxes while hovering the graph
      */
     _handleMouseOver: function(d, i) {
-        var self = window.hg;
+        var self = window.hg;      
         var x0 = self._x.invert(d3.mouse(this)[0]); //distance in m
         var d0 = d.coords[0].x,
             d1 = d.coords[1].x;
@@ -671,10 +682,10 @@ L.Control.Heightgraph = L.Control.extend({
         var xPositionBox = self._x(x0) - (self._focusWidth + 5);
         var totalWidth = self._width - self._margin.left - self._margin.right;
         if (self._x(x0) + self._focusWidth < totalWidth) {
-            self._focus.style("display", "initial").attr("transform", "translate(" + self._x(x0) + "," + (self.options.height - self.options.margins.top - self.options.margins.bottom - 5) + ")");
+            self._focus.style("display", "initial").attr("transform", "translate(" + self._x(x0) + ","  + (self.options.height - self.options.margins.top - self.options.margins.bottom - 30) + ")");
         }
         if (self._x(x0) + self._focusWidth > totalWidth) {
-            self._focus.style("display", "initial").attr("transform", "translate(" + xPositionBox + "," + (self.options.height - self.options.margins.top - self.options.margins.bottom - 5) + ")");
+            self._focus.style("display", "initial").attr("transform", "translate(" + xPositionBox + "," + (self.options.height - self.options.margins.top - self.options.margins.bottom - 30) + ")");
         }
         self._DistanceTspan.text(" " + Math.round((x0 / 1000) * 100) / 100 + ' km');
         self._HeightTspan.text(" " + y0.toFixed(0) + ' m');
@@ -685,10 +696,16 @@ L.Control.Heightgraph = L.Control.extend({
         //self._focus.select("#type").text('Value: ' + d.text);
         //if (d.text.length > 0) self._focus.select("#blockdistance").text('Segment length: ' + (d.blockdist / 1000).toFixed(2) + ' km');
         self._focusLine.style("display", "block").attr('x1', self._x(x0)).attr('x2', self._x(x0));
+                if (self._mouseHeightFocus) {
+            self._mouseHeightFocus.style("display", 'block');
+            self._mouseHeightFocusLabel.style("display", 'block');
+            self._pointG.style("display", 'block');
+            self._focus.style('display', 'block');
+            self._focusLine.style('display', 'block');
+        }
     },
     _handleMouseLeave: function() {
-        d3.select('.focus')[0][0].style.display = "none";
-        d3.select('.focusLine')[0][0].style.display = "none";
+        var self = window.hg;
         if (self._mouseHeightFocus) {
             self._mouseHeightFocus.style("display", "none");
             self._mouseHeightFocusLabel.style("display", "none");
@@ -697,7 +714,8 @@ L.Control.Heightgraph = L.Control.extend({
             self._focusLine.style('display', 'none');
         }
     },
-    _handleMouseEnter: function() {
+/*    _handleMouseEnter: function() {
+        var self = window.hg;
         if (self._mouseHeightFocus) {
             self._mouseHeightFocus.style("display", 'block');
             self._mouseHeightFocusLabel.style("display", 'block');
@@ -706,7 +724,7 @@ L.Control.Heightgraph = L.Control.extend({
             self._focusLine.style('display', 'block');
         }
     },
-    _handleMouseClick: function() {
+*/    _handleMouseClick: function() {
         console.log('hi');
     }
 });
