@@ -1,5 +1,5 @@
-var mappings = {};
-mappings.Gradients = {
+var colorMappings = {};
+colorMappings.Gradients = {
     '0': {
         text: '16%+',
         color: '#028306'
@@ -45,7 +45,7 @@ mappings.Gradients = {
         color: '#AD0F0C'
     }
 };
-mappings.Waytypes = {
+colorMappings.Waytypes = {
     '0': {
         text: 'Other',
         color: '#30959e'
@@ -91,7 +91,7 @@ mappings.Waytypes = {
         color: '#ade8ed'
     }
 };
-mappings.Surfaces = {
+colorMappings.Surfaces = {
     '0': {
         text: 'Other',
         color: '#ddcdeb'
