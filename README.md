@@ -1,9 +1,9 @@
 #HeightProfile
 
-##[What is this?](#What is this?)
-##[How to use](#How to use)
+##[What is this?](##What is this?)
+##[How to use](##How to use)
 
-#What is it?
+##What is it?
 
 A Leaflet plugin to view an interactive height profile of polylines using d3. Addtional information (steepness, blockdistance) are also given in different profiles (Waytypes, Surfaces, Gradients) and will be shown with different color highlighting. This plugin is under development and is inspired by [MrMufflon/Leaflet.Elevation](https://github.com/MrMufflon/Leaflet.Elevation).
 
@@ -14,7 +14,8 @@ Firefox
 
 Supported data:
 
-GeoJSON:`
+GeoJSON:
+```
 var geojson = {
     "type": "FeatureCollection",
     "features": [{
@@ -53,11 +54,12 @@ var geojson = {
             "lon": "8.843994140625002"
         }]
     }
-};`
+};
+```
+##How to use
 
-#How to use
-
-Altitude information for each point is necessary in the given data. Segments of the route with differnt attribute types has to be in the data if elevation highlighting is selected.`
+Altitude information for each point is necessary in the given data. Segments of the route with differnt attribute types has to be in the data if elevation highlighting is selected.
+```
 //all used options are the default values
 L.Control.Heightgraph = L.Control.extend({
     options: {
@@ -92,4 +94,5 @@ L.Control.Heightgraph = L.Control.extend({
     onRemove: function(map) {
         this._container = null;
         this._svg = undefined;
-    },`
+    },
+    ```
