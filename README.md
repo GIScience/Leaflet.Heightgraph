@@ -1,11 +1,14 @@
 #HeightProfile
 
-##[What is this?](##What is this?)
+##[What is it?](##What is it?)
 ##[How to use](##How to use)
 
 ##What is it?
 
 A Leaflet plugin to view an interactive height profile of polylines using d3. Addtional information (steepness, blockdistance) are also given in different profiles (Waytypes, Surfaces, Gradients) and will be shown with different color highlighting. This plugin is under development and is inspired by [MrMufflon/Leaflet.Elevation](https://github.com/MrMufflon/Leaflet.Elevation).
+
+Here is the [link](https://giscience.github.io/Leaflet.Heightgraph/index.html#) to get a preview.
+
 
 Supported and tested Browsers:
 
