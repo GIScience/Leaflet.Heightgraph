@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+ <html lang="en">
+     <head>
+         <meta charset="utf-8"/>
+         <title>Elevation Graph Example</title>
+         <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+         <style>
+             html, body, #map {
+                 height:100%;
+                 width:100%;
+                 padding:0px;
+                 margin:0px;
+             } 
+         </style> 
+         <!--Leaflet-->
+         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
+         <script src="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
+         <link rel="stylesheet" href="L.Control.Heightgraph.css"/>
+         <script src="https://d3js.org/d3.v3.min.js"></script>
+         <script type="text/javascript" src="example_data.js"></script>
+         <script type="text/javascript" src="example_mappings.js"></script>
+         <script type="text/javascript" src="L.Control.Heightgraph.js"></script>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.2.1/chroma.min.js"></script>
+         
+     </head>
+ 
+     <div id="map"></div>
+ 
+     <script type="text/javascript">
+         var map = new L.Map('map');
+ 
+         var url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+             attr = 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+ 
+ 
+         var openstreetmap = L.tileLayer(url, {
+             id: 'openstreetmap',
+             attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+         });
+ 
+         var bounds = new L.LatLngBounds(new L.LatLng(49.3356786,8.493329), new L.LatLng(49.4912906, 8.8714796 ));
+     
+         var hg = L.control.heightgraph({
+             width: 800,
+             height: 280,
+             margins: {
+                 top: 10,
+                 right: 30,
+                 bottom: 55,
+                 left: 50
+             },
+             position: "bottomright",
+             mappings: colorMappings
+         });
+ 
+         hg.addTo(map);
+         
+         hg.addData(geojson);
+ 
+         L.geoJson(geojson).addTo(map);
+ 
+         map.addLayer(openstreetmap).fitBounds(bounds);
+ 
+     </script>
+ </html>
