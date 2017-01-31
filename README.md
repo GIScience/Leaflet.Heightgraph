@@ -1,5 +1,7 @@
 #HeightProfile
 
+![preview](https://cloud.githubusercontent.com/assets/15326489/22463377/9dfe33f4-e7b1-11e6-907e-188d73ee36a1.png)
+
 ##[What is it?](##What is it?)
 ##[How to use](##How to use)
 
