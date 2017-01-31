@@ -56,6 +56,7 @@ var FeatureCollections = [{
 }];
 ```
 
+### Optional:
 You may add a mappings object to customize the colors and labels in the height graph. Without adding custom mappings the segments and labels within the graph will be displayed in random colors created with chroma.js. Each key of the object must correspond to the `summary` key in `properties` within the `FeatureCollection`.
 
 ```javascript
@@ -71,7 +72,7 @@ colorMappings.Steepness = {
 };
 ```
 
-### How to use
+### How to use:
 
 ```javascript
 // all used options are the default values
