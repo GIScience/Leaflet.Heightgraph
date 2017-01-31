@@ -15,9 +15,9 @@ Supported Browsers:
 - Firefox
 
 ### Supported data:
-Input data has to be of type [GeoJSON-Format](http://geojson.org/). This consists of a certain amount of feature collections which correspond to a certain attribute which could -as an example- be surface or gradient information. Each `FeatureCollection` comprises to a certain `attribute` in its `properties` (e.g. `'summary': 'steepness'`) and has a list of variable length of `LineString` features with coordinates (including height values) and the `attributeType` corresponding to the certain type of attribute (in this case steepness) declared in its `properties`. 
+Input data has to be of type [GeoJSON-Format](http://geojson.org/). This may consist of feature collections corresponding to a certain attribute which could - as an example - be surface or gradient information. Each `FeatureCollection` comprises to a certain `attribute` in its `properties` (e.g. `'summary': 'steepness'`) and has a list of variable length of `LineString` features with coordinates (including height values) and the `attributeType` corresponding to the certain type of attribute within this segment (in this case an index of steepness) declared in its `properties`. 
 
-[Demo](https://giscience.github.io/Leaflet.Heightgraph/index.html)
+[Demo](https://giscience.github.io/Leaflet.Heightgraph)
 
 ```javascript
 var FeatureCollections = [{
