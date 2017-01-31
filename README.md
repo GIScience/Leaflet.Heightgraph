@@ -21,6 +21,7 @@ Supported data:
 To use the routing in combination with the profile the data has to be in the [GeoJSON-Format](http://geojson.org/). 
 It contains a FeatureCollection in which the coordinates and geometries are defined. The features are provided in an array of variable length. In each segment of this array the geometry has to be defined by the type "LineString" and the coordinates which give information about Longtitude,Latitude and Altitude in an array.
 The properties of each feature defines the attribute type of one block of LineStrings. These properties are listed in a library and give the information about the type (e.g. steepness type 6: elevation of 1-3%) and color (e.g '#CF5352') of the specific block of LineStrings. 
+The properties at the end of the FeatureCollection will name the profile (e.g. Gradients, Surfaces) and will be displayed in the selection range below the graph.
 
 
 GeoJSON:
@@ -56,12 +57,8 @@ var geojson = {
     }],
     "properties": {
         "Creator": "OpenRouteService.org",
-        "records": 19,
-        "summary": "Bins of elevation types in route",
-        "waypoint_coordinates": [{
-            "lat": "49.49132258420274",
-            "lon": "8.843994140625002"
-        }]
+        "records": 30,
+        "summary": "Gradients"
     }
 };
 ```
@@ -123,4 +120,4 @@ L.Control.Heightgraph = L.Control.extend({
         this._container = null;
         this._svg = undefined;
     },
-    ```
+    
