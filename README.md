@@ -11,11 +11,15 @@ Here is the [link](https://giscience.github.io/Leaflet.Heightgraph/index.html#) 
 
 
 Supported and tested Browsers:
-
-Chrome
-Firefox
+- Chrome
+- Firefox
 
 Supported data:
+
+To use the routing in combination with the profile the data has to be in the [GeoJSON-Format](http://geojson.org/). 
+It contains a FeatureCollection in which the coordinates and geometries are defined. The features are provided in an array of variable length. In each segment of this array the geometry has to be defined by the type "LineString" and the coordinates which give information about Longtitude,Latitude and Altitude in an array.
+The properties of each feature defines the attribute type of one block of LineStrings. These properties are listed in a library and give the information about the type (e.g. steepness type 6: elevation of 1-3%) and color (e.g '#CF5352') of the specific block of LineStrings. 
+
 
 GeoJSON:
 ```
@@ -59,9 +63,28 @@ var geojson = {
     }
 };
 ```
+Library colorMappgins:
+
+The library gives information about the color in which each segement of the bar chart will be drawn. Additionally the implemented text will be shown in the legend of the graph, as well as in the hoverBox on top of the bar chart. Without this library the segments of the bar chart will be displayed in random colors created with chroma.js.
+```
+colorMappings.Gradients = {
+    '6': {
+        text: '1-3%',
+        color: '#F29898'
+    },
+    '7': {
+        text: '4-6%',
+        color: '#E07575'
+    },
+    '8': {
+        text: '7-9%',
+        color: '#CF5352'
+    },
+```
+
 ##How to use
 
-Altitude information for each point is necessary in the given data. Segments of the route with differnt attribute types has to be in the data if elevation highlighting is selected.
+Altitude information for each point is necessary in the given data. Segments of the route with different attribute types has to be in the data if (elevation) highlighting is selected.
 ```
 //all used options are the default values
 L.Control.Heightgraph = L.Control.extend({
