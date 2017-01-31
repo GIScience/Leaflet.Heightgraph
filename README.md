@@ -1,7 +1,7 @@
 Leaflet.HeightProfile
 =====================
 
-![preview](https://cloud.githubusercontent.com/assets/15326489/22463377/9dfe33f4-e7b1-11e6-907e-188d73ee36a1.png)
+![preview](https://cloud.githubusercontent.com/assets/10322094/22474104/472bcc88-e7db-11e6-8c9e-7e1d53cd0b57.png)
 
 1. [What is this?](https://github.com/GIScience/Leaflet.Heightgraph#what-is-this)
 2. [How to use this library](https://github.com/GIScience/Leaflet.Heightgraph#how-to-use)
