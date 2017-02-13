@@ -46,14 +46,7 @@ L.Control.Heightgraph = L.Control.extend({
             }
         }
         this._data = data;
-        this._findProfileTypes(data);
-        this._selection();
-        this._calcDistances();
-        this._calculateHeightType();
-        this._updateLegend();
-        this._updateBarData();
-        this._createBarChart();
-        this._createLegend(this._svg);
+        this._init();
     },
     _initToggle: function() {
         /* inspired by L.Control.Layers */
@@ -104,6 +97,19 @@ L.Control.Heightgraph = L.Control.extend({
             this._y.domain([0, 1]);
             this._updateAxis();
         },*/
+    /**
+     * executes all functions in the beginning and hides the results
+     */
+    _init: function() {
+        this._findProfileTypes(this._data);
+        this._selection();
+        this._calcDistances();
+        this._calculateHeightType();
+        this._updateLegend();
+        this._updateBarData();
+        this._createBarChart();
+        this._createLegend(this._svg);
+    },
     /**
      *find all existing ProfileTypes of data for creating dynamic legend
      * @param {FeatureCollection} data

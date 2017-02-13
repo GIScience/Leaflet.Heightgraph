@@ -1,98 +1,94 @@
-#HeightProfile
+Leaflet.HeightProfile
+=====================
 
-##[What is this?](##What is this?)
-##[How to use](##How to use)
+![preview](https://cloud.githubusercontent.com/assets/10322094/22474104/472bcc88-e7db-11e6-8c9e-7e1d53cd0b57.png)
 
-##What is it?
+1. [What is this?](https://github.com/GIScience/Leaflet.Heightgraph#what-is-this)
+2. [How to use this library](https://github.com/GIScience/Leaflet.Heightgraph#how-to-use)
 
-A Leaflet plugin to view an interactive height profile of polylines using d3. Addtional information (steepness, blockdistance) are also given in different profiles (Waytypes, Surfaces, Gradients) and will be shown with different color highlighting. This plugin is under development and is inspired by [MrMufflon/Leaflet.Elevation](https://github.com/MrMufflon/Leaflet.Elevation).
+### What is this?
 
-Supported and tested Browsers:
+This plugin is under development and is inspired by [MrMufflon/Leaflet.Elevation](https://github.com/MrMufflon/Leaflet.Elevation). You may use this plugin to view an interactive height profile of polylines and its segments using d3js. The input data may consist of different types of attributes you wish to display.
 
-Chrome
-Firefox
+Supported Browsers:
+- Chrome
+- Firefox
 
-Supported data:
+### Supported data:
+Input data has to be of type [GeoJSON-Format](http://geojson.org/). This may consist of feature collections corresponding to a certain attribute which could - as an example - be surface or gradient information. Each `FeatureCollection` comprises to a certain `attribute` in its `properties` (e.g. `'summary': 'steepness'`) and has a list of variable length of `LineString` features with coordinates (including height values) and the `attributeType` corresponding to the certain type of attribute within this segment (in this case an index of steepness) declared in its `properties`. 
 
-GeoJSON:
-```
-var geojson = {
+[Demo](https://giscience.github.io/Leaflet.Heightgraph)
+
+```javascript
+var FeatureCollections = [{
     "type": "FeatureCollection",
     "features": [{
         "type": "Feature",
         "geometry": {
             "type": "LineString",
             "coordinates": [
-                [8.788387, 49.3941891, 121.5],
-                [8.7884979, 49.3942292, 121.3],
-                [8.7886319, 49.3943058, 121.2]            
+                [8.6865264, 49.3859188, 114.5],
+                [8.6864108, 49.3868472, 114.3],
+                [8.6860538, 49.3903808, 114.8]
             ]
         },
         "properties": {
-            "steepness": 6
+            "attributeType": "3"
         }
     }, {
         "type": "Feature",
         "geometry": {
             "type": "LineString",
             "coordinates": [
-                [8.9253361, 49.524242, 254],
-                [8.9259096, 49.5241819, 259.1],
-                [8.9313854, 49.5224565, 314.2]
+                [8.6857921, 49.3936309, 114.4],
+                [8.6860124, 49.3936431, 114.3]
             ]
         },
         "properties": {
-            "steepness": 8
+            "attributeType": "0"
         }
     }],
     "properties": {
         "Creator": "OpenRouteService.org",
-        "records": 19,
-        "summary": "Bins of elevation types in route",
-        "waypoint_coordinates": [{
-            "lat": "49.49132258420274",
-            "lon": "8.843994140625002"
-        }]
+        "records": 2,
+        "summary": "Steepness"
+    }
+}];
+```
+
+### Optional:
+You may add a mappings object to customize the colors and labels in the height graph. Without adding custom mappings the segments and labels within the graph will be displayed in random colors created with chroma.js. Each key of the object must correspond to the `summary` key in `properties` within the `FeatureCollection`.
+
+```javascript
+colorMappings.Steepness = {
+    '3': {
+        text: '1-3%',
+        color: '#F29898'
+    },
+    '0': {
+        text: '4-6%',
+        color: '#E07575'
     }
 };
 ```
-##How to use
 
-Altitude information for each point is necessary in the given data. Segments of the route with differnt attribute types has to be in the data if elevation highlighting is selected.
-```
-//all used options are the default values
-L.Control.Heightgraph = L.Control.extend({
-    options: {
-        position: "topleft",
-        width: 800,
-        height: 125,
-        margins: {
-            top: 20,
-            right: 50,
-            bottom: 25,
-            left: 50
-        },
-        mappings: undefined
+### How to use:
+
+```javascript
+// all used options are the default values
+var hg = L.control.heightgraph({
+    width: 800,
+    height: 280,
+    margins: {
+        top: 10,
+        right: 30,
+        bottom: 55,
+        left: 50
     },
-    onAdd: function(map) {
-        var opts = this.options;
-        var controlDiv = this._container = L.DomUtil.create('div', 'heightgraph');
-        L.DomEvent.disableClickPropagation(controlDiv);
-        var buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", controlDiv);
-        var link = L.DomUtil.create('a', "heightgraph-toggle-icon", buttonContainer);
-        link.href = '#';
-        var closeButton = this._closeButton = L.DomUtil.create('a', "heightgraph-close-icon", controlDiv);
-        this._showState = false;
-        this._initToggle();
-        // size for heightgraph box (svg)
-        this._margin = this.options.margins;
-        this._width = this.options.width - this._margin.left - this._margin.right;
-        this._height = this.options.height - this._margin.top - this._margin.bottom;
-        this._mappings = this.options.mappings;
-        return controlDiv;
-    },
-    onRemove: function(map) {
-        this._container = null;
-        this._svg = undefined;
-    },
-    ```
+    position: "bottomright",
+    mappings: undefined || colorMappings
+});
+hg.addTo(map);
+hg.addData(geojson);
+L.geoJson(geojson).addTo(map);
+
