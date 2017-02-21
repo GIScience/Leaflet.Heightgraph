@@ -46,7 +46,12 @@ L.Control.Heightgraph = L.Control.extend({
             }
         }
         this._data = data;
-        this._init();
+        this._selection();
+        this._calcDistances();
+        this._createLegendList();
+        this._createBarData();
+        this._createBarChart();
+        this._createLegend(this._svg);
     },
     _initToggle: function() {
         /* inspired by L.Control.Layers */
@@ -98,58 +103,18 @@ L.Control.Heightgraph = L.Control.extend({
             this._updateAxis();
         },*/
     /**
-     * executes all functions in the beginning and hides the results
-     */
-    _init: function() {
-        this._findProfileTypes(this._data);
-        this._selection();
-        this._calcDistances();
-        this._calculateHeightType();
-        this._updateLegend();
-        this._updateBarData();
-        this._createBarChart();
-        this._createLegend(this._svg);
-    },
-    /**
-     *find all existing ProfileTypes of data for creating dynamic legend
-     * @param {FeatureCollection} data
-     */
-    _findProfileTypes: function(data) {
-        var length = this._dataLength = data.length;
-        var allProfileTypes = [];
-        //var shownText;
-        for (var i = 0; i < length; i++) {
-            var type = data[i].properties.summary;
-            allProfileTypes.push({
-                text: type,
-                type: type,
-                id: i
-            });
-        }
-        allProfileTypes.push({
-            text: "None",
-            type: "None",
-            id: -1
-        });
-        this._allProfileTypes = allProfileTypes;
-    },
-    /**
      * reacts on changes in selection box and updates heightprofile
      * @param {integer} seletedOption
      */
     _selection: function(selectedOption) {
         var data = this._data;
-        this._selectedData = data[0];
         this._selectedOption === undefined ? this._selectedOption = 0 : this._selectedOption = selectedOption;
         if (selectedOption !== undefined) {
-            this._svg.selectAll("*").remove();
-            this._profileType = this._selectedOption;
-            this._profileType == -1 ? this._selectedData = data[0] : this._selectedData = data[this._profileType];
-            //this._profileType == 3 ? this._selectedData = data[0] : this._selectedData = data[this._profileType];
-            this._calcDistances();
-            this._calculateHeightType();
-            this._updateLegend();
-            this._updateBarData();
+            if (this._svg != undefined) {
+                //remove old graph
+                this._svg.selectAll("*").remove();
+            }
+            // build new graph
             this._createBarChart();
             this._createLegend(this._svg);
         }
@@ -158,154 +123,128 @@ L.Control.Heightgraph = L.Control.extend({
      * Returns distance between each coordinate of Linestring
      */
     _calcDistances: function() {
-        distances = {};
-        var first, calc;
-        //var wpList=[];
-        var a = this._selectedData;
-        distances.distance = [];
-        distances.wpDistance = [];
-        distances.blockDistances = [];
-        distances.blockDistancesOnce = [];
-        distances.blockTypes = [];
-        distances.blockTypesOnce = [];
-        distances.blocks = [];
-        var featureLength = this._featureLength = a.features.length;
-        distances.coordsOfDist = [];
-        for (var i = 0; i < featureLength; i++) {
-            var coordLength = a.features[i].geometry.coordinates.length;
-            var blockDistance = 0;
-            for (var j = 0; j < coordLength - 1; j++) {
-                var g = new L.LatLng(a.features[i].geometry.coordinates[j][1], a.features[i].geometry.coordinates[j][0]);
-                var h = new L.LatLng(a.features[i].geometry.coordinates[j + 1][1], a.features[i].geometry.coordinates[j + 1][0]);
-                calc = g.distanceTo(h);
-                distances.distance.push(calc);
-                //save types related to blockDistances
-                var t = a.features[i].properties.attributeType[0];
-                distances.blockTypes.push(t);
-                // calculate distances of specific block
-                blockDistance += calc;
-                distances.coordsOfDist.push([g, h]);
+        //new
+        this._profile = {};
+        this._profile.ids = {};
+        this._profile.blockInfo = {};
+        this._profile.elevationVals = {};
+        this._profile.barDistances = {};
+        this._profile.barAttributes = {};
+        this._profile.coords = {};
+        var data = this._data;
+        for (var y = 0; y <= this._data.length; y++) {
+            profile = {};
+            this._profile.ids[y] = {
+                id: y,
+                text: (data[y] === undefined) ? "None" : data[y].properties.summary
+            };
+            var b = (data[y] === undefined) ? data[0] : data[y];
+            profile.blockDistances = [];
+            profile.blockDistancesOnce = [];
+            profile.blockTypesOnce = [];
+            profile.blockTypeVals = [];
+            profile.elevationVals = [];
+            profile.barDistances = [];
+            profile.barAttributes = [];
+            var featureLength = b.features.length;
+            profile.coordsOfDist = [];
+            for (var i = 0; i < featureLength; i++) {
+                var coordLength = b.features[i].geometry.coordinates.length;
+                var blockDistance = 0;
+                for (var j = 0; j < coordLength - 1; j++) {
+                    var g = new L.LatLng(b.features[i].geometry.coordinates[j][1], b.features[i].geometry.coordinates[j][0]);
+                    var h = new L.LatLng(b.features[i].geometry.coordinates[j + 1][1], b.features[i].geometry.coordinates[j + 1][0]);
+                    calc = g.distanceTo(h);
+                    profile.barDistances.push(calc);
+                    // calculate distances of specific block
+                    blockDistance += calc;
+                    profile.coordsOfDist.push([g, h]);
+                    //save elevation values and attribute types related to blocks
+                    profile.elevationVals.push(b.features[i].geometry.coordinates[j][2]);
+                    profile.blockTypeVals.push(b.features[i].properties.attributeType);
+                    profile.barAttributes.push(b.features[i].properties.attributeType);
+                }
+                profile.blockDistances.push(Array.apply(null, Array(coordLength - 1)).map(function() {
+                    return blockDistance;
+                }));
+                profile.blockTypesOnce.push(b.features[i].properties.attributeType);
+                profile.blockDistancesOnce.push(blockDistance)
             }
-            distances.blockDistances.push(Array.apply(null, Array(coordLength - 1)).map(function() {
-                return blockDistance;
-            }));
-            distances.blockTypesOnce.push(t);
+            // flatten again
+            profile.blockDistances = [].concat.apply([], profile.blockDistances);
+            this._profile.blockInfo[y] = {
+                number: featureLength,
+                blockDistancesOnce: profile.blockDistancesOnce,
+                blockDistances: profile.blockDistances,
+                blockTypesOnce: profile.blockTypesOnce,
+                blockTypes: profile.blockTypeVals
+            };
+            this._profile.coords[y] = profile.coordsOfDist;
+            this._profile.elevationVals[y] = profile.elevationVals;
+            this._profile.barDistances[y] = profile.barDistances;
+            this._profile.barAttributes[y] = profile.barAttributes;
         }
-        //save block types and
-        for (var g = 0; g < distances.blockDistances.length; g++) {
-            distances.blocks.push({
-                blockType: distances.blockTypesOnce[g],
-                distance: distances.blockDistances[g][0]
-            });
-        }
-        // flatten again
-        distances.blockDistances = [].concat.apply([], distances.blockDistances);
-        distances.blockDistancesOnce = distances.blockDistances.filter(function(elem, index) {
-            return index == distances.blockDistances.indexOf(elem);
-        });
-        distances.totaldistance = distances.distance.reduce(function(pv, cv) {
+        this._profile.totalDistance = profile.barDistances.reduce(function(pv, cv) {
             return pv + cv;
         }, 0);
-        this._distances = distances;
     },
+    //new
     /**
-     * pushes the the elevation values and the type values in lists
+     * Creates a legend list with the proportion of each type, color, and name of type
      */
-    _calculateHeightType: function() {
-        var a = this._selectedData;
-        var heights = [];
-        var values = [];
-        for (var i = 0; i < this._featureLength; i++) {
-            var coordNumber = a.features[i].geometry.coordinates.length;
-            // ignore first entry
-            for (var j = 1; j < coordNumber; j++) {
-                heights.push(a.features[i].geometry.coordinates[j][2]);
-                values.push(a.features[i].properties.attributeType);
-            }
-        }
-        this._heightvalues = heights;
-        this._values = values;
-    },
-    /**
-     * Calculates the proportion of each Type to be displayed in the legend
-     */
-    _calculateTypeRate: function() {
-        //doppelte typen zusammenrechnen --> in propfunct
-        var typesString = this._cleanList;
-        var types = typesString.map(Number);
-        var maxTypes = d3.max(types);
-        var totaldistance = this._distances.totaldistance;
-        var a = this._distances.blocks;
-        var distances = Array(maxTypes + 1).fill(0);
-        this._blockList = [];
-        for (var i = 0; i < a.length; i++) {
-            type = parseInt(a[i].blockType);
-            distances[type] = distances[type] + a[i].distance;
-        }
-        for (var j in distances) {
-            this._blockList.push({
-                type: j,
-                blockDistanceSum: distances[j],
-                proportion: Math.round(distances[j] / totaldistance * 100)
+    _createLegendList: function() {
+        var profileCount = this._data.length;
+        this._profile.legendList = {}
+        //for each profile
+        for (var i = 0; i < profileCount; i++) {
+            this._profile.legendList[i] = []
+            var dists = this._profile.blockInfo[i].blockDistancesOnce;
+            var blockTypes = this._profile.blockInfo[i].blockTypesOnce;
+            //remove duplicates
+            var typesCleaned = blockTypes.filter(function(elem, index) {
+                return index == blockTypes.indexOf(elem);
             });
-        }
-        this._blockList.sort(function(a, b) {
-            return a.blockDistanceSum - b.blockDistanceSum;
-        });
-    },
-    /**
-     * defines a list with the color, text, type and proportion of each block
-     */
-    _updateLegend: function() {
-        var a = this._values;
-        var b = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
-        var c = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].type : "None";
-        var legendList = [];
-        var text = [];
-        var color = [];
-        var self = this;
-        //remove duplicates
-        this._cleanList = a.filter(function(elem, index) {
-            return index == a.indexOf(elem);
-        });
-        //Calculate Proportion of each Block in relation to totaldistance
-        self._calculateTypeRate();
-        //create random colors for undefined types
-        if (this._mappings === undefined) {
-            this._colorList = self._createRandomColors();
-        }
-        for (var i = 0; i < this._cleanList.length; i++) {
-            //if None-Profile is selected
-            if (this._selectedOption == -1) {
-                legendList[i] = {
-                    text: "",
-                    color: "None"
-                };
-            } else {
-                for (var j = 0; j < self._blockList.length; j++) {
-                    if (self._blockList[j].type == this._cleanList[i]) {
-                        legendList[i] = {
-                            text: (this._mappings === undefined) ? this._colorList[this._cleanList[i]].text : this._mappings[c][this._cleanList[i]].text,
-                            color: (this._mappings === undefined) ? this._colorList[this._cleanList[i]].color : this._mappings[c][this._cleanList[i]].color,
-                            type: this._cleanList[i],
-                            proportion: self._blockList[j].proportion
-                        };
-                    }
+            //parse string to int
+            var types = typesCleaned.map(Number);
+            //find max of types
+            var maxTypes = d3.max(types);
+            //create Array to be filled with added distances
+            var distances = Array(maxTypes + 1).fill(0);
+            //create random colours if not defined by user
+            if (this._mappings === undefined) {
+                this._profile.colorList = this._randomColors(typesCleaned);
+            }
+            for (var j = 0; j < dists.length; j++) {
+                var value = parseInt(blockTypes[j]);
+                distances[value] = distances[value] + dists[j];
+            }
+            for (var k in distances) {
+                if (distances[k] != 0) {
+                    this._profile.legendList[i].push({
+                        type: k,
+                        blockDistanceSum: distances[k],
+                        proportion: Math.round(distances[k] / this._profile.totalDistance * 100),
+                        text: (this._mappings === undefined) ? this._profile.colorList[k].text : this._mappings[this._profile.ids[i].text][k].text,
+                        color: (this._mappings === undefined) ? this._profile.colorList[k].color : this._mappings[this._profile.ids[i].text][k].color,
+                    });
                 }
             }
+            this._profile.legendList[i].sort(function(a, b) {
+                return b.blockDistanceSum - a.blockDistanceSum;
+            });
         }
-        legendList.sort(function(a, b) {
-            return b.proportion - a.proportion;
-        });
-        this._dynamicLegend = legendList;
+        this._profile.legendList[profileCount] = {
+            text: "",
+            color: "None"
+        };
     },
     /**
      * creates a range of different random colors for highlighting the bar (when no colors are predefined)
      */
-    _createRandomColors: function() {
-        var values = this._cleanList;
+    _randomColors: function(types) {
+        var values = types;
         var colorList = [];
-        for (var i = 0; i < this._cleanList.length; i++) {
+        for (var i = 0; i < values.length; i++) {
             colorList[values[i]] = {
                 color: chroma.random(),
                 text: values[i]
@@ -313,62 +252,79 @@ L.Control.Heightgraph = L.Control.extend({
         }
         return colorList;
     },
+    //new
     /**
-     * creates list with four x and y coordinates for svg-path (Polygon) and the related type,text, blockDistance, color, LatLng
+     * Creates a list with four x,y coords and other important infos for the bars drawn with d3
      */
-    _updateBarData: function() {
-        //var b = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].text : "None";
-        var c = (this._selectedOption != -1) ? this._allProfileTypes[this._selectedOption].type : "None";
-        var count = this._heightvalues.length;
-        var color, text, list = [];
-        var adddist = [0];
-        this._maxHeight = d3.max(this._heightvalues);
-        this._minHeight = d3.min(this._heightvalues);
-        for (var i = 0; i < count; i++) {
-            adddist[i + 1] = adddist[i] + this._distances.distance[i];
-            if (this._selectedOption == -1) {
-                text = "";
-                color = "lightgrey";
-            } else {
-                text = this._mappings === undefined ? this._colorList[this._values[i]].text : this._mappings[c][this._values[i]].text;
-                color = this._mappings === undefined ? this._colorList[this._values[i]].color : this._mappings[c][this._values[i]].color;
+    _createBarData: function() {
+        this._profile.maxElevation = {};
+        this._profile.minElevation = {};
+        //starts at 0
+        var x = [0];
+        var list = {};
+        //for each profile
+        for (var i = 0; i < this._data.length; i++) {
+            list[i] = [];
+            //highest and lowest elevation Value
+            this._profile.maxElevation[i] = d3.max(this._profile.elevationVals[i]);
+            this._profile.minElevation[i] = d3.min(this._profile.elevationVals[i]);
+            for (var j = 0; j < this._profile.elevationVals[i].length; j++) {
+                //text and colour for each bar
+                var text = this._mappings === undefined ? this._profile.colorList[i].text : this._mappings[this._profile.ids[i].text][this._profile.barAttributes[i][j]].text;
+                var color = this._mappings === undefined ? this._profile.colorList[i].color : this._mappings[this._profile.ids[i].text][this._profile.barAttributes[i][j]].color;
+                //added distance for each bar
+                x[j + 1] = x[j] + this._profile.barDistances[i][j];
+                list[i].push({
+                    coords: [{
+                        x: x[j],
+                        y: this._profile.elevationVals[i][j]
+                    }, {
+                        x: x[(j + 1 == this._profile.elevationVals[i].length) ? j : j + 1],
+                        y: this._profile.elevationVals[i][(j + 1 == this._profile.elevationVals[i].length) ? j : j + 1]
+                    }, {
+                        x: x[(j + 1 == this._profile.elevationVals[i].length) ? j : j + 1],
+                        y: (this._profile.minElevation[i] - (this._profile.maxElevation[i] / 10))
+                    }, {
+                        x: x[j],
+                        y: (this._profile.minElevation[i] - (this._profile.maxElevation[i] / 10))
+                    }],
+                    coords_maxElevation: [{
+                        x: x[j],
+                        y: this._profile.maxElevation[i]
+                    }, {
+                        x: x[(j + 1 == this._profile.elevationVals[i].length) ? j : j + 1],
+                        y: this._profile.maxElevation[i]
+                    }, {
+                        x: x[(j + 1 == this._profile.elevationVals[i].length) ? j : j + 1],
+                        y: (this._profile.minElevation[i] - this._profile.maxElevation[i] / 10)
+                    }, {
+                        x: x[j],
+                        y: (this._profile.minElevation[i] - this._profile.maxElevation[i] / 10)
+                    }],
+                    type: this._profile.barAttributes[i][j],
+                    text: text,
+                    blockdist: this._profile.blockInfo[i].blockDistances[j],
+                    color: color,
+                    LatLng: this._profile.coords[i][j]
+                })
             }
-            list.push({
-                coords: [{
-                    x: adddist[i],
-                    y: this._heightvalues[i]
-                }, {
-                    x: adddist[(i + 1 == count) ? i : i + 1],
-                    y: this._heightvalues[(i + 1 == count) ? i : i + 1]
-                }, {
-                    x: adddist[(i + 1 == count) ? i : i + 1],
-                    y: (this._minHeight - (this._maxHeight / 10))
-                }, {
-                    x: adddist[i],
-                    y: (this._minHeight - (this._maxHeight / 10))
-                }],
-                coords_maxheight: [{
-                    x: adddist[i],
-                    y: this._maxHeight
-                }, {
-                    x: adddist[(i + 1 == count) ? i : i + 1],
-                    y: this._maxHeight
-                }, {
-                    x: adddist[(i + 1 == count) ? i : i + 1],
-                    y: (this._minHeight - this._maxHeight / 10)
-                }, {
-                    x: adddist[i],
-                    y: (this._minHeight - this._maxHeight / 10)
-                }],
-                type: this._values[i],
-                text: text,
-                blockdist: this._distances.blockDistances[i],
-                color: color,
-                LatLng: this._distances.coordsOfDist[i]
-            });
         }
-        this._polygonData = list;
+        var none = list[0].slice();
+        for (l in none) {
+            none[l] = {
+                text: "",
+                color: "lightgrey",
+                type: "",
+                blockdist: none[l].blockdist,
+                LatLng: none[l].LatLng,
+                coords_maxElevation: none[l].coords_maxElevation,
+                coords: none[l].coords
+            }
+        }
+        list[this._data.length] = none;
+        this._profile.barData = list;
     },
+    //
     /**
      * Creates a marker on the map while hovering
      * @param {FeatureCollection} lat lon: actual coordinates of the route
@@ -397,16 +353,17 @@ L.Control.Heightgraph = L.Control.extend({
      * Creates the elevation profile with SVG
      */
     _createBarChart: function() {
-        var polygonData = this._polygonData; // this._polygonData ist in createBorderTopLine undefined... warum?
-        var dynamicLegend = this._dynamicLegend; // this._dynamicLegend ist in createLegend undefined... warum?
+        var y = this._selectedOption;
+        var polygonData = this._profile.barData[y]; // this._polygonData ist in createBorderTopLine undefined... warum?
+        var dynamicLegend = this._profile.legendList[y]; // this._dynamicLegend ist in createLegend undefined... warum?
         //SVG area
         var margin = this._margins,
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;
         //Max and Min of heightvalues of graph
-        var min = this._minHeight;
-        var max = this._maxHeight;
-        var yHeightmin = this._yHeightmin = this._minHeight - (this._maxHeight / 10);
+        var min = this._profile.minElevation[y];
+        var max = this._profile.maxElevation[y];
+        var yElevationMin = this._profile.yElevationMin = this._profile.minElevation[y] - (this._profile.maxElevation[y] / 10);
         var svg;
         var self = this;
         self._createScales();
@@ -429,7 +386,6 @@ L.Control.Heightgraph = L.Control.extend({
         this._svg.append('g').attr('class', 'y axis').attr("transform", "translate(" + width + " ,0)").call(this._yEndAxis);
         // scale data (polygon-path)
         var polygon = d3.svg.line().x(function(d) {
-            //if (maxheight) return 
             var x = self._x;
             return x(d.x);
         }).y(function(d) {
@@ -437,17 +393,18 @@ L.Control.Heightgraph = L.Control.extend({
             return y(d.y);
         });
         // bar chart as path
-        this._svg.selectAll('hpath').data(this._polygonData).enter().append('path').attr('class', 'bars').attr('d', function(d) {
+        console.log(y, this._profile.barData[y]);
+        this._svg.selectAll('hpath').data(this._profile.barData[y]).enter().append('path').attr('class', 'bars').attr('d', function(d) {
             return polygon(d.coords);
         }).attr('fill', function(d) {
             return (d.color);
         });
         // bar chart invisible for hover as path
-        this._svg.selectAll('hpath').data(this._polygonData).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
-            return polygon(d.coords_maxheight);
+        this._svg.selectAll('hpath').data(this._profile.barData[y]).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
+            return polygon(d.coords_maxElevation);
         }).on('mouseover', self._handleMouseOver);
         this._svg.on('mouseleave', self._handleMouseLeave);
-        self._createBorderTopLine(polygonData, svg);
+        self._createBorderTopLine(this._profile.barData[y], svg);
         self._createSelectionBox(svg);
         //self._createLegend(svg);
         self._createFocus();
@@ -455,7 +412,7 @@ L.Control.Heightgraph = L.Control.extend({
     // create focus Line and focus InfoBox while hovering
     _createFocus: function() {
         var self = this;
-        var boxPosition = self._yHeightmin - 88;
+        var boxPosition = self._profile.yElevationMin - 88;
         var textPosition = boxPosition + 27;
         var textDistance = 35;
         this._focusWidth = 150;
@@ -470,7 +427,7 @@ L.Control.Heightgraph = L.Control.extend({
             this._TypeTspan = self._focusType.append('tspan').attr("class", "tspan");
         }
         self._focusLineGroup = self._svg.append("g").attr("class", "focusLine");
-        self._focusLine = self._focusLineGroup.append("line").attr("y1", 0).attr("y2", self._y(this._minHeight - (this._maxHeight / 10)));
+        self._focusLine = self._focusLineGroup.append("line").attr("y1", 0).attr("y2", self._y(self._profile.minElevation[self._selectedOption] - (self._profile.maxElevation[self._selectedOption] / 10)));
         this._DistanceTspan = self._focusDistance.append('tspan').attr("class", "tspan");
         this._HeightTspan = self._focusHeight.append('tspan').attr("class", "tspan");
     },
@@ -479,12 +436,12 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _createScales: function() {
         var x, y, xAxis, yAxis;
-        var yHeightmin = this._yHeightmin;
-        var max = this._maxHeight;
+        var yHeightmin = this._profile.yElevationMin;
+        var max = this._profile.maxElevation[this._selectedOption];
         var margin = this._margins,
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;
-        this._x = d3.scale.linear().range([0, width]).domain([-80, distances.totaldistance]);
+        this._x = d3.scale.linear().range([0, width]).domain([-80, this._profile.totalDistance]);
         this._y = d3.scale.linear().range([height, 0]).domain([yHeightmin - 2, max]);
         this._yEnd = d3.scale.linear().range([height, 0]).domain([yHeightmin, max]);
         this._xAxis = d3.svg.axis().scale(this._x).orient("bottom").tickFormat(function(d) {
@@ -535,14 +492,15 @@ L.Control.Heightgraph = L.Control.extend({
             if (d.id == "leftArrowSelection") arrowLeft();
         });
         var self = this;
-        self._length = this._allProfileTypes.length;
-        var id = this._selectedOption == -1 ? this._allProfileTypes.length - 1 : this._selectedOption;
+        self._length = this._data.length;
+        var id = this._selectedOption;
         chooseSelection(id);
 
         function arrowRight() {
             var counter = self._selectedOption += 1;
-            if (counter == self._allProfileTypes.length - 1) {
-                self._selectedOption = -1;
+            if (counter == self._data.length + 1) {
+                counter = 0
+                self._selectedOption = 0;
             }
             self._selection(self._selectedOption);
             chooseSelection(counter);
@@ -551,19 +509,15 @@ L.Control.Heightgraph = L.Control.extend({
         function arrowLeft() {
             var counter = self._selectedOption -= 1;
             if (counter == -1) {
-                counter = self._allProfileTypes.length - 1;
-                self._selectedOption = -1;
-            }
-            if (counter < -1) {
-                counter = self._allProfileTypes.length - 2;
-                self._selectedOption = self._allProfileTypes.length - 2;
+                counter = self._data.length;
+                self._selectedOption = self._data.length;
             }
             chooseSelection(counter);
             self._selection(self._selectedOption);
         }
 
         function chooseSelection(id) {
-            var type = self._allProfileTypes[id];
+            var type = self._profile.ids[id] //allProfileTypes[id];
             var data = [{
                 "selection": type.text
             }];
@@ -589,7 +543,7 @@ L.Control.Heightgraph = L.Control.extend({
         legendHover = svg.selectAll('.legend-hover').data(leg).enter().append('g').attr('class', 'legend-hover');
         var backgroundbox = svg.selectAll('.legend-hover').append('rect').attr('x', 450).attr('y', 0).attr('height', 150).attr('width', 170).attr('class', 'legend-box');
         //svg.selectAll('.legend-hover').append('text').text('hallo').attr('x', 450).attr('y', 20).attr('fill','white').attr('class','legend-newtext');
-        var legend = svg.selectAll('.hlegend-hover').data(this._dynamicLegend).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
+        var legend = svg.selectAll('.hlegend-hover').data(this._profile.legendList[this._selectedOption]).enter().append('g').attr('class', 'legend').attr('transform', function(d, i) {
             var height = legendRectSize + legendSpacing;
             var offset = height * 2;
             var horz = legendRectSize - 15;
