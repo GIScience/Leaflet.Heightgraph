@@ -326,6 +326,12 @@ L.Control.Heightgraph = L.Control.extend({
         this._profile.maxElevation[this._data.length] = d3.max(this._profile.elevationVals[0]);
         this._profile.minElevation[this._data.length] = d3.min(this._profile.elevationVals[0]);
         this._profile.barData = list;
+        delete this._profile.blockInfo;
+        delete this._profile.barAttributes;
+        delete this._profile.elevationVals;
+        delete this._profile.barDistances;
+        delete this._profile.coords;
+        console.log(this._profile)
     },
     //
     /**
@@ -545,6 +551,9 @@ L.Control.Heightgraph = L.Control.extend({
         var legendSpacing = 7;
         var self = this;
         legendHover = svg.selectAll('.legend-hover').data(leg).enter().append('g').attr('class', 'legend-hover');
+        if (self._selectedOption == self._data.length) {
+            d3.selectAll('.legend-hover')[0][0].style.display = "none";
+        }
         var backgroundbox = svg.selectAll('.legend-hover').append('rect').attr('x', 450).attr('y', 0).attr('height', 150).attr('width', 170).attr('class', 'legend-box');
         //svg.selectAll('.legend-hover').append('text').text('hallo').attr('x', 450).attr('y', 20).attr('fill','white').attr('class','legend-newtext');
         var legend = svg.selectAll('.hlegend-hover').data(this._profile.legendList[this._selectedOption]).enter().append('g').attr('class', 'legend').style("display", "none").attr('transform', function(d, i) {
