@@ -322,6 +322,8 @@ L.Control.Heightgraph = L.Control.extend({
             }
         }
         list[this._data.length] = none;
+        this._profile.maxElevation[this._data.length] = d3.max(this._profile.elevationVals[0]);
+        this._profile.minElevation[this._data.length] = d3.min(this._profile.elevationVals[0]);
         this._profile.barData = list;
     },
     //
@@ -393,7 +395,6 @@ L.Control.Heightgraph = L.Control.extend({
             return y(d.y);
         });
         // bar chart as path
-        console.log(y, this._profile.barData[y]);
         this._svg.selectAll('hpath').data(this._profile.barData[y]).enter().append('path').attr('class', 'bars').attr('d', function(d) {
             return polygon(d.coords);
         }).attr('fill', function(d) {
