@@ -19,7 +19,7 @@ Input data has to be of type [GeoJSON-Format](http://geojson.org/). This may con
 
 ### Install with Bower
 
-`` bower install leaflet.elevation ``
+`` bower install leaflet.heightgraph ``
 
 [Demo](https://giscience.github.io/Leaflet.Heightgraph)
 
