@@ -17,6 +17,10 @@ Supported Browsers:
 ### Supported data:
 Input data has to be of type [GeoJSON-Format](http://geojson.org/). This may consist of feature collections corresponding to a certain attribute which could - as an example - be surface or gradient information. Each `FeatureCollection` comprises to a certain `attribute` in its `properties` (e.g. `'summary': 'steepness'`) and has a list of variable length of `LineString` features with coordinates (including height values) and the `attributeType` corresponding to the certain type of attribute within this segment (in this case an index of steepness) declared in its `properties`. 
 
+### Install with Bower
+
+`` bower install leaflet.elevation ``
+
 [Demo](https://giscience.github.io/Leaflet.Heightgraph)
 
 ```javascript
