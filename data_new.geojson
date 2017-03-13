@@ -1,4 +1,4 @@
-[{
+var geojson= [{
     "type": "FeatureCollection",
     "features": [{
         "type": "Feature",
@@ -1220,4 +1220,4 @@
             "lon": "8.706321716308596"
         }]
     }
-}]
+}];
