@@ -19,6 +19,10 @@ Input data has to be of type [GeoJSON-Format](http://geojson.org/). This may con
 
 [Demo](https://giscience.github.io/Leaflet.Heightgraph)
 
+### Install with Bower
+
+`` bower install leaflet.heightgraph ``
+
 ```javascript
 var FeatureCollections = [{
     "type": "FeatureCollection",

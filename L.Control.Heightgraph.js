@@ -51,6 +51,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._createBarData();
         this._createBarChart();
         this._createLegend(this._svg);
+        console.log(this._profile)
     },
     _initToggle: function() {
         if (!L.Browser.touch) {
@@ -548,7 +549,6 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _createBorderTopLine: function(polygonData, svg) {
         var self = this;
-        polygonData.push(polygonData[polygonData.length-1])
         var borderTopLine = d3.line().x(function(d) {
             var x = self._x;
             return x(d.coords[0].x);
