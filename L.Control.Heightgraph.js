@@ -320,9 +320,12 @@ L.Control.Heightgraph = L.Control.extend({
         this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY);
         this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").attr('fill', color);
         this._mouseHeightFocusLabel.selectAll("*").remove();
-        this._mouseHeightFocusLabel.append("rect").attr("x", layerpoint.x + 3).attr("y", normalizedY).attr("width", 75).attr("height", 30);
+        this._mouseHeightFocusLabel.append("rect").attr("x", layerpoint.x + 3).attr("y", normalizedY).attr("class",'bBox');
         this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan");
         this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 5).attr("y", normalizedY + 24).text(text).attr("class", "tspan");
+        var maxWidth = d3.max([this._mouseHeightFocusLabel.nodes()[0].children[1].getBoundingClientRect().width, this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect().width]);
+        var maxHeight = this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect().width ==0? 12+ 6: 2*12 + 6;
+        d3.selectAll('.bBox').attr("width", maxWidth +10).attr("height", maxHeight);
     },
     /**
      * Creates the elevation profile with SVG
@@ -385,15 +388,22 @@ L.Control.Heightgraph = L.Control.extend({
         var textDistance = 15;
         this._focusWidth = 150;
         self._focus = self._svg.append("g").attr("class", "focus");
-        self._focus.append("rect").attr("x", 3).attr("y", -self._y(boxPosition)).attr("width", this._focusWidth).attr("height", 65);
+        //background box
+        self._focus.append("rect").attr("x", 3).attr("y", -self._y(boxPosition)).attr("width", this._focusWidth).attr("display","none");
+        // text line 1
         self._focusDistance = self._focus.append("text").attr("x", 7).attr("y", -self._y(boxPosition) + 1 * textDistance).attr("id", "distance").text('Distance:');
+        //text line 2
         self._focusHeight = self._focus.append("text").attr("x", 7).attr("y", -self._y(boxPosition) + 2 * textDistance).attr("id", "height").text('Elevation:');
         if (self._selectedOption < self._data.length) {
+            // text line 3
             self._focusBlockDistance = self._focus.append("text").attr("x", 7).attr("y", -self._y(boxPosition) + 3 * textDistance).attr("id", "blockdistance").text('Segment length:');
+            //text line 4
             self._focusType = self._focus.append("text").attr("x", 7).attr("y", -self._y(boxPosition) + 4 * textDistance).attr("id", "type").text('Type:');
             this._BlockDistanceTspan = self._focusBlockDistance.append('tspan').attr("class", "tspan");
             this._TypeTspan = self._focusType.append('tspan').attr("class", "tspan");
         }
+        var height = self._dynamicBoxSize('.focus text')[0];
+        d3.selectAll('.focus rect').attr("height", height * textDistance + (textDistance/2)).attr("display","block");
         self._focusLineGroup = self._svg.append("g").attr("class", "focusLine");
         self._focusLine = self._focusLineGroup.append("line").attr("y1", 0).attr("y2", self._y(self._profile.yElevationMin));
         this._DistanceTspan = self._focusDistance.append('tspan').attr("class", "tspan");
@@ -532,27 +542,29 @@ L.Control.Heightgraph = L.Control.extend({
         legendHover.append('text').attr('class', 'legend-menu').attr("class", "no-select").attr('x', width - 50).attr('y', height + 40).text(function(d, i) {
             return d.text;
         }).on('mouseover', function() {
-            d3.selection.prototype.nodes = function() {
-                var nodes = new Array(this.size()),
-                    i = -1;
-                this.each(function() {
-                    nodes[++i] = this;
-                });
-                return nodes;
-            }
-            var cnt = d3.selectAll('.legend').nodes().length;
-            var widths = [];
-            for (var i = 0; i < cnt; i++) {
-                widths.push(d3.selectAll('.legend').nodes()[i].getBoundingClientRect().width);
-            }
-            maxWidth = d3.max(widths);
-            var backgroundbox = svg.selectAll('.legend-hover').append('rect').attr('x', 485).attr('y', 0).attr('height', 13.6 * (cnt + 1)).attr('width', maxWidth + legendRectSize + legendSpacing).attr('class', 'legend-box');
+            var dyn =self._dynamicBoxSize('.legend');
+            var backgroundbox = svg.selectAll('.legend-hover').append('rect').attr('x', 485).attr('y', 0).attr('height', 13.6 * (dyn[0]) + (10)).attr('width', dyn[1]+ legendRectSize + legendSpacing).attr('class', 'legend-box');
             d3.select('.legend-box').style("display", "block").style("stroke", "#888");
             d3.selectAll('.legend').style("display", "block");
         }).on('mouseleave', function() {
             d3.select('.legend-box').style("display", "none");
             d3.selectAll('.legend').style("display", "none");
         });
+    },
+    /**
+     * calculates the margins of boxes 
+     * @param {String} className: name of the class
+     * @return {array} borders: number of text lines, widest range of text
+     */
+    _dynamicBoxSize: function(className){
+        var cnt = d3.selectAll(className).nodes().length;
+        var widths = [];
+        for (var i = 0; i < cnt; i++) {
+            widths.push(d3.selectAll(className).nodes()[i].getBoundingClientRect().width);
+        }
+        var maxWidth = d3.max(widths);
+        var borders=[cnt, maxWidth]
+        return (borders)
     },
     /**
      * create top border line on graph 
@@ -595,19 +607,15 @@ L.Control.Heightgraph = L.Control.extend({
         var LatLngCoords = d.LatLng;
         var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
         self._showMarker(segmentCenter, y0, color, text);
-        var xPositionBox = self._x(x0) - (self._focusWidth + 5);
-        var totalWidth = self._width - self._margin.left - self._margin.right;
-        if (self._x(x0) + self._focusWidth < totalWidth) {
-            self._focus.style("display", "initial").attr("transform", "translate(" + self._x(x0) + "," + self._y(self._profile.yElevationMin) + ")");
-        }
-        if (self._x(x0) + self._focusWidth > totalWidth) {
-            self._focus.style("display", "initial").attr("transform", "translate(" + xPositionBox + "," + self._y(self._profile.yElevationMin
-                ) + ")");
-        }
+
         self._DistanceTspan.text(" " + Math.round((x0 / 1000) * 100) / 100 + ' km');
         self._HeightTspan.text(" " + y0.toFixed(0) + ' m');
         if (d.text.length > 0) self._BlockDistanceTspan.text(" " + (d.blockdist / 1000).toFixed(2) + ' km');
         self._TypeTspan.text(" " + d.text);
+        var boxWidth = d3.max([self._DistanceTspan.nodes()[0].getBoundingClientRect().width,
+            self._HeightTspan.nodes()[0].getBoundingClientRect().width,
+            self._BlockDistanceTspan.nodes()[0].getBoundingClientRect().width,
+            self._TypeTspan.nodes()[0].getBoundingClientRect().width]);
         self._focusLine.style("display", "block").attr('x1', self._x(x0)).attr('x2', self._x(x0));
         if (self._mouseHeightFocus) {
             self._mouseHeightFocus.style("display", 'block');
@@ -615,6 +623,16 @@ L.Control.Heightgraph = L.Control.extend({
             self._pointG.style("display", 'block');
             self._focus.style('display', 'block');
             self._focusLine.style('display', 'block');
+            d3.selectAll('.focus rect').attr("width", boxWidth+10);
+        }
+        var xPositionBox = self._x(x0) - (boxWidth + 15);
+        var totalWidth = self._width - self._margin.left - self._margin.right;
+        if (self._x(x0) + self._focusWidth < totalWidth) {
+            self._focus.style("display", "initial").attr("transform", "translate(" + self._x(x0) + "," + self._y(self._profile.yElevationMin) + ")");
+        }
+        if (self._x(x0) + self._focusWidth > totalWidth) {
+            self._focus.style("display", "initial").attr("transform", "translate(" + xPositionBox + "," + self._y(self._profile.yElevationMin
+                ) + ")");
         }
     },
     /**
