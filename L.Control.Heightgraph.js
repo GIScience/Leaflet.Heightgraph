@@ -27,9 +27,46 @@ L.Control.Heightgraph = L.Control.extend({
         //var dynamicLegend = this._profile.legendList[y]; // this._dynamicLegend ist in createLegend undefined... warum?
         this._svgWidth = this._width - this._margin.left - this._margin.right;
         this._svgHeight = this._height - this._margin.top - this._margin.bottom;
-        var svg = this._svg = d3.select(this._container).append("svg").attr("class", "background").attr("width", this._svgWidth + this._margin.left + this._margin.right).attr("height", this._svgHeight + this._margin.top + this._margin.bottom).append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
+        var svg = this._svg = d3.select(this._container)
+            .append("svg")
+            .attr("class", "background")
+            .attr("width", this._svgWidth + this._margin.left + this._margin.right)
+            .attr("height", this._svgHeight + this._margin.top + this._margin.bottom)
+            .append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
+        
+    
         return container;
     },
+     /*
+     * Handles the moueseover the chart and displays distance and altitude level
+     */
+    _mousemoveHandler: function(d, i, ctx) {
+        var coords = d3.mouse(this._svg.node());
+        var blocks = this._profile.blocks[this._selectedOption].geometries;
+        this._blocksFlattended = [].concat.apply([], blocks);
+        var item = this._blocksFlattended[this._findItemForX(coords[0])];
+        console.log(item)
+       
+            // alt = item.altitude,
+            // dist = item.dist,
+            // ll = item.latlng,
+            // numY = opts.hoverNumber.formatter(alt, opts.hoverNumber.decimalsY),
+            // numX = opts.hoverNumber.formatter(dist, opts.hoverNumber.decimalsX);
+
+
+
+    },
+    /*
+     * Finds a data entry for a given x-coordinate of the diagram
+     */
+    _findItemForX: function(x) {
+        var bisect = d3.bisector(function(d) {
+            return d.position;
+        }).left;
+        var xinvert = this._x.invert(x);
+        return bisect(this._blocksFlattended, xinvert);
+    },
+
     onRemove: function(map) {
         this._container = null;
         this._svg = undefined;
@@ -54,6 +91,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._computeStats();
         this._appendScales();
         this._appendGrid();
+        this._appendBackground();
         this._createChart(this._selectedOption);
         //this._createLegend(this._svg);
     },
@@ -105,8 +143,8 @@ L.Control.Heightgraph = L.Control.extend({
         this._profile = {};
         this._profile.coordinates = [];
         this._profile.elevations = [];
-        this._profile.ptDistances = [];
-        this._profile.ptDistances.push(0);
+        this._profile.cumDistances = [];
+        this._profile.cumDistances.push(0);
         this._profile.blocks = [];
         var data = this._data;
         var cumDistance = 0;
@@ -118,18 +156,14 @@ L.Control.Heightgraph = L.Control.extend({
             };
             this._profile.blocks[y].distances = [];
             this._profile.blocks[y].attributes = [];
-            this._profile.blocks[y].indices = [];
             this._profile.blocks[y].geometries = [];
             var cnt = 0;
             for (var i = 0; i < data[y].features.length; i++) {
                 // data is redundant in every elemtent of data which is why we collect it once
-                var startIdx, endIdx, altitude, ptA, ptB, ptDistance, blockDistance = 0,
+                var altitude, ptA, ptB, ptDistance,
                     geometry = [];
                 var coordsLength = data[y].features[i].geometry.coordinates.length;
                 for (var j = 0; j < coordsLength; j++) {
-                    if (j === 0) {
-                        startIdx = cnt;
-                    }
                     ptA = new L.LatLng(data[y].features[i].geometry.coordinates[j][1], data[y].features[i].geometry.coordinates[j][0]);
                     altitude = data[y].features[i].geometry.coordinates[j][2];
                     // add elevations, coordinates and point distances only once
@@ -140,11 +174,9 @@ L.Control.Heightgraph = L.Control.extend({
                             ptDistance = ptA.distanceTo(ptB) / 1000;
                             // calculate distances of specific block
                             cumDistance += ptDistance;
-                            blockDistance += ptDistance;
                             this._profile.elevations.push(altitude);
                             this._profile.coordinates.push(ptA);
-                            this._profile.ptDistances.push(cumDistance);
-                        
+                            this._profile.cumDistances.push(cumDistance);
                         }
                         cnt += 1;
                     } else if (j == coordsLength - 1 && i == data[y].features.length - 1) {
@@ -154,13 +186,12 @@ L.Control.Heightgraph = L.Control.extend({
                         }
                         cnt += 1;
                     }
-                    // save the position which corresponds to the distance along
-                    // the route. 
+                    // save the position which corresponds to the distance along the route. 
                     var position;
                     if (j === 0 && i > 0) {
-                        position = this._profile.ptDistances[cnt - 2];
+                        position = this._profile.cumDistances[cnt - 2];
                     } else {
-                        position = this._profile.ptDistances[cnt - 1];
+                        position = this._profile.cumDistances[cnt - 1];
                     }
                     geometry.push({
                         altitude: altitude,
@@ -178,7 +209,6 @@ L.Control.Heightgraph = L.Control.extend({
                     color: this._mappings[data[y].properties.summary][attributeType].color
                 });
                 this._profile.blocks[y].distances.push(cumDistance);
-                this._profile.blocks[y].indices.push([startIdx, cnt]);
                 this._profile.blocks[y].geometries.push(geometry);
             }
         }
@@ -251,13 +281,11 @@ L.Control.Heightgraph = L.Control.extend({
      * Creates a list with four x,y coords and other important infos for the bars drawn with d3
      */
     _computeStats: function() {
-        // highest and lowest elevation value for creating an invisible graph of maximum height 
-        // for providing the info box in the whole diagramm while hovering
         var max = this._profile.maxElevation = d3.max(this._profile.elevations);
         var min = this._profile.minElevation = d3.min(this._profile.elevations);
         var quantile = this._profile.elevationQuantile = d3.quantile(this._profile.elevations, 0.75);
         // adapted min and max elevation values of graph 
-        var yElevationMin = this._profile.yElevationMin = (quantile < (min + min / 10)) ? (min - max / 5 < 0 ? 0 : min - max / 5) : min - (max / 10);
+        this._profile.yElevationMin = (quantile < (min + min / 10)) ? (min - max / 5 < 0 ? 0 : min - max / 5) : min - (max / 10);
         this._profile.yElevationMax = quantile > (max - max / 10) ? max + (max / 3) : max;
         console.log(this._profile);
     },
@@ -299,13 +327,6 @@ L.Control.Heightgraph = L.Control.extend({
             console.log(i)
             this._appendAreas(areaBlocks[i], idx, i);
         }
-       
-        // // bar chart as path
-        // this._svg.selectAll('hpath').data(this._profile.barData[y]).enter().append('path').attr('class', 'bars').attr('d', function(d, i) {
-        //     return polygon(d.coords);
-        // }).attr('fill', function(d) {
-        //     return (d.color);
-        // });
         // // bar chart invisible for hover as path
         // this._svg.selectAll('hpath').data(this._profile.barData[y]).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
         //     return polygon(d.coords_maxElevation);
@@ -359,7 +380,7 @@ L.Control.Heightgraph = L.Control.extend({
         console.log(this._x.domain(), this._y.domain())
         //this._yEnd = d3.scaleLinear().range([height, 0]).domain([yHeightmin, max]);
         this._xAxis = d3.axisBottom().scale(this._x).tickFormat(function(d) {
-            return d / 1000 + " km";
+            return d + " km";
             // var prefix = d3.formatPrefix(d);
             // return prefix.scale(d) //+ prefix.symbol;
         });
@@ -367,6 +388,15 @@ L.Control.Heightgraph = L.Control.extend({
             return d + " m";
         });
         this._yEndAxis = d3.axisRight().scale(this._yEnd).ticks(0);
+    },
+    _appendBackground: function() {
+        var background = this._background = d3.select(this._container).select("svg").select("g").append("rect")
+            .attr("width", this._svgWidth)
+            .attr("height", this._svgHeight)
+            .style("fill", "none")
+            .style("stroke", "none")
+            .style("pointer-events", "all")
+            .on("mousemove.focus", this._mousemoveHandler.bind(this));
     },
     _appendGrid: function() {
         // append x grid
@@ -390,10 +420,7 @@ L.Control.Heightgraph = L.Control.extend({
             return self._y(d.altitude);
         }).curve(d3.curveLinear);
         this._areapath = this._svg.append("path").attr("class", "area");
-        this._areapath.datum(block)
-        .attr("d", this._area)
-        .attr("stroke", c)
-        .style("fill", c);
+        this._areapath.datum(block).attr("d", this._area).attr("stroke", c).style("fill", c).style("pointer-events", "none");
     },
     // gridlines in x axis function
     _make_x_axis: function() {
