@@ -27,46 +27,9 @@ L.Control.Heightgraph = L.Control.extend({
         //var dynamicLegend = this._profile.legendList[y]; // this._dynamicLegend ist in createLegend undefined... warum?
         this._svgWidth = this._width - this._margin.left - this._margin.right;
         this._svgHeight = this._height - this._margin.top - this._margin.bottom;
-        var svg = this._svg = d3.select(this._container)
-            .append("svg")
-            .attr("class", "background")
-            .attr("width", this._svgWidth + this._margin.left + this._margin.right)
-            .attr("height", this._svgHeight + this._margin.top + this._margin.bottom)
-            .append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
-        
-    
+        var svg = this._svg = d3.select(this._container).append("svg").attr("class", "background").attr("width", this._svgWidth + this._margin.left + this._margin.right).attr("height", this._svgHeight + this._margin.top + this._margin.bottom).append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
         return container;
     },
-     /*
-     * Handles the moueseover the chart and displays distance and altitude level
-     */
-    _mousemoveHandler: function(d, i, ctx) {
-        var coords = d3.mouse(this._svg.node());
-        var blocks = this._profile.blocks[this._selectedOption].geometries;
-        this._blocksFlattended = [].concat.apply([], blocks);
-        var item = this._blocksFlattended[this._findItemForX(coords[0])];
-        console.log(item)
-       
-            // alt = item.altitude,
-            // dist = item.dist,
-            // ll = item.latlng,
-            // numY = opts.hoverNumber.formatter(alt, opts.hoverNumber.decimalsY),
-            // numX = opts.hoverNumber.formatter(dist, opts.hoverNumber.decimalsX);
-
-
-
-    },
-    /*
-     * Finds a data entry for a given x-coordinate of the diagram
-     */
-    _findItemForX: function(x) {
-        var bisect = d3.bisector(function(d) {
-            return d.position;
-        }).left;
-        var xinvert = this._x.invert(x);
-        return bisect(this._blocksFlattended, xinvert);
-    },
-
     onRemove: function(map) {
         this._container = null;
         this._svg = undefined;
@@ -91,8 +54,11 @@ L.Control.Heightgraph = L.Control.extend({
         this._computeStats();
         this._appendScales();
         this._appendGrid();
-        this._appendBackground();
         this._createChart(this._selectedOption);
+        this._appendBackground();
+        // self._createBorderTopLine(this._profile.barData[y], svg);
+        this._createSelectionBox();
+        this._createFocus();
         //this._createLegend(this._svg);
     },
     _initToggle: function() {
@@ -112,9 +78,9 @@ L.Control.Heightgraph = L.Control.extend({
     _expand: function() {
         for (var i = 0; i < this._container.children.length; i++) {
             if (!this._showState) {
-                (i == 0) ? this._container.children[i].style.display = "none": this._container.children[i].style.display = "block";
+                (i === 0) ? this._container.children[i].style.display = "none": this._container.children[i].style.display = "block";
             } else {
-                (i == 0) ? this._container.children[i].style.display = "block": this._container.children[i].style.display = "none";
+                (i === 0) ? this._container.children[i].style.display = "block": this._container.children[i].style.display = "none";
             }
         }
         this._showState = !this._showState;
@@ -124,16 +90,15 @@ L.Control.Heightgraph = L.Control.extend({
      * @param {integer} selectedOption
      */
     _selection: function(selectedOption) {
-        var data = this._data;
-        this._selectedOption = selectedOption == undefined ? 0 : this._selectedOption;
+        this._selectedOption = selectedOption === undefined ? 0 : this._selectedOption;
         if (selectedOption !== undefined) {
             if (this._svg !== undefined) {
                 // remove old graph
-                this._svg.selectAll("*").remove();
+                this._svg.selectAll("path").remove();
+                this._createChart(selectedOption);
             }
             // build new graph
-            this._createBarChart();
-            this._createLegend(this._svg);
+            //this._createLegend(this._svg);
         }
     },
     /**
@@ -163,6 +128,13 @@ L.Control.Heightgraph = L.Control.extend({
                 var altitude, ptA, ptB, ptDistance,
                     geometry = [];
                 var coordsLength = data[y].features[i].geometry.coordinates.length;
+                // save attribute types related to blocks
+                var attributeType = data[y].features[i].properties.attributeType;
+                this._profile.blocks[y].attributes.push({
+                    type: attributeType,
+                    text: this._mappings[data[y].properties.summary][attributeType].text,
+                    color: this._mappings[data[y].properties.summary][attributeType].color
+                });
                 for (var j = 0; j < coordsLength; j++) {
                     ptA = new L.LatLng(data[y].features[i].geometry.coordinates[j][1], data[y].features[i].geometry.coordinates[j][0]);
                     altitude = data[y].features[i].geometry.coordinates[j][2];
@@ -198,16 +170,11 @@ L.Control.Heightgraph = L.Control.extend({
                         position: position,
                         x: ptA.lng,
                         y: ptA.lat,
-                        latlng: ptA
+                        latlng: ptA,
+                        type: this._mappings[data[y].properties.summary][attributeType].text,
+                        areaIdx: i
                     });
                 }
-                // save attribute types related to blocks
-                var attributeType = data[y].features[i].properties.attributeType;
-                this._profile.blocks[y].attributes.push({
-                    type: attributeType,
-                    text: this._mappings[data[y].properties.summary][attributeType].text,
-                    color: this._mappings[data[y].properties.summary][attributeType].color
-                });
                 this._profile.blocks[y].distances.push(cumDistance);
                 this._profile.blocks[y].geometries.push(geometry);
             }
@@ -284,34 +251,34 @@ L.Control.Heightgraph = L.Control.extend({
         var max = this._profile.maxElevation = d3.max(this._profile.elevations);
         var min = this._profile.minElevation = d3.min(this._profile.elevations);
         var quantile = this._profile.elevationQuantile = d3.quantile(this._profile.elevations, 0.75);
-        // adapted min and max elevation values of graph 
         this._profile.yElevationMin = (quantile < (min + min / 10)) ? (min - max / 5 < 0 ? 0 : min - max / 5) : min - (max / 10);
         this._profile.yElevationMax = quantile > (max - max / 10) ? max + (max / 3) : max;
         console.log(this._profile);
     },
     /**
      * Creates a marker on the map while hovering
-     * @param {Object} lat lon: actual coordinates of the route
-     * @param {float} height: actual height
-     * @param {string} color: color of graph-segment
-     * @param {string} text: value of graph-segment
+     * @param {Object} ll: actual coordinates of the route
+     * @param {float} alt: height
+     * @param {string} type: type of element
      */
-    _showMarker: function(segmentCenter, height, color, text) {
-        var layerpoint = this._map.latLngToLayerPoint(segmentCenter);
+    _showMarker: function(ll, height, type) {
+        var layerpoint = this._map.latLngToLayerPoint(ll);
         var normalizedY = layerpoint.y - 75;
         if (!this._mouseHeightFocus) {
+            console.log(true)
             var heightG = d3.select(".leaflet-overlay-pane svg").append("g");
             this._mouseHeightFocus = heightG.append('svg:line').attr('class', 'height-focus line').attr('x2', '0').attr('y2', '0').attr('x1', '0').attr('y1', '0');
             this._mouseHeightFocusLabel = heightG.append("g").attr('class', 'height-focus label');
             var pointG = this._pointG = heightG.append("g").attr('class', 'height-focus circle');
             pointG.append("svg:circle").attr("r", 5).attr("cx", 0).attr("cy", 0).attr("class", "height-focus circle-lower");
         }
-        this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY);
-        this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").attr('fill', color);
         this._mouseHeightFocusLabel.selectAll("*").remove();
+        this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY).style("display", "block");
+        this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").style("display", "block");
+        this._mouseHeightFocusLabel.style("display", "block");
         this._mouseHeightFocusLabel.append("rect").attr("x", layerpoint.x + 3).attr("y", normalizedY).attr("class", 'bBox');
         this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan");
-        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 5).attr("y", normalizedY + 24).text(text).attr("class", "tspan");
+        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 5).attr("y", normalizedY + 24).text(type).attr("class", "tspan");
         var maxWidth = d3.max([this._mouseHeightFocusLabel.nodes()[0].children[1].getBoundingClientRect().width, this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect().width]);
         var maxHeight = this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect().width === 0 ? 12 + 6 : 2 * 12 + 6;
         d3.selectAll('.bBox').attr("width", maxWidth + 10).attr("height", maxHeight);
@@ -320,49 +287,38 @@ L.Control.Heightgraph = L.Control.extend({
      * Creates the elevation profile with SVG
      */
     _createChart: function(idx) {
-        console.log(idx)
-        var areaBlocks = this._profile.blocks[idx].geometries; // this._polygonData ist in createBorderTopLine undefined... warum?
-        console.log(areaBlocks)
-        for (var i = 0; i < areaBlocks.length; i++) {
-            console.log(i)
-            this._appendAreas(areaBlocks[i], idx, i);
+        var areas = this._profile.blocks[idx].geometries;
+        this._areasFlattended = [].concat.apply([], areas);
+        for (var i = 0; i < areas.length; i++) {
+            this._appendAreas(areas[i], idx, i);
         }
-        // // bar chart invisible for hover as path
-        // this._svg.selectAll('hpath').data(this._profile.barData[y]).enter().append('path').attr('class', 'bars-overlay').attr('d', function(d) {
-        //     return polygon(d.coords_maxElevation);
-        // }).on('mouseover', self._handleMouseOver.bind(this));
-        // this._svg.on('mouseleave', self._handleMouseLeave.bind(this));
-        // self._createBorderTopLine(this._profile.barData[y], svg);
-        // self._createSelectionBox(svg);
-        // self._createFocus();
     },
     // create focus Line and focus InfoBox while hovering
     _createFocus: function() {
-        var self = this;
-        var boxPosition = self._profile.yElevationMin;
+        var boxPosition = this._profile.yElevationMin;
         var textDistance = 15;
         this._focusWidth = 150;
-        self._focus = self._svg.append("g").attr("class", "focus");
+        this._focus = this._svg.append("g").attr("class", "focus");
         //background box
-        self._focus.append("rect").attr("x", 3).attr("y", -self._y(boxPosition)).attr("width", this._focusWidth).attr("display", "none");
+        this._focus.append("rect").attr("x", 3).attr("y", -this._y(boxPosition)).attr("width", this._focusWidth).attr("display", "none");
         // text line 1
-        self._focusDistance = self._focus.append("text").attr("x", 7).attr("y", -self._y(boxPosition) + 1 * textDistance).attr("id", "distance").text('Distance:');
+        this._focusDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 1 * textDistance).attr("id", "distance").text('Distance:');
         //text line 2
-        self._focusHeight = self._focus.append("text").attr("x", 7).attr("y", -self._y(boxPosition) + 2 * textDistance).attr("id", "height").text('Elevation:');
-        if (self._selectedOption < self._data.length) {
-            // text line 3
-            self._focusBlockDistance = self._focus.append("text").attr("x", 7).attr("y", -self._y(boxPosition) + 3 * textDistance).attr("id", "blockdistance").text('Segment length:');
-            //text line 4
-            self._focusType = self._focus.append("text").attr("x", 7).attr("y", -self._y(boxPosition) + 4 * textDistance).attr("id", "type").text('Type:');
-            this._BlockDistanceTspan = self._focusBlockDistance.append('tspan').attr("class", "tspan");
-            this._TypeTspan = self._focusType.append('tspan').attr("class", "tspan");
-        }
-        var height = self._dynamicBoxSize('.focus text')[0];
+        this._focusHeight = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 2 * textDistance).attr("id", "height").text('Elevation:');
+        //if (this._selectedOption < this._data.length) {
+        // text line 3
+        this._focusBlockDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 3 * textDistance).attr("id", "blockdistance").text('Segment length:');
+        //text line 4
+        this._focusType = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 4 * textDistance).attr("id", "type").text('Type:');
+        this._areaTspan = this._focusBlockDistance.append('tspan').attr("class", "tspan");
+        this._typeTspan = this._focusType.append('tspan').attr("class", "tspan");
+        //}
+        var height = this._dynamicBoxSize('.focus text')[0];
         d3.selectAll('.focus rect').attr("height", height * textDistance + (textDistance / 2)).attr("display", "block");
-        self._focusLineGroup = self._svg.append("g").attr("class", "focusLine");
-        self._focusLine = self._focusLineGroup.append("line").attr("y1", 0).attr("y2", self._y(self._profile.yElevationMin));
-        this._DistanceTspan = self._focusDistance.append('tspan').attr("class", "tspan");
-        this._HeightTspan = self._focusHeight.append('tspan').attr("class", "tspan");
+        this._focusLineGroup = this._svg.append("g").attr("class", "focusLine");
+        this._focusLine = this._focusLineGroup.append("line").attr("y1", 0).attr("y2", this._y(this._profile.yElevationMin));
+        this._distTspan = this._focusDistance.append('tspan').attr("class", "tspan");
+        this._altTspan = this._focusHeight.append('tspan').attr("class", "tspan");
     },
     /**
      * defines the ranges and format of x- and y- scales
@@ -377,12 +333,8 @@ L.Control.Heightgraph = L.Control.extend({
         this._y = d3.scaleLinear().range([height, 0]);
         this._x.domain([0, this._profile.totalDistance]);
         this._y.domain([yHeightMin, yHeightMax]);
-        console.log(this._x.domain(), this._y.domain())
-        //this._yEnd = d3.scaleLinear().range([height, 0]).domain([yHeightmin, max]);
         this._xAxis = d3.axisBottom().scale(this._x).tickFormat(function(d) {
             return d + " km";
-            // var prefix = d3.formatPrefix(d);
-            // return prefix.scale(d) //+ prefix.symbol;
         });
         this._yAxis = d3.axisLeft().scale(this._y).ticks(5).tickFormat(function(d) {
             return d + " m";
@@ -390,13 +342,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._yEndAxis = d3.axisRight().scale(this._yEnd).ticks(0);
     },
     _appendBackground: function() {
-        var background = this._background = d3.select(this._container).select("svg").select("g").append("rect")
-            .attr("width", this._svgWidth)
-            .attr("height", this._svgHeight)
-            .style("fill", "none")
-            .style("stroke", "none")
-            .style("pointer-events", "all")
-            .on("mousemove.focus", this._mousemoveHandler.bind(this));
+        var background = this._background = d3.select(this._container).select("svg").select("g").append("rect").attr("width", this._svgWidth).attr("height", this._svgHeight).style("fill", "none").style("stroke", "none").style("pointer-events", "all").on("mousemove.focus", this._mousemoveHandler.bind(this)).on("mouseout.focus", this._mouseoutHandler.bind(this));
     },
     _appendGrid: function() {
         // append x grid
@@ -430,7 +376,9 @@ L.Control.Heightgraph = L.Control.extend({
     _make_y_axis: function() {
         return d3.axisLeft().scale(this._y);
     },
-    _createSelectionBox: function(svg) {
+    _createSelectionBox: function() {
+        self = this;
+        var svg = d3.select('svg');
         var margin = this._margins,
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;
@@ -461,41 +409,40 @@ L.Control.Heightgraph = L.Control.extend({
             if (d.id == "rightArrowSelection") arrowRight();
             if (d.id == "leftArrowSelection") arrowLeft();
         });
-        var self = this;
-        self._length = this._data.length;
+        var length = this._profile.blocks.length;
         var id = this._selectedOption;
         chooseSelection(id);
 
         function arrowRight() {
             var counter = self._selectedOption += 1;
-            if (counter == self._data.length + 1) {
+            if (counter == self._profile.blocks.length + 1) {
                 counter = 0;
                 self._selectedOption = 0;
             }
-            self._selection(self._selectedOption);
             chooseSelection(counter);
+            self._selection(self._selectedOption);
         }
 
         function arrowLeft() {
             var counter = self._selectedOption -= 1;
             if (counter == -1) {
-                counter = self._data.length;
-                self._selectedOption = self._data.length;
+                counter = self._profile.blocks.length;
+                self._selectedOption = self._profile.blocks.length;
             }
             chooseSelection(counter);
             self._selection(self._selectedOption);
         }
 
         function chooseSelection(id) {
-            var type = self._profile.ids[id];
+            var type = self._profile.blocks[id].info;
             var data = [{
                 "selection": type.text
             }];
-            svg.selectAll('.text').data(data).enter().append('text').attr("x", 15).attr("y", height + 40).text(function(d) {
+            d3.select('#selectionText').remove();
+            svg.selectAll('selection_text').data(data).enter().append('text').attr("x", 15).attr("y", height + 40).text(function(d) {
                 return d.selection;
             }).attr("class", "legend-menu").attr("id", "selectionText");
         }
-        this._selectedOption = self._selectedOption;
     },
     /**
      * create dynamic legend with d3
@@ -581,62 +528,56 @@ L.Control.Heightgraph = L.Control.extend({
         }).curve(d3.curveBasis);
         svg.append("svg:path").attr("d", borderTopLineAdd(polygonData)).attr('class', 'borderTop');
     },
-    /**
-     * creates Info-Boxes while hovering the graph
-     * @param {Object} d: contains coords, type, text, blockdistance
-     */
-    _handleMouseOver: function(d) {
-        var self = this;
-        var x0 = self._x.invert(d3.mouse(d3.event.currentTarget)[0]); //distance in m
-        var d0 = d.coords[0].x,
-            d1 = d.coords[1].x;
-        var d2 = d1 - x0 > x0 - d0 ? 0 : 1; // shortest distance between mouse and coords of polygon
-        var y0 = (Math.round(((d.coords[0].y + d.coords[1].y) / 2) * 100) / 100); //height
-        var color = d.color;
-        var text = d.text;
-        var LatLngCoords = d.LatLng;
-        var segmentCenter = L.latLngBounds(LatLngCoords[0], LatLngCoords[1]).getCenter();
-        self._showMarker(segmentCenter, y0, color, text);
-        self._DistanceTspan.text(" " + Math.round((x0 / 1000) * 100) / 100 + ' km');
-        self._HeightTspan.text(" " + y0.toFixed(0) + ' m');
-        if (d.text.length > 0) self._BlockDistanceTspan.text(" " + (d.blockdist / 1000).toFixed(2) + ' km');
-        self._TypeTspan.text(" " + d.text);
-        var boxWidth = d3.max([self._DistanceTspan.nodes()[0].getBoundingClientRect().width,
-            self._HeightTspan.nodes()[0].getBoundingClientRect().width,
-            self._BlockDistanceTspan.nodes()[0].getBoundingClientRect().width,
-            self._TypeTspan.nodes()[0].getBoundingClientRect().width
-        ]);
-        self._focusLine.style("display", "block").attr('x1', self._x(x0)).attr('x2', self._x(x0));
-        if (self._mouseHeightFocus) {
-            self._mouseHeightFocus.style("display", 'block');
-            self._mouseHeightFocusLabel.style("display", 'block');
-            self._pointG.style("display", 'block');
-            self._focus.style('display', 'block');
-            self._focusLine.style('display', 'block');
-            d3.selectAll('.focus rect').attr("width", boxWidth + 10);
-        }
-        var xPositionBox = self._x(x0) - (boxWidth + 15);
-        var totalWidth = self._width - self._margin.left - self._margin.right;
-        if (self._x(x0) + self._focusWidth < totalWidth) {
-            self._focus.style("display", "initial").attr("transform", "translate(" + self._x(x0) + "," + self._y(self._profile.yElevationMin) + ")");
-        }
-        if (self._x(x0) + self._focusWidth > totalWidth) {
-            self._focus.style("display", "initial").attr("transform", "translate(" + xPositionBox + "," + self._y(self._profile.yElevationMin) + ")");
+    _mouseoutHandler: function() {
+        if (this._focusLine) {
+            this._pointG.style('display', 'none');
+            this._focus.style('display', 'none');
+            this._focusLine.style('display', 'none');
+            this._mouseHeightFocus.style('display', 'none');
+            this._mouseHeightFocusLabel.style('display', 'none');
         }
     },
-    /**
-     * handles mouseLeave event with removing hover box and hover line
+    /*
+     * Handles the moueseover the chart and displays distance and altitude level
      */
-    _handleMouseLeave: function() {
-        var self = this;
-        if (self._mouseHeightFocus) {
-            self._mouseHeightFocus.style("display", "none");
-            self._mouseHeightFocusLabel.style("display", "none");
-            self._pointG.style("display", "none");
-            self._focus.style('display', 'none');
-            self._focusLine.style('display', 'none');
+    _mousemoveHandler: function(d, i, ctx) {
+        var coords = d3.mouse(this._svg.node());
+        var item = this._areasFlattended[this._findItemForX(coords[0])],
+            alt = item.altitude,
+            dist = item.position,
+            ll = item.latlng,
+            areaIdx = item.areaIdx,
+            type = item.type;
+        this._showMarker(ll, alt, type);
+        this._distTspan.text(" " + dist.toFixed(1) + ' km');
+        this._altTspan.text(" " + alt + ' m');
+        this._areaTspan.text(" " + areaIdx + ' km');
+        this._typeTspan.text(" " + type);
+        var boxWidth = d3.max([this._distTspan.nodes()[0].getBoundingClientRect().width,
+            this._altTspan.nodes()[0].getBoundingClientRect().width,
+            this._areaTspan.nodes()[0].getBoundingClientRect().width,
+            this._typeTspan.nodes()[0].getBoundingClientRect().width
+        ]);
+        this._focusLine.style("display", "block").attr('x1', this._x(dist)).attr('x2', this._x(dist));
+        var xPositionBox = this._x(dist) - (boxWidth + 37);
+        var totalWidth = this._width - this._margin.left - this._margin.right;
+        if (this._x(dist) + this._focusWidth < totalWidth) {
+            this._focus.style("display", "initial").attr("transform", "translate(" + this._x(dist) + "," + this._y(this._profile.yElevationMin) + ")");
         }
-    }
+        if (this._x(dist) + this._focusWidth > totalWidth) {
+            this._focus.style("display", "initial").attr("transform", "translate(" + xPositionBox + "," + this._y(this._profile.yElevationMin) + ")");
+        }
+    },
+    /*
+     * Finds a data entry for a given x-coordinate of the diagram
+     */
+    _findItemForX: function(x) {
+        var bisect = d3.bisector(function(d) {
+            return d.position;
+        }).left;
+        var xinvert = this._x.invert(x);
+        return bisect(this._areasFlattended, xinvert);
+    },
 });
 L.control.heightgraph = function(options) {
     return new L.Control.Heightgraph(options);
