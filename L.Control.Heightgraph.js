@@ -55,10 +55,10 @@ L.Control.Heightgraph = L.Control.extend({
         this._appendScales();
         this._appendGrid();
         this._createChart(this._selectedOption);
-        this._appendBackground();
         // self._createBorderTopLine(this._profile.barData[y], svg);
         this._createSelectionBox();
         this._createFocus();
+        this._appendBackground();
         //this._createLegend(this._svg);
     },
     _initToggle: function() {
@@ -529,6 +529,7 @@ L.Control.Heightgraph = L.Control.extend({
         svg.append("svg:path").attr("d", borderTopLineAdd(polygonData)).attr('class', 'borderTop');
     },
     _mouseoutHandler: function() {
+        console.log(true)
         if (this._focusLine) {
             this._pointG.style('display', 'none');
             this._focus.style('display', 'none');
