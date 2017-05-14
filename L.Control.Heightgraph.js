@@ -57,8 +57,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._createChart(this._selectedOption);
         // self._createBorderTopLine(this._profile.barData[y], svg);
         this._createSelectionBox();
-        this._createFocus();
-        this._appendBackground();
+        
         //this._createLegend(this._svg);
     },
     _initToggle: function() {
@@ -292,6 +291,9 @@ L.Control.Heightgraph = L.Control.extend({
         for (var i = 0; i < areas.length; i++) {
             this._appendAreas(areas[i], idx, i);
         }
+        // focus and background have to be created again as it has to be on top
+        this._createFocus();
+        this._appendBackground();
     },
     // create focus Line and focus InfoBox while hovering
     _createFocus: function() {
