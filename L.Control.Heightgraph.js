@@ -57,8 +57,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._createChart(this._selectedOption);
         // self._createBorderTopLine(this._profile.barData[y], svg);
         this._createSelectionBox();
-        this._createFocus();
-        this._appendBackground();
+        
         //this._createLegend(this._svg);
     },
     _initToggle: function() {
@@ -265,21 +264,24 @@ L.Control.Heightgraph = L.Control.extend({
     _showMarker: function(ll, height, type) {
         var layerpoint = this._map.latLngToLayerPoint(ll);
         var normalizedY = layerpoint.y - 75;
-        //if (!this._mouseHeightFocus) {
+        if (!this._mouseHeightFocus) {
             console.log(true)
             var heightG = d3.select(".leaflet-overlay-pane svg").append("g");
             this._mouseHeightFocus = heightG.append('svg:line').attr('class', 'height-focus line').attr('x2', '0').attr('y2', '0').attr('x1', '0').attr('y1', '0');
             this._mouseHeightFocusLabel = heightG.append("g").attr('class', 'height-focus label');
+            this._mouseHeightFocusLabelRect = this._mouseHeightFocusLabel.append("rect").attr('class', 'bBox');
+            this._mouseHeightFocusLabelTextElev = this._mouseHeightFocusLabel.append("text").attr('class', 'tspan');
+            this._mouseHeightFocusLabelTextType = this._mouseHeightFocusLabel.append("text").attr('class', 'tspan');
             var pointG = this._pointG = heightG.append("g").attr('class', 'height-focus circle');
             pointG.append("svg:circle").attr("r", 5).attr("cx", 0).attr("cy", 0).attr("class", "height-focus circle-lower");
-        //}
-        this._mouseHeightFocusLabel.selectAll("*").remove();
+
+        }
+        this._mouseHeightFocusLabel.style("display", "block");
         this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY).style("display", "block");
         this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").style("display", "block");
-        this._mouseHeightFocusLabel.style("display", "block");
-        this._mouseHeightFocusLabel.append("rect").attr("x", layerpoint.x + 3).attr("y", normalizedY).attr("class", 'bBox');
-        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan");
-        this._mouseHeightFocusLabel.append("text").attr("x", layerpoint.x + 5).attr("y", normalizedY + 24).text(type).attr("class", "tspan");
+        this._mouseHeightFocusLabelRect.attr("x", layerpoint.x + 3).attr("y", normalizedY).attr("class", 'bBox');
+        this._mouseHeightFocusLabelTextElev.attr("x", layerpoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan");
+        this._mouseHeightFocusLabelTextType.attr("x", layerpoint.x + 5).attr("y", normalizedY + 24).text(type).attr("class", "tspan");
         var maxWidth = d3.max([this._mouseHeightFocusLabel.nodes()[0].children[1].getBoundingClientRect().width, this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect().width]);
         var maxHeight = this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect().width === 0 ? 12 + 6 : 2 * 12 + 6;
         d3.selectAll('.bBox').attr("width", maxWidth + 10).attr("height", maxHeight);
@@ -293,12 +295,17 @@ L.Control.Heightgraph = L.Control.extend({
         for (var i = 0; i < areas.length; i++) {
             this._appendAreas(areas[i], idx, i);
         }
+        this._createFocus(); 
+        this._appendBackground();
     },
     // create focus Line and focus InfoBox while hovering
     _createFocus: function() {
         var boxPosition = this._profile.yElevationMin;
         var textDistance = 15;
         this._focusWidth = 150;
+        if(this._focus){
+            this._focus.selectAll("*").remove();
+        }
         this._focus = this._svg.append("g").attr("class", "focus");
         //background box
         this._focus.append("rect").attr("x", 3).attr("y", -this._y(boxPosition)).attr("width", this._focusWidth).attr("display", "none");
@@ -320,6 +327,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._focusLine = this._focusLineGroup.append("line").attr("y1", 0).attr("y2", this._y(this._profile.yElevationMin));
         this._distTspan = this._focusDistance.append('tspan').attr("class", "tspan");
         this._altTspan = this._focusHeight.append('tspan').attr("class", "tspan");
+        
     },
     /**
      * defines the ranges and format of x- and y- scales
