@@ -50,13 +50,15 @@ L.Control.Heightgraph = L.Control.extend({
         this._data = data;
         this._selection();
         this._prepareData();
+        //this._createLegendList();
         this._computeStats();
         this._appendScales();
         this._appendGrid();
         this._createChart(this._selectedOption);
-        this._createBorderTopLine();
+        // self._createBorderTopLine(this._profile.barData[y], svg);
         this._createSelectionBox();
-        //this._createLegendList();
+        this._createFocus();
+        this._appendBackground();
         //this._createLegend(this._svg);
     },
     _initToggle: function() {
@@ -178,6 +180,7 @@ L.Control.Heightgraph = L.Control.extend({
             }
         }
         this._profile.totalDistance = cumDistance;
+        console.log(this._profile)
     },
     /**
      * Creates a legend list with the proportion of each type, color, and name of type
@@ -262,14 +265,14 @@ L.Control.Heightgraph = L.Control.extend({
     _showMarker: function(ll, height, type) {
         var layerpoint = this._map.latLngToLayerPoint(ll);
         var normalizedY = layerpoint.y - 75;
-        if (!this._mouseHeightFocus) {
+        //if (!this._mouseHeightFocus) {
             console.log(true)
             var heightG = d3.select(".leaflet-overlay-pane svg").append("g");
             this._mouseHeightFocus = heightG.append('svg:line').attr('class', 'height-focus line').attr('x2', '0').attr('y2', '0').attr('x1', '0').attr('y1', '0');
             this._mouseHeightFocusLabel = heightG.append("g").attr('class', 'height-focus label');
             var pointG = this._pointG = heightG.append("g").attr('class', 'height-focus circle');
             pointG.append("svg:circle").attr("r", 5).attr("cx", 0).attr("cy", 0).attr("class", "height-focus circle-lower");
-        }
+        //}
         this._mouseHeightFocusLabel.selectAll("*").remove();
         this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY).style("display", "block");
         this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").style("display", "block");
@@ -286,13 +289,10 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _createChart: function(idx) {
         var areas = this._profile.blocks[idx].geometries;
-        this._profile.areasFlattended = [].concat.apply([], areas);
+        this._areasFlattended = [].concat.apply([], areas);
         for (var i = 0; i < areas.length; i++) {
             this._appendAreas(areas[i], idx, i);
         }
-        // focus and background have to be created again as it has to be on top
-        this._createFocus();
-        this._appendBackground();
     },
     // create focus Line and focus InfoBox while hovering
     _createFocus: function() {
@@ -509,19 +509,28 @@ L.Control.Heightgraph = L.Control.extend({
      * @param {array} polygonData: coords with x,y values 
      * @param {array} svg: existing graph
      */
-    _createBorderTopLine: function() {
+    _createBorderTopLine: function(polygonData, svg) {
         var self = this;
         var borderTopLine = d3.line().x(function(d) {
             var x = self._x;
-            return x(d.position);
+            return x(d.coords[0].x);
         }).y(function(d) {
             var y = self._y;
-            return y(d.altitude);
+            return y(d.coords[0].y);
         }).curve(d3.curveBasis);
         //create second line to cover the last chart on the graph
-        d3.select("svg").select("g").append("svg:path").attr("d", borderTopLine(this._profile.areasFlattended)).attr('class', 'borderTop');
+        svg.append("svg:path").attr("d", borderTopLine(polygonData)).attr('class', 'borderTop');
+        var borderTopLineAdd = d3.line().x(function(d) {
+            var x = self._x;
+            return x(d.coords[1].x);
+        }).y(function(d) {
+            var y = self._y;
+            return y(d.coords[1].y);
+        }).curve(d3.curveBasis);
+        svg.append("svg:path").attr("d", borderTopLineAdd(polygonData)).attr('class', 'borderTop');
     },
     _mouseoutHandler: function() {
+        console.log(true)
         if (this._focusLine) {
             this._pointG.style('display', 'none');
             this._focus.style('display', 'none');
@@ -535,7 +544,7 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _mousemoveHandler: function(d, i, ctx) {
         var coords = d3.mouse(this._svg.node());
-        var item = this._profile.areasFlattended[this._findItemForX(coords[0])],
+        var item = this._areasFlattended[this._findItemForX(coords[0])],
             alt = item.altitude,
             dist = item.position,
             ll = item.latlng,
@@ -569,7 +578,7 @@ L.Control.Heightgraph = L.Control.extend({
             return d.position;
         }).left;
         var xinvert = this._x.invert(x);
-        return bisect(this._profile.areasFlattended, xinvert);
+        return bisect(this._areasFlattended, xinvert);
     },
 });
 L.control.heightgraph = function(options) {
