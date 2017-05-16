@@ -283,7 +283,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._mouseHeightFocusLabelTextElev.attr("x", layerpoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan");
         this._mouseHeightFocusLabelTextType.attr("x", layerpoint.x + 5).attr("y", normalizedY + 24).text(type).attr("class", "tspan");
         var maxWidth = d3.max([this._mouseHeightFocusLabel.nodes()[0].children[1].getBoundingClientRect().width, this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect().width]);
-        var maxHeight = this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect().width === 0 ? 12 + 6 : 2 * 12 + 6;
+        var maxHeight = this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect().width === 0 ? 12 + 6 : 2 * 12 + 6; //dynamicBox
         d3.selectAll('.bBox').attr("width", maxWidth + 10).attr("height", maxHeight);
     },
     /**
@@ -569,7 +569,7 @@ L.Control.Heightgraph = L.Control.extend({
             this._typeTspan.nodes()[0].getBoundingClientRect().width
         ]);
         this._focusLine.style("display", "block").attr('x1', this._x(dist)).attr('x2', this._x(dist));
-        var xPositionBox = this._x(dist) - (boxWidth + 37);
+        var xPositionBox = this._x(dist) - (boxWidth + 37); //Werte ändern
         var totalWidth = this._width - this._margin.left - this._margin.right;
         if (this._x(dist) + this._focusWidth < totalWidth) {
             this._focus.style("display", "initial").attr("transform", "translate(" + this._x(dist) + "," + this._y(this._profile.yElevationMin) + ")");
