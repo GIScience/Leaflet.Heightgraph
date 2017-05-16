@@ -681,16 +681,22 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _mousemoveHandler: function(d, i, ctx) {
         var coords = d3.mouse(this._svg.node());
+        var areaLength;
         var item = this._areasFlattended[this._findItemForX(coords[0])],
             alt = item.altitude,
             dist = item.position,
             ll = item.latlng,
             areaIdx = item.areaIdx,
             type = item.type;
+        if (areaIdx === 0) {
+            areaLength = this._profile.blocks[this._selectedOption].distances[areaIdx];
+        } else {
+            areaLength = this._profile.blocks[this._selectedOption].distances[areaIdx] - this._profile.blocks[this._selectedOption].distances[areaIdx - 1];
+        }
         this._showMarker(ll, alt, type);
         this._distTspan.text(" " + dist.toFixed(1) + ' km');
         this._altTspan.text(" " + alt + ' m');
-        this._areaTspan.text(" " + areaIdx + ' km');
+        this._areaTspan.text(" " + areaLength.toFixed(1) + ' km');
         this._typeTspan.text(" " + type);
         var boxWidth = d3.max([this._distTspan.nodes()[0].getBoundingClientRect()
             .width,
