@@ -229,7 +229,6 @@ L.Control.Heightgraph = L.Control.extend({
         var layerpoint = this._map.latLngToLayerPoint(ll);
         var normalizedY = layerpoint.y - 75;
         if (!this._mouseHeightFocus) {
-            console.log(true)
             var heightG = d3.select(".leaflet-overlay-pane svg")
                 .append("g");
             this._mouseHeightFocus = heightG.append('svg:line')
@@ -326,7 +325,6 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("y", -this._y(boxPosition) + 2 * textDistance)
             .attr("id", "height")
             .text('Elevation:');
-        //if (this._selectedOption < this._data.length) {
         // text line 3
         this._focusBlockDistance = this._focus.append("text")
             .attr("x", 7)
@@ -343,7 +341,6 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("class", "tspan");
         this._typeTspan = this._focusType.append('tspan')
             .attr("class", "tspan");
-        //}
         var height = this._dynamicBoxSize('.focus text')[0];
         d3.selectAll('.focus rect')
             .attr("height", height * textDistance + (textDistance / 2))
@@ -594,7 +591,7 @@ L.Control.Heightgraph = L.Control.extend({
             .enter()
             .append('g')
             .attr('class', 'legend-hover');
-        // refactor
+        // TODO refactor
         legendHover.append('text')
             .attr('class', 'legend-menu')
             .attr("class", "no-select")
@@ -667,7 +664,6 @@ L.Control.Heightgraph = L.Control.extend({
             .attr('class', 'borderTop');
     },
     _mouseoutHandler: function() {
-        console.log(true)
         if (this._focusLine) {
             this._pointG.style('display', 'none');
             this._focus.style('display', 'none');
