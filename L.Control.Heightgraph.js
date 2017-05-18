@@ -317,12 +317,9 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("y", normalizedY + 24)
             .text(type)
             .attr("class", "tspan");
-        var maxWidth = d3.max([this._mouseHeightFocusLabel.nodes()[0].children[1].getBoundingClientRect()
-            .width, this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect()
-            .width
-        ]);
-        var maxHeight = this._mouseHeightFocusLabel.nodes()[0].children[2].getBoundingClientRect()
-            .width === 0 ? 12 + 6 : 2 * 12 + 6;
+        var maxWidth = this._dynamicBoxSize('text.tspan')[1];
+        //box size should change for profile none (no type)
+        var maxHeight = (type ==="") ? 12 + 6 : 2 * 12 + 6;
         d3.selectAll('.bBox')
             .attr("width", maxWidth + 10)
             .attr("height", maxHeight);
@@ -343,7 +340,6 @@ L.Control.Heightgraph = L.Control.extend({
     _createFocus: function() {
         var boxPosition = this._profile.yElevationMin;
         var textDistance = 15;
-        this._focusWidth = 150;
         if (this._focus) {
             this._focus.selectAll("*")
                 .remove();
@@ -351,10 +347,9 @@ L.Control.Heightgraph = L.Control.extend({
         this._focus = this._svg.append("g")
             .attr("class", "focus");
         //background box
-        this._focus.append("rect")
+        this._focusRect = this._focus.append("rect")
             .attr("x", 3)
             .attr("y", -this._y(boxPosition))
-            .attr("width", this._focusWidth)
             .attr("display", "none");
         // text line 1
         this._focusDistance = this._focus.append("text")
@@ -744,30 +739,23 @@ L.Control.Heightgraph = L.Control.extend({
             ll = item.latlng,
             areaIdx = item.areaIdx,
             type = item.type;
+        var boxWidth = this._dynamicBoxSize('.focus text')[1] +10;
         this._showMarker(ll, alt, type);
         this._distTspan.text(" " + dist.toFixed(1) + ' km');
         this._altTspan.text(" " + alt + ' m');
         this._areaTspan.text(" " + areaIdx + ' km');
         this._typeTspan.text(" " + type);
-        var boxWidth = d3.max([this._distTspan.nodes()[0].getBoundingClientRect()
-            .width,
-            this._altTspan.nodes()[0].getBoundingClientRect()
-            .width,
-            this._areaTspan.nodes()[0].getBoundingClientRect()
-            .width,
-            this._typeTspan.nodes()[0].getBoundingClientRect()
-            .width
-        ]);
+        this._focusRect.attr("width", boxWidth);
         this._focusLine.style("display", "block")
             .attr('x1', this._x(dist))
             .attr('x2', this._x(dist));
-        var xPositionBox = this._x(dist) - (boxWidth + 37);
+        var xPositionBox = this._x(dist) - (boxWidth + 5);
         var totalWidth = this._width - this._margin.left - this._margin.right;
-        if (this._x(dist) + this._focusWidth < totalWidth) {
+        if (this._x(dist) + boxWidth < totalWidth) {
             this._focus.style("display", "initial")
                 .attr("transform", "translate(" + this._x(dist) + "," + this._y(this._profile.yElevationMin) + ")");
         }
-        if (this._x(dist) + this._focusWidth > totalWidth) {
+        if (this._x(dist) + boxWidth > totalWidth) {
             this._focus.style("display", "initial")
                 .attr("transform", "translate(" + xPositionBox + "," + this._y(this._profile.yElevationMin) + ")");
         }
