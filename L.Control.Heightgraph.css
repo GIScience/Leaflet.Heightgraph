@@ -2,12 +2,13 @@
     background-color: #FFF;
     border-radius: 10px;
     display: none;
+    cursor: default;
+    user-select: none;
 }
 
 .heightgraph-toggle {
     cursor: pointer;
     box-shadow: 0 1px 7px rgba(0, 0, 0, .4);
-    -webkit-border-radius: 5px;
     border-radius: 5px;
     width: 28px;
     height: 28px;
@@ -33,66 +34,20 @@
     display: none;
 }
 
-.extent-container {
-    background: red;
-    width: 30px;
-    height: 26px;
-    position: absolute;
-    left: 0;
-    display: none;
-}
-
-.bars {
-    fill-opacity: 0.9;
-    shape-rendering: crispEdges;
-    pointer-events: none;
-}
-
-.bars-overlay {
-    fill: none;
-    pointer-events: all;
-}
-
-.borderTop {
+.border-top {
     stroke-width: 1;
     stroke: #999;
     fill: none;
-}
-
-
-.legendBox {
-    position: relative;
-    left: 20px;
-}
-
-.legend-rect {
-    pointer-events: none;
-    border: 5px;
 }
 
 .legend-hover {
     cursor: pointer;
 }
 
-.legend-menu {
-    fill: black;
-    pointer-events: none;
-    user-select: none;
-}
-
 .legend-text {
     fill: #000;
-    font-size: 10;
+    font-size: 10px;
     cursor: pointer;
-}
-
-.no-select {
-    user-select: none;
-}
-
-.legend-box {
-    fill: white;
-    display: none;
 }
 
 .tick, .tick text {
@@ -105,24 +60,12 @@
     pointer-events: none;
 }
 
-.AxisText {
-    text-anchor: middle;
-    color: #999;
-    fill: #999;
-    pointer-events: none;
-}
-
 .axis path {
     stroke: black;
     fill: none;
     stroke-width: 2px;
     shape-rendering: crispEdges;
     stroke: lightgrey;
-    pointer-events: none;
-}
-
-.axis line {
-    stroke: #999;
     pointer-events: none;
 }
 
@@ -136,16 +79,11 @@
 .focus rect {
     fill: rgba(255, 255, 255, 0.8);
     stroke-width: 1px;
-    -shape-rendering: crispEdges;
     stroke: #888;
     pointer-events: none;
 }
 
 .focus text {
-    font-size: 12px;
-}
-
-.height-focus.label text {
     font-size: 12px;
 }
 
@@ -172,23 +110,8 @@
 }
 
 .height-focus.circle {
-    stroke: #444;
-}
-
-.height-focus.circle-lower {
-    weight: 1;
-    visibility: visible;
-}
-
-.selection {
-    position: absolute;
-    top: 20px;
-    right: 40px;
-    z-index: 1;
-    background: #FFF;
-    color: #000;
-    display: none;
-    width: 100px;
+    stroke: #FFF;
+    stroke-width: 1px;
 }
 
 .grid .tick {
@@ -210,6 +133,10 @@
     font-weight: bold;
 }
 
-.selectSign {
+.select-symbol {
     cursor: pointer;
+}
+
+.select-info {
+    cursor: default;
 }

@@ -74,11 +74,11 @@ L.Control.Heightgraph = L.Control.extend({
     _expand: function() {
         if (!this._showState) {
             d3.select(this._button).style("display", "none");
-            d3.selectAll('svg').style("display", "block");
+            d3.select(this._container).selectAll('svg').style("display", "block");
             d3.select(this._closeButton).style("display", "block");
         } else {
             d3.select(this._button).style("display", "block");
-            d3.selectAll('svg').style("display", "none");
+            d3.select(this._container).selectAll('svg').style("display", "none");
             d3.select(this._closeButton).style("display", "none");
         }
         this._showState = !this._showState;
@@ -513,11 +513,11 @@ L.Control.Heightgraph = L.Control.extend({
             "id": "rightArrowSelection",
             "angle": 180
         }];
-        var selectionSign = svg.selectAll('.selectSign')
+        var selectionSign = svg.selectAll('.select-symbol')
             .data(jsonCircles)
             .enter()
             .append('path')
-            .attr("class", "selectSign")
+            .attr("class", "select-symbol")
             .attr("d", d3.symbol()
                 .type(function(d) {
                     return d.type;
@@ -574,7 +574,7 @@ L.Control.Heightgraph = L.Control.extend({
                 .text(function(d) {
                     return d.selection;
                 })
-                .attr("class", "legend-menu")
+                .attr("class", "select-info")
                 .attr("id", "selectionText");
         }
     },
@@ -687,7 +687,7 @@ L.Control.Heightgraph = L.Control.extend({
             .curve(d3.curveBasis);
         this._svg.append("svg:path")
             .attr("d", borderTopLine(data))
-            .attr('class', 'borderTop');
+            .attr('class', 'border-top');
     },
     /*
      * Handles the mouseout event when the mouse leaves the background
