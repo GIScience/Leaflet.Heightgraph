@@ -1,6 +1,6 @@
 L.Control.Heightgraph = L.Control.extend({
     options: {
-        position: "topleft",
+        position: "bottomright",
         width: 800,
         height: 125,
         margins: {
@@ -24,12 +24,11 @@ L.Control.Heightgraph = L.Control.extend({
         this._width = this.options.width - this._margin.left - this._margin.right;
         this._height = this.options.height - this._margin.top - this._margin.bottom;
         this._mappings = this.options.mappings;
-        //var dynamicLegend = this._profile.legendList[y]; // this._dynamicLegend ist in createLegend undefined... warum?
         this._svgWidth = this._width - this._margin.left - this._margin.right;
         this._svgHeight = this._height - this._margin.top - this._margin.bottom;
         var svg = this._svg = d3.select(this._container)
             .append("svg")
-            .attr("class", "background")
+            .attr("class", "heightgraph-container")
             .attr("width", this._svgWidth + this._margin.left + this._margin.right)
             .attr("height", this._svgHeight + this._margin.top + this._margin.bottom)
             .append("g")
@@ -48,11 +47,6 @@ L.Control.Heightgraph = L.Control.extend({
         if (this._svg !== undefined) {
             this._svg.selectAll("*")
                 .remove();
-            /** reset options */
-            var options = document.querySelectorAll('.selection option');
-            for (var i = 0, l = options.length; i < l; i++) {
-                options[i].selected = options[i].defaultSelected;
-            }
         }
         this._data = data;
         this._selection();
@@ -75,15 +69,17 @@ L.Control.Heightgraph = L.Control.extend({
         }
     },
     /**
-     * expand container when button clicked and shrink when close-Button clicked
+     * Expand container when button clicked and shrink when close-Button clicked
      */
     _expand: function() {
-        for (var i = 0; i < this._container.children.length; i++) {
-            if (!this._showState) {
-                (i === 0) ? this._container.children[i].style.display = "none": this._container.children[i].style.display = "block";
-            } else {
-                (i === 0) ? this._container.children[i].style.display = "block": this._container.children[i].style.display = "none";
-            }
+        if (!this._showState) {
+            d3.select(this._button).style("display", "none");
+            d3.selectAll('svg').style("display", "block");
+            d3.select(this._closeButton).style("display", "block");
+        } else {
+            d3.select(this._button).style("display", "block");
+            d3.selectAll('svg').style("display", "none");
+            d3.select(this._closeButton).style("display", "none");
         }
         this._showState = !this._showState;
     },
@@ -109,6 +105,33 @@ L.Control.Heightgraph = L.Control.extend({
         }
     },
     /**
+     * Creates a random int between 0 and max
+     */
+    _randomNumber: function(max) {
+        return Math.round((Math.random() * (max - 0) + 0));
+    },
+    _d3ColorCategorical: [{
+        "name": "schemeAccent"
+    }, {
+        "name": "schemeDark2"
+    }, {
+        "name": "schemeSet2"
+    }, {
+        "name": "schemeSet1"
+    }, {
+        "name": "schemeCategory10"
+    }, {
+        "name": "schemeSet3"
+    }, {
+        "name": "schemePaired"
+    }, {
+        "name": "schemeCategory20"
+    }, {
+        "name": "schemeCategory20b"
+    }, {
+        "name": "schemeCategory20c"
+    }],
+    /**
      * Prepares the data needed for the height graph
      */
     _prepareData: function() {
@@ -119,29 +142,51 @@ L.Control.Heightgraph = L.Control.extend({
         this._profile.cumDistances.push(0);
         this._profile.blocks = [];
         var data = this._data;
-        var cumDistance = 0;
+        var categorical = [];
+        var colorScale;
+        if (this._mappings === undefined) {
+            var randomNumber = this._randomNumber(categorical.length);
+            colorScale = d3.scaleOrdinal(d3[this._d3ColorCategorical[randomNumber].name]);
+        }
         for (var y = 0; y < data.length; y++) {
+            var cumDistance = 0;
             this._profile.blocks[y] = {};
             this._profile.blocks[y].info = {
                 id: y,
-                text: (data[y] === undefined) ? "none" : data[y].properties.summary
+                text: data[y].properties.summary
             };
             this._profile.blocks[y].distances = [];
             this._profile.blocks[y].attributes = [];
             this._profile.blocks[y].geometries = [];
             this._profile.blocks[y].legend = {};
-            var cnt = 0;
-            for (var i = 0; i < data[y].features.length; i++) {
+            var i, cnt = 0,
+                usedColors = {};
+            for (i = 0; i < data[y].features.length; i++) {
                 // data is redundant in every elemtent of data which is why we collect it once
                 var altitude, ptA, ptB, ptDistance,
                     geometry = [];
                 var coordsLength = data[y].features[i].geometry.coordinates.length;
                 // save attribute types related to blocks
                 var attributeType = data[y].features[i].properties.attributeType;
+                // check if mappings are defined, otherwise random colors
+                var text, color;
+                if (this._mappings === undefined) {
+                    if (attributeType in usedColors) {
+                        text = attributeType;
+                        color = usedColors[attributeType];
+                    } else {
+                        text = attributeType;
+                        color = colorScale(i);
+                        usedColors[attributeType] = color;
+                    }
+                } else {
+                    text = this._mappings[data[y].properties.summary][attributeType].text;
+                    color = this._mappings[data[y].properties.summary][attributeType].color;
+                }
                 var attribute = {
                     type: attributeType,
-                    text: this._mappings[data[y].properties.summary][attributeType].text,
-                    color: this._mappings[data[y].properties.summary][attributeType].color
+                    text: text,
+                    color: color
                 };
                 this._profile.blocks[y].attributes.push(attribute);
                 // add to legend
@@ -154,11 +199,11 @@ L.Control.Heightgraph = L.Control.extend({
                     // add elevations, coordinates and point distances only once
                     // last point in feature is first of next which is why we have to juggle with indices
                     if (j < coordsLength - 1) {
+                        ptB = new L.LatLng(data[y].features[i].geometry.coordinates[j + 1][1], data[y].features[i].geometry.coordinates[j + 1][0]);
+                        ptDistance = ptA.distanceTo(ptB) / 1000;
+                        // calculate distances of specific block
+                        cumDistance += ptDistance;
                         if (y === 0) {
-                            ptB = new L.LatLng(data[y].features[i].geometry.coordinates[j + 1][1], data[y].features[i].geometry.coordinates[j + 1][0]);
-                            ptDistance = ptA.distanceTo(ptB) / 1000;
-                            // calculate distances of specific block
-                            cumDistance += ptDistance;
                             this._profile.elevations.push(altitude);
                             this._profile.coordinates.push(ptA);
                             this._profile.cumDistances.push(cumDistance);
@@ -184,29 +229,17 @@ L.Control.Heightgraph = L.Control.extend({
                         x: ptA.lng,
                         y: ptA.lat,
                         latlng: ptA,
-                        type: this._mappings[data[y].properties.summary][attributeType].text,
+                        type: text,
                         areaIdx: i
                     });
                 }
                 this._profile.blocks[y].distances.push(cumDistance);
                 this._profile.blocks[y].geometries.push(geometry);
             }
+            if (y == data.length - 1) {
+                this._profile.totalDistance = cumDistance;
+            }
         }
-        this._profile.totalDistance = cumDistance;
-    },
-    /**
-     * creates a range of different random colors for highlighting the bar (when no colors are predefined)
-     */
-    _randomColors: function(types) {
-        var values = types;
-        var colorList = [];
-        for (var i = 0; i < values.length; i++) {
-            colorList[values[i]] = {
-                color: chroma.random(),
-                text: values[i]
-            };
-        }
-        return colorList;
     },
     /**
      * Creates a list with four x,y coords and other important infos for the bars drawn with d3
@@ -217,7 +250,6 @@ L.Control.Heightgraph = L.Control.extend({
         var quantile = this._profile.elevationQuantile = d3.quantile(this._profile.elevations, 0.75);
         this._profile.yElevationMin = (quantile < (min + min / 10)) ? (min - max / 5 < 0 ? 0 : min - max / 5) : min - (max / 10);
         this._profile.yElevationMax = quantile > (max - max / 10) ? max + (max / 3) : max;
-        console.log(this._profile);
     },
     /**
      * Creates a marker on the map while hovering
@@ -273,14 +305,14 @@ L.Control.Heightgraph = L.Control.extend({
             .text(type)
             .attr("class", "tspan");
         var maxWidth = this._dynamicBoxSize('text.tspan')[1];
-        //box size should change for profile none (no type)
-        var maxHeight = (type ==="") ? 12 + 6 : 2 * 12 + 6;
+        // box size should change for profile none (no type)
+        var maxHeight = (type === "") ? 12 + 6 : 2 * 12 + 6;
         d3.selectAll('.bBox')
             .attr("width", maxWidth + 10)
             .attr("height", maxHeight);
     },
     /**
-     * Creates the elevation profile with SVG
+     * Creates the elevation profile
      */
     _createChart: function(idx) {
         areas = this._profile.blocks[idx].geometries;
@@ -290,20 +322,22 @@ L.Control.Heightgraph = L.Control.extend({
         }
         this._createFocus();
         this._appendBackground();
-        this._createLegend();
         this._createBorderTopLine();
+        this._createLegend();
     },
-    // create focus Line and focus InfoBox while hovering
+    /**
+     *  Creates focus Line and focus box while hovering
+     */
     _createFocus: function() {
         var boxPosition = this._profile.yElevationMin;
         var textDistance = 15;
         if (this._focus) {
-            this._focus.selectAll("*")
-                .remove();
+            this._focus.remove();
+            this._focusLineGroup.remove();
         }
         this._focus = this._svg.append("g")
             .attr("class", "focus");
-        //background box
+        // background box
         this._focusRect = this._focus.append("rect")
             .attr("x", 3)
             .attr("y", -this._y(boxPosition))
@@ -314,7 +348,7 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("y", -this._y(boxPosition) + 1 * textDistance)
             .attr("id", "distance")
             .text('Distance:');
-        //text line 2
+        // text line 2
         this._focusHeight = this._focus.append("text")
             .attr("x", 7)
             .attr("y", -this._y(boxPosition) + 2 * textDistance)
@@ -326,7 +360,7 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("y", -this._y(boxPosition) + 3 * textDistance)
             .attr("id", "blockdistance")
             .text('Segment length:');
-        //text line 4
+        // text line 4
         this._focusType = this._focus.append("text")
             .attr("x", 7)
             .attr("y", -this._y(boxPosition) + 4 * textDistance)
@@ -351,7 +385,7 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("class", "tspan");
     },
     /**
-     * defines the ranges and format of x- and y- scales
+     * Defines the ranges and format of x- and y- scales and appends them
      */
     _appendScales: function() {
         var yHeightMin = this._profile.yElevationMin;
@@ -380,6 +414,9 @@ L.Control.Heightgraph = L.Control.extend({
             .scale(this._yEnd)
             .ticks(0);
     },
+    /**
+     * Appends a background an adds mouse handlers 
+     */
     _appendBackground: function() {
         var background = this._background = d3.select(this._container)
             .select("svg")
@@ -393,30 +430,33 @@ L.Control.Heightgraph = L.Control.extend({
             .on("mousemove.focus", this._mousemoveHandler.bind(this))
             .on("mouseout.focus", this._mouseoutHandler.bind(this));
     },
+    /**
+     * Appends a grid to the graph 
+     */
     _appendGrid: function() {
-        // append x grid
         this._svg.append("g")
             .attr("class", "grid")
             .attr("transform", "translate(0," + this._svgHeight + ")")
             .call(this._make_x_axis()
                 .tickSize(-this._svgHeight, 0, 0)
                 .tickFormat(""));
-        // append y grid
         this._svg.append("g")
             .attr("class", "grid")
             .call(this._make_y_axis()
                 .tickSize(-this._svgWidth, 0, 0)
                 .ticks(5)
                 .tickFormat(""));
-        // axes and axes labels
         this._svg.append('g')
-            .attr("transform", "translate(0," + this._svgHeight + ")") // create a <g> element
-            .attr('class', 'x axis') // specify classes
+            .attr("transform", "translate(0," + this._svgHeight + ")")
+            .attr('class', 'x axis')
             .call(this._xAxis);
         this._svg.append('g')
             .attr('class', 'y axis')
             .call(this._yAxis);
     },
+    /**
+     * Appends the areas to the graph
+     */
     _appendAreas: function(block, idx, eleIdx) {
         var c = this._profile.blocks[idx].attributes[eleIdx].color;
         var self = this;
@@ -449,6 +489,9 @@ L.Control.Heightgraph = L.Control.extend({
         return d3.axisLeft()
             .scale(this._y);
     },
+    /**
+     * Appends a selection box for different blocks
+     */
     _createSelectionBox: function() {
         self = this;
         var svg = d3.select('svg');
@@ -456,19 +499,19 @@ L.Control.Heightgraph = L.Control.extend({
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;
         var jsonCircles = [{
-            "x": 20,
-            "y": height + 45,
+            "x": width - 50,
+            "y": height + 48,
             "color": "#000",
             "type": d3.symbolTriangle,
             "id": "leftArrowSelection",
-            "angle": 180
+            "angle": -360
         }, {
-            "x": 110,
-            "y": height + 47,
+            "x": width - 35,
+            "y": height + 45,
             "color": "#000",
             "type": d3.symbolTriangle,
             "id": "rightArrowSelection",
-            "angle": -360
+            "angle": 180
         }];
         var selectionSign = svg.selectAll('.selectSign')
             .data(jsonCircles)
@@ -521,13 +564,12 @@ L.Control.Heightgraph = L.Control.extend({
             var data = [{
                 "selection": type.text
             }];
-            d3.select('#selectionText')
-                .remove();
-            svg.selectAll('selection_text')
+            if (self._selectionText) self._selectionText.remove();
+            self._selectionText = svg.selectAll('selection_text')
                 .data(data)
                 .enter()
                 .append('text')
-                .attr("x", 40)
+                .attr("x", width - 20)
                 .attr("y", height + 50)
                 .text(function(d) {
                     return d.selection;
@@ -537,7 +579,7 @@ L.Control.Heightgraph = L.Control.extend({
         }
     },
     /**
-     * create dynamic legend with d3
+     * Creates and appends legend to chart
      */
     _createLegend: function() {
         var self = this;
@@ -565,16 +607,17 @@ L.Control.Heightgraph = L.Control.extend({
             });
         legend.append('rect')
             .attr('class', 'legend-rect')
-            .attr('x', 500)
+            .attr('x', 15)
             .attr('y', 6 * 6)
             .attr('width', 6)
+            .style('stroke', 'black')
             .attr('height', 6)
             .style('fill', function(d, i) {
                 return d.color;
             });
         legend.append('text')
             .attr('class', 'legend-text')
-            .attr('x', 515)
+            .attr('x', 30)
             .attr('y', 6 * 7)
             .text(function(d, i) {
                 var textProp = d.text;
@@ -586,27 +629,17 @@ L.Control.Heightgraph = L.Control.extend({
             .enter()
             .append('g')
             .attr('class', 'legend-hover');
-        // TODO refactor
         legendHover.append('text')
             .attr('class', 'legend-menu')
             .attr("class", "no-select")
-            .attr('x', width - 50)
+            .attr('x', 15)
             .attr('y', height + 40)
             .text(function(d, i) {
                 return d.text;
             })
             .on('mouseover', function() {
-                var dyn = self._dynamicBoxSize('.legend');
-                var backgroundbox = self._svg.selectAll('.legend-hover')
-                    .append('rect')
-                    .attr('x', 485)
-                    .attr('y', 0)
-                    .attr('height', 13.6 * (dyn[0]) + (10))
-                    .attr('width', dyn[1] + legendRectSize + legendSpacing)
-                    .attr('class', 'legend-box');
                 d3.select('.legend-box')
-                    .style("display", "block")
-                    .style("stroke", "#888");
+                    .style("display", "block");
                 d3.selectAll('.legend')
                     .style("display", "block");
             })
@@ -637,9 +670,7 @@ L.Control.Heightgraph = L.Control.extend({
         return borders;
     },
     /**
-     * create top border line on graph 
-     * @param {array} polygonData: coords with x,y values 
-     * @param {array} svg: existing graph
+     * Creates top border line on graph 
      */
     _createBorderTopLine: function() {
         var self = this;
@@ -658,6 +689,9 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("d", borderTopLine(data))
             .attr('class', 'borderTop');
     },
+    /*
+     * Handles the mouseout event when the mouse leaves the background
+     */
     _mouseoutHandler: function() {
         if (this._focusLine) {
             this._pointG.style('display', 'none');
@@ -679,7 +713,7 @@ L.Control.Heightgraph = L.Control.extend({
             ll = item.latlng,
             areaIdx = item.areaIdx,
             type = item.type;
-        var boxWidth = this._dynamicBoxSize('.focus text')[1] +10;
+        var boxWidth = this._dynamicBoxSize('.focus text')[1] + 10;
         if (areaIdx === 0) {
             areaLength = this._profile.blocks[this._selectedOption].distances[areaIdx];
         } else {

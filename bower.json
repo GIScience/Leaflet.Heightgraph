@@ -1,30 +1,31 @@
 {
-    "name": "Leaflet.Heightgraph",
-    "homepage": "https://giscience.github.io/Leaflet.Heightgraph/",
-    "authors": [
-        "Angelika Kinas <kinas@stud.uni-heidelberg.de>",
-        "Timothy Ellersiek <timothy.ellersiek@geog.uni-heidelberg.de>"
-    ],
-    "description": "A Leaflet plugin to view height profile of GeoJSON- and GPX polylines using d3.",
-    "main": [
-        "L.Control.Heightgraph.js",
-        "L.Control.Heightgraph.css"
-    ],
-    "keywords": [
-        "Leaflet",
-        "Elevation",
-        "map",
-        "d3",
-        "Heightgraph"
-    ],
-    "license": "MIT",
-    "ignore": [
-        "**/.*",
-        "bower_components",
-        "node_modules"
-    ],
-    "dependencies": {
-        "leaflet": "1.0.3",
-        "d3": "4.6.0"
-    }
+  "name": "Leaflet.Heightgraph",
+  "homepage": "https://giscience.github.io/Leaflet.Heightgraph/",
+  "authors": [
+    "Angelika Kinas <kinas@stud.uni-heidelberg.de>",
+    "Timothy Ellersiek <timothy.ellersiek@geog.uni-heidelberg.de>"
+  ],
+  "description": "A Leaflet plugin to view height profile of GeoJSON- and GPX polylines using d3.",
+  "main": [
+    "L.Control.Heightgraph.js",
+    "L.Control.Heightgraph.css"
+  ],
+  "keywords": [
+    "Leaflet",
+    "Elevation",
+    "map",
+    "d3",
+    "Heightgraph"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "node_modules"
+  ],
+  "dependencies": {
+    "leaflet": "1.0.3",
+    "d3": "4.6.0",
+    "d3-scale-chromatic": "^1.1.0"
+  }
 }
