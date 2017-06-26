@@ -18,12 +18,6 @@ Supported Browsers:
 ### Supported data:
 Input data has to be of type [GeoJSON-Format](http://geojson.org/). This must consist of feature collection(s) corresponding to a certain attribute which could - as an example - be surface or gradient information. Each `FeatureCollection` comprises a certain `attribute` in its `properties` (e.g. `'summary': 'steepness'`) and has a list of `LineString` features with coordinates including height values and the `attributeType` which corresponds to the certain type of attribute within this segment (in this case it could be an index of steepness) declared in its `properties`. 
 
-[Demo](https://giscience.github.io/Leaflet.Heightgraph)
-
-### Install with Bower
-
-`` bower install leaflet.heightgraph ``
-
 ```javascript
 var FeatureCollections = [{
     "type": "FeatureCollection",
@@ -60,6 +54,12 @@ var FeatureCollections = [{
     }
 }];
 ```
+
+[Demo](https://giscience.github.io/Leaflet.Heightgraph)
+
+### Install with Bower
+
+`` bower install leaflet.heightgraph ``
 
 ### Optional:
 You may add a mappings object to customize the colors and labels in the height graph. Without adding custom mappings the segments and labels within the graph will be displayed in random colors. Each key of the object must correspond to the `summary` key in `properties` within the `FeatureCollection`.

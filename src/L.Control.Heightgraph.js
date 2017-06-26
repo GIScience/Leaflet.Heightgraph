@@ -55,7 +55,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._appendScales();
         this._appendGrid();
         this._createChart(this._selectedOption);
-        this._createSelectionBox();
+        if (this._data.length > 1) this._createSelectionBox();
     },
     _initToggle: function() {
         if (!L.Browser.touch) {
