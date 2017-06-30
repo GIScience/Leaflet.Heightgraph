@@ -73,13 +73,21 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _expand: function() {
         if (!this._showState) {
-            d3.select(this._button).style("display", "none");
-            d3.select(this._container).selectAll('svg').style("display", "block");
-            d3.select(this._closeButton).style("display", "block");
+            d3.select(this._button)
+                .style("display", "none");
+            d3.select(this._container)
+                .selectAll('svg')
+                .style("display", "block");
+            d3.select(this._closeButton)
+                .style("display", "block");
         } else {
-            d3.select(this._button).style("display", "block");
-            d3.select(this._container).selectAll('svg').style("display", "none");
-            d3.select(this._closeButton).style("display", "none");
+            d3.select(this._button)
+                .style("display", "block");
+            d3.select(this._container)
+                .selectAll('svg')
+                .style("display", "none");
+            d3.select(this._closeButton)
+                .style("display", "none");
         }
         this._showState = !this._showState;
     },
@@ -239,7 +247,7 @@ L.Control.Heightgraph = L.Control.extend({
             if (y == data.length - 1) {
                 this._profile.totalDistance = cumDistance;
             }
-        }
+        }      
     },
     /**
      * Creates a list with four x,y coords and other important infos for the bars drawn with d3
@@ -583,7 +591,12 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _createLegend: function() {
         var self = this;
-        var data = Object.values(self._profile.blocks[this._selectedOption].legend);
+        //console.log(Object.values(self._profile.blocks[this._selectedOption].legend), self._profile.blocks[this._selectedOption].legend, true);
+        //var data = Object.values(self._profile.blocks[this._selectedOption].legend);
+        var data = [];
+        for (var item in this._profile.blocks[this._selectedOption].legend) {
+            data.push(this._profile.blocks[this._selectedOption].legend[item]);
+        }
         var margin = this._margins,
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;

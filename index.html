@@ -12,7 +12,6 @@
                  margin:0px;
              } 
          </style> 
-         <!--Leaflet-->
          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
          <script src="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
          <link rel="stylesheet" href="src/L.Control.Heightgraph.css"/>
@@ -23,11 +22,12 @@
          <script type="text/javascript" src="src/L.Control.Heightgraph.js"></script>
          
      </head>
- 
+     <body>
      <div id="map"></div>
- 
+     </body> 
      <script type="text/javascript">
          var map = new L.Map('map');
+
  
          var url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
              attr = 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';

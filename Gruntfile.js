@@ -20,7 +20,7 @@ module.exports = function(grunt) {
                 options: {
                     specs: 'spec/*Spec.js',
                     helpers: 'spec/*Helper.js',
-                    vendor: ['http://cdn.leafletjs.com/leaflet-0.7.2/leaflet-src.js', './lib/leaflet-gpx/gpx.js', 'http://d3js.org/d3.v3.js'],
+                    vendor: ['https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js', 'https://d3js.org/d3.v4.min.js', "https://d3js.org/d3-scale-chromatic.v0.3.min.js"],
                     '--local-to-remote-url-access': true
                 }
             }
