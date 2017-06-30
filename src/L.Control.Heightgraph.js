@@ -247,7 +247,8 @@ L.Control.Heightgraph = L.Control.extend({
             if (y == data.length - 1) {
                 this._profile.totalDistance = cumDistance;
             }
-        }      
+        }
+        console.log(this._profile);   
     },
     /**
      * Creates a list with four x,y coords and other important infos for the bars drawn with d3

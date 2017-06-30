@@ -136,7 +136,7 @@ describe('L.Control.Heightgraph', function() {
         //2nd feature
         expect(el._profile.blocks[1].info.text).toEqual(data[1].properties.summary);
     });
-    it('reads number of coordinates of data correctly', function() {
+    it('reads coordinates of data correctly', function() {
         //1st block of 1st and 2nd feature
         expect(el._profile.blocks[0].geometries[0].length).toEqual(data[0].features[0].geometry.coordinates.length);
         expect(el._profile.blocks[1].geometries[0].length).toEqual(data[1].features[0].geometry.coordinates.length);
