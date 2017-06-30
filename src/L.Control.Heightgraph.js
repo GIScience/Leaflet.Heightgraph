@@ -248,7 +248,7 @@ L.Control.Heightgraph = L.Control.extend({
                 this._profile.totalDistance = cumDistance;
             }
         }
-        console.log(this._profile);   
+        console.log(this._profile);
     },
     /**
      * Creates a list with four x,y coords and other important infos for the bars drawn with d3
@@ -503,7 +503,8 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _createSelectionBox: function() {
         self = this;
-        var svg = d3.select('svg');
+        var svg = d3.select(this._container)
+            .select("svg");
         var margin = this._margins,
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;
