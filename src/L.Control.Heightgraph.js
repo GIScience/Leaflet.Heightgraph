@@ -103,7 +103,7 @@ L.Control.Heightgraph = L.Control.extend({
                 this._svg.selectAll("path.area")
                     .remove();
                 // remove top border
-                this._svg.selectAll("path.borderTop")
+                this._svg.selectAll("path.border-top")
                     .remove();
                 // remove legend
                 this._svg.selectAll(".legend")
