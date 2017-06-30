@@ -96,4 +96,16 @@ var hg = L.control.heightgraph({
 hg.addTo(map);
 hg.addData(geojson);
 L.geoJson(geojson).addTo(map);
+```
 
+### Dependencies:
+
+Install npm dependencies with
+```
+npm install d3-scale-chromatic --save-dev
+```
+
+Run jasmine tests with
+```
+grunt jasmine
+```
