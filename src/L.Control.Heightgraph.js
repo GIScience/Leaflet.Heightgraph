@@ -502,7 +502,7 @@ L.Control.Heightgraph = L.Control.extend({
      * Appends a selection box for different blocks
      */
     _createSelectionBox: function() {
-        self = this;
+        var self = this;
         var svg = d3.select(this._container)
             .select("svg");
         var margin = this._margins,
