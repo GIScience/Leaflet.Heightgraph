@@ -516,7 +516,7 @@ L.Control.Heightgraph = L.Control.extend({
             .style("pointer-events", "all")
             .on("mousemove.focus", this._mousemoveHandler.bind(this))
             .on("mouseout.focus", this._mouseoutHandler.bind(this));
-        if (!L.Browser.touch) {
+        if (L.Browser.android) {
             background.on("touchstart.drag", this._dragHandler.bind(this))
                 .on("touchstart.drag", this._dragStartHandler.bind(this))
                 .on("touchstart.focus", this._mousemoveHandler.bind(this));
