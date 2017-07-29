@@ -16,7 +16,7 @@ Supported Browsers:
 - Opera
 
 ### Supported data:
-Input data has to be of type [GeoJSON-Format](http://geojson.org/). This must consist of feature collection(s) corresponding to a certain attribute which could - as an example - be surface or gradient information. Each `FeatureCollection` comprises a certain `attribute` in its `properties` (e.g. `'summary': 'steepness'`) and has a list of `LineString` features with coordinates including height values and the `attributeType` which corresponds to the certain type of attribute within this segment (in this case it could be an index of steepness) declared in its `properties`. 
+Input data has to be of type [GeoJSON-Format](http://geojson.org/). This must consist of feature collection(s) corresponding to a certain attribute which could - as an example - be surface or gradient information. Each `FeatureCollection` comprises a certain `attribute` in its `properties` (e.g. `'summary': 'steepness'`) and has a list of `LineString` features with coordinates including height values and the `attributeType` which corresponds to the certain type of attribute within this segment (in this case it could be an index of steepness) declared in its `properties`. Notice that the list of coordinates has to start with the last coordinates of the previous `LineString`.
 
 ```javascript
 var FeatureCollections = [{
@@ -39,6 +39,7 @@ var FeatureCollections = [{
         "geometry": {
             "type": "LineString",
             "coordinates": [
+                [8.6860538, 49.3903808, 114.8],
                 [8.6857921, 49.3936309, 114.4],
                 [8.6860124, 49.3936431, 114.3]
             ]
