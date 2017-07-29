@@ -69,6 +69,83 @@ L.Control.Heightgraph = L.Control.extend({
             L.DomEvent.on(this._closeButton, 'click', this._expand, this);
         }
     },
+    _dragHandler: function() {
+        //we don´t want map events to occur here
+        d3.event.preventDefault();
+        d3.event.stopPropagation();
+        this._gotDragged = true;
+        this._drawDragRectangle();
+    },
+    /**
+     * Draws the currently dragged rectabgle over the chart.
+     */
+    _drawDragRectangle: function() {
+        if (!this._dragStartCoords) {
+            return;
+        }
+        var dragEndCoords = this._dragCurrentCoords = d3.mouse(this._background.node());
+        var x1 = Math.min(this._dragStartCoords[0], dragEndCoords[0]),
+            x2 = Math.max(this._dragStartCoords[0], dragEndCoords[0]);
+        if (!this._dragRectangle && !this._dragRectangleG) {
+            var g = d3.select(this._container)
+                .select("svg")
+                .select("g");
+            this._dragRectangleG = g.append("g");
+            this._dragRectangle = this._dragRectangleG.append("rect")
+                .attr("width", x2 - x1)
+                .attr("height", this._svgHeight)
+                .attr("x", x1)
+                .attr('class', 'mouse-drag')
+                .style("fill", "grey")
+                .style("opacity", 0.5)
+                .style("pointer-events", "none");
+        } else {
+            this._dragRectangle.attr("width", x2 - x1)
+                .attr("x", x1);
+        }
+    },
+    /**
+     * Removes the drag rectangle and zoms back to the total extent of the data.
+     */
+    _resetDrag: function() {
+        if (this._dragRectangleG) {
+            this._dragRectangleG.remove();
+            this._dragRectangleG = null;
+            this._dragRectangle = null;
+            this._map.fitBounds(bounds);
+        }
+    },
+    /**
+     * Handles end of dragg operations. Zooms the map to the selected items extent.
+     */
+    _dragEndHandler: function() {
+        if (!this._dragStartCoords || !this._gotDragged) {
+            this._dragStartCoords = null;
+            this._gotDragged = false;
+            this._resetDrag();
+            return;
+        }
+        var item1 = this._findItemForX(this._dragStartCoords[0]),
+            item2 = this._findItemForX(this._dragCurrentCoords[0]);
+        this._fitSection(item1, item2);
+        this._dragStartCoords = null;
+        this._gotDragged = false;
+    },
+    _dragStartHandler: function() {
+        d3.event.preventDefault();
+        d3.event.stopPropagation();
+        this._gotDragged = false;
+        this._dragStartCoords = d3.mouse(this._background.node());
+    },
+    /**
+     * Make the map fit the route section between given indexes. 
+     */
+    _fitSection: function(index1, index2) {
+        var start = Math.min(index1, index2),
+            end = Math.max(index1, index2);
+        var ext = [this._areasFlattended[start].latlng, this._areasFlattended[end].latlng];
+        this._map.fitBounds(ext);
+    },
     /**
      * Expand container when button clicked and shrink when close-Button clicked
      */
@@ -439,6 +516,18 @@ L.Control.Heightgraph = L.Control.extend({
             .style("pointer-events", "all")
             .on("mousemove.focus", this._mousemoveHandler.bind(this))
             .on("mouseout.focus", this._mouseoutHandler.bind(this));
+        if (!L.Browser.touch) {
+            background.on("touchstart.drag", this._dragHandler.bind(this))
+                .on("touchstart.drag", this._dragStartHandler.bind(this))
+                .on("touchstart.focus", this._mousemoveHandler.bind(this));
+            L.DomEvent.on(this._container, 'touchend', this._dragEndHandler, this);
+        } else {
+            background.on("mousemove.focus", this._mousemoveHandler.bind(this))
+                .on("mouseout.focus", this._mouseoutHandler.bind(this))
+                .on("mousedown.drag", this._dragStartHandler.bind(this))
+                .on("mousemove.drag", this._dragHandler.bind(this));
+            L.DomEvent.on(this._container, 'mouseup', this._dragEndHandler, this);
+        }
     },
     /**
      * Appends a grid to the graph 
