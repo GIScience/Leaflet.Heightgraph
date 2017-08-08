@@ -470,6 +470,52 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("class", "tspan");
         this._altTspan = this._focusHeight.append('tspan')
             .attr("class", "tspan");
+        //horizontal Selection
+        this._horizontalLine = this._svg.append("line")
+            .attr("class", "horizontalLine")
+            .attr("x1", 0)
+            .attr("x2", this._width - this._margin.left - this._margin.right)
+            .attr("y1", this._y(this._profile.yElevationMin))
+            .attr("y2", this._y(this._profile.yElevationMin))
+            .style("stroke", "blue");
+
+        var jsonCircles = [{
+            "x": this._width - this._margin.left - this._margin.right,
+            "y": this._y(this._profile.yElevationMin),
+            "color": "blue",
+            "type": d3.symbolTriangle,
+            "id": "leftArrowSelection",
+            "angle": -90
+        }];
+        var self = this;
+        var horizontalDrag = this._svg.selectAll('.horizontal-symbol')
+            .data(jsonCircles)
+            .enter()
+            .append('path')
+            .attr("class", "lineSelection")
+            .attr("d", d3.symbol()
+                .type(function(d) {
+                    return d.type;
+                }))
+            .attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")";
+            })
+            .attr("id", function(d) {
+                return d.id;
+            })
+            .style("fill", function(d) {
+                return d.color;
+            })
+            .on('drag', function(d){
+             // move circlex
+             var dy = d3.mouse(self._svg.node());
+             var y1New = parseFloat(d3.select(this).attr('y1'))+ dy;
+             var y2New = parseFloat(d3.select(this).attr('y2'))+ dy;
+            self._horizontalLine.attr("y1",y1New)
+                 .attr("y2",y2New);
+             }).on('dragend', function(){
+           });
+
     },
     /**
      * Defines the ranges and format of x- and y- scales and appends them

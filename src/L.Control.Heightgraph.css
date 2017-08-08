@@ -140,3 +140,7 @@
 .select-info {
     cursor: default;
 }
+
+.lineSelection {
+    cursor: pointer;
+}
