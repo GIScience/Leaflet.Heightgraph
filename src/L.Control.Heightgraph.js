@@ -474,7 +474,7 @@ L.Control.Heightgraph = L.Control.extend({
      * Defines the ranges and format of x- and y- scales and appends them
      */
     _appendScales: function() {
-        var self = this;
+        var shortDist = Boolean(this._profile.totalDistance<= 5);
         var yHeightMin = this._profile.yElevationMin;
         var yHeightMax = this._profile.yElevationMax;
         var margin = this._margins,
@@ -486,18 +486,19 @@ L.Control.Heightgraph = L.Control.extend({
             .range([height, 0]);
         this._x.domain([0, this._profile.totalDistance]);
         this._y.domain([yHeightMin, yHeightMax]);
-        this._xAxis = d3.axisBottom()
-            .scale(this._x)
-            .tickFormat(function(d) {
-                var value;
-                var countDecimals = function (value){
-                    if(Math.floor(value) === value) return 0;
-                    return value.toString().split(".")[1].length || 0;
-                }
-                countDecimals(d)>2? value = d3.format(".2f")(d): value =d;
-                self._profile.totalDistance<= 1? value = value *1000 + " m": value = value + " km";
-                return value;
-            });
+        if (shortDist == true){
+            this._xAxis = d3.axisBottom()
+                .scale(this._x)
+                .tickFormat(function(d) {
+                    return d3.format(".2f")(d) + " km";
+                });
+        } else {
+            this._xAxis = d3.axisBottom()
+                .scale(this._x)
+                .tickFormat(function(d) {
+                    return d3.format(".1f")(d) + " km";
+                });
+        }
         this._yAxis = d3.axisLeft()
             .scale(this._y)
             .ticks(5)
