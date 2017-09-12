@@ -304,8 +304,8 @@ L.Control.Heightgraph = L.Control.extend({
                     }
                     // save the position which corresponds to the distance along the route. 
                     var position;
-                    if (j === 0 && i > 0) {
-                        position = this._profile.cumDistances[cnt - 2];
+                    if (j == coordsLength - 1 && i < data[y].features.length - 1) {
+                        position = this._profile.cumDistances[cnt];
                     } else {
                         position = this._profile.cumDistances[cnt - 1];
                     }
@@ -474,7 +474,7 @@ L.Control.Heightgraph = L.Control.extend({
      * Defines the ranges and format of x- and y- scales and appends them
      */
     _appendScales: function() {
-        var shortDist = Boolean(this._profile.totalDistance<= 5);
+        var shortDist = Boolean(this._profile.totalDistance <= 5);
         var yHeightMin = this._profile.yElevationMin;
         var yHeightMax = this._profile.yElevationMax;
         var margin = this._margins,
@@ -486,7 +486,7 @@ L.Control.Heightgraph = L.Control.extend({
             .range([height, 0]);
         this._x.domain([0, this._profile.totalDistance]);
         this._y.domain([yHeightMin, yHeightMax]);
-        if (shortDist == true){
+        if (shortDist == true) {
             this._xAxis = d3.axisBottom()
                 .scale(this._x)
                 .tickFormat(function(d) {
