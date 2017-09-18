@@ -9,7 +9,8 @@ L.Control.Heightgraph = L.Control.extend({
             bottom: 25,
             left: 50
         },
-        mappings: undefined
+        mappings: undefined,
+        expand: true
     },
     onAdd: function(map) {
         var opts = this.options;
@@ -56,7 +57,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._appendGrid();
         this._createChart(this._selectedOption);
         if (this._data.length > 1) this._createSelectionBox();
-        this._expand();
+        if (this.options.expand) this._expand();
     },
     _initToggle: function() {
         if (!L.Browser.touch) {
