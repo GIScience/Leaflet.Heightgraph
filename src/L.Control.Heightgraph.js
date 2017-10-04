@@ -9,7 +9,8 @@ L.Control.Heightgraph = L.Control.extend({
             bottom: 25,
             left: 50
         },
-        mappings: undefined
+        mappings: undefined,
+        expand: true
     },
     onAdd: function(map) {
         var opts = this.options;
@@ -56,7 +57,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._appendGrid();
         this._createChart(this._selectedOption);
         if (this._data.length > 1) this._createSelectionBox();
-        this._expand();
+        if (this.options.expand) this._expand();
     },
     _initToggle: function() {
         if (!L.Browser.touch) {
@@ -311,8 +312,8 @@ L.Control.Heightgraph = L.Control.extend({
                     }
                     // save the position which corresponds to the distance along the route. 
                     var position;
-                    if (j === 0 && i > 0) {
-                        position = this._profile.cumDistances[cnt - 2];
+                    if (j == coordsLength - 1 && i < data[y].features.length - 1) {
+                        position = this._profile.cumDistances[cnt];
                     } else {
                         position = this._profile.cumDistances[cnt - 1];
                     }
@@ -332,7 +333,7 @@ L.Control.Heightgraph = L.Control.extend({
             if (y == data.length - 1) {
                 this._profile.totalDistance = cumDistance;
             }
-        };
+        }
     },
     /**
      * Creates a list with four x,y coords and other important infos for the bars drawn with d3
@@ -578,6 +579,7 @@ L.Control.Heightgraph = L.Control.extend({
      * Defines the ranges and format of x- and y- scales and appends them
      */
     _appendScales: function() {
+        var shortDist = Boolean(this._profile.totalDistance <= 5);
         var yHeightMin = this._profile.yElevationMin;
         var yHeightMax = this._profile.yElevationMax;
         var margin = this._margins,
@@ -589,11 +591,19 @@ L.Control.Heightgraph = L.Control.extend({
             .range([height, 0]);
         this._x.domain([0, this._profile.totalDistance]);
         this._y.domain([yHeightMin, yHeightMax]);
-        this._xAxis = d3.axisBottom()
-            .scale(this._x)
-            .tickFormat(function(d) {
-                return d + " km";
-            });
+        if (shortDist == true) {
+            this._xAxis = d3.axisBottom()
+                .scale(this._x)
+                .tickFormat(function(d) {
+                    return d3.format(".2f")(d) + " km";
+                });
+        } else {
+            this._xAxis = d3.axisBottom()
+                .scale(this._x)
+                .tickFormat(function(d) {
+                    return d3.format(".1f")(d) + " km";
+                });
+        }
         this._yAxis = d3.axisLeft()
             .scale(this._y)
             .ticks(5)
