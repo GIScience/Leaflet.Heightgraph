@@ -186,6 +186,13 @@ L.Control.Heightgraph = L.Control.extend({
                 // remove legend
                 this._svg.selectAll(".legend")
                     .remove();
+                // remove horizontal Line
+                this._svg.selectAll(".lineSelection")
+                    .remove();
+                this._svg.selectAll(".horizontalLine")
+                    .remove();
+                this._svg.selectAll(".horizontalLineText")
+                    .remove();
                 this._createChart(selectedOption);
             }
         }
@@ -325,8 +332,7 @@ L.Control.Heightgraph = L.Control.extend({
             if (y == data.length - 1) {
                 this._profile.totalDistance = cumDistance;
             }
-        }
-        console.log(this._profile);
+        };
     },
     /**
      * Creates a list with four x,y coords and other important infos for the bars drawn with d3
@@ -411,6 +417,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._appendBackground();
         this._createBorderTopLine();
         this._createLegend();
+        this._createHorizontalLine();
     },
     /**
      *  Creates focus Line and focus box while hovering
@@ -470,24 +477,34 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("class", "tspan");
         this._altTspan = this._focusHeight.append('tspan')
             .attr("class", "tspan");
-        //horizontal Selection
+    },
+    /**
+     *  Creates horizontal Line for dragging
+     */
+    _createHorizontalLine: function() {
+        var self = this;
         this._horizontalLine = this._svg.append("line")
             .attr("class", "horizontalLine")
             .attr("x1", 0)
             .attr("x2", this._width - this._margin.left - this._margin.right)
             .attr("y1", this._y(this._profile.yElevationMin))
             .attr("y2", this._y(this._profile.yElevationMin))
-            .style("stroke", "blue");
-
+            .style("stroke", "black");
+        this._elevationValueText = this._svg.append("text")
+            .attr("class", "horizontalLineText")
+            .attr("x", this._width - this._margin.left - this._margin.right - 20)
+            .attr("y", this._y(this._profile.yElevationMin)-10)
+            .attr("fill", "black");
+        //<text x="20" y="20" font-family="sans-serif" font-size="20px" fill="red">Hello!</text>
+        //triangle symbol as controler
         var jsonCircles = [{
-            "x": this._width - this._margin.left - this._margin.right,
+            "x": this._width - this._margin.left - this._margin.right + 7,
             "y": this._y(this._profile.yElevationMin),
-            "color": "blue",
+            "color": "black",
             "type": d3.symbolTriangle,
-            "id": "leftArrowSelection",
-            "angle": -90
+            "angle": -90,
+            "size": 100
         }];
-        var self = this;
         var horizontalDrag = this._svg.selectAll('.horizontal-symbol')
             .data(jsonCircles)
             .enter()
@@ -496,6 +513,9 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("d", d3.symbol()
                 .type(function(d) {
                     return d.type;
+                })
+                .size(function(d) {
+                    return d.size;
                 }))
             .attr("transform", function(d) {
                 return "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")";
@@ -506,16 +526,53 @@ L.Control.Heightgraph = L.Control.extend({
             .style("fill", function(d) {
                 return d.color;
             })
-            .on('drag', function(d){
-             // move circlex
-             var dy = d3.mouse(self._svg.node());
-             var y1New = parseFloat(d3.select(this).attr('y1'))+ dy;
-             var y2New = parseFloat(d3.select(this).attr('y2'))+ dy;
-            self._horizontalLine.attr("y1",y1New)
-                 .attr("y2",y2New);
-             }).on('dragend', function(){
-           });
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
 
+        function dragstarted(d) {
+            d3.select(this)
+                .raise()
+                .classed("active", true);
+            d3.select(".horizontalLine")
+                .raise()
+                .classed("active", true);
+        }
+
+        function dragged(d) {
+            d3.select(this)
+                .attr("transform", function(d) {
+                    return "translate(" + d.x + "," + (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)) + ") rotate(" + d.angle + ")";
+                })
+            d3.select(".horizontalLine")
+                .attr("y1", (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)))
+                .attr("y2", (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)));
+            self._highlightedCoords = self._findCoordsForY(d3.event.y);
+            d3.select(".horizontalLineText")
+                .attr("y", (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y-10)))
+                .text(d3.format(".0f")(self._y.invert((d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)))) + " m");
+        }
+
+        function dragended(d) {
+            d3.select(this)
+                .classed("active", false);
+            d3.select(".horizontalLine")
+                .classed("active", false);
+            if (self._markedSegments != undefined) {
+                self._map.removeLayer(self._markedSegments);
+            }
+            self._markSegmentsOnMap(self._highlightedCoords);
+        }
+    },
+    /**
+     * Highlights segments on the map above given elevation value
+     */
+    _markSegmentsOnMap: function(coords) {
+        this._markedSegments = L.polyline(coords, {
+                color: 'red'
+            })
+            .addTo(this._map);
     },
     /**
      * Defines the ranges and format of x- and y- scales and appends them
@@ -900,6 +957,41 @@ L.Control.Heightgraph = L.Control.extend({
             .left;
         var xinvert = this._x.invert(x);
         return bisect(this._areasFlattended, xinvert);
+    },
+    /*
+     * Finds data entries above a given y-elevation value and returns geo-coordinates
+     */
+    _findCoordsForY: function(y) {
+        var self = this;
+
+        function bisect(b, yinvert) {
+            //save indexes of elevation values above the horizontal line
+            var list = [];
+            for (var i = 0; i < b.length; i++) {
+                if (b[i].altitude >= yinvert) {
+                    list.push(i);
+                }
+            }
+            //split index list into coherent blocks of coordinates
+            var newList = [];
+            var start = 0;
+            for (var i = 0; i < list.length - 1; i++) {
+                if (list[i + 1] != list[i] + 1) {
+                    newList.push(list.slice(start, i + 1));
+                    start = i + 1;
+                }
+            }
+            newList.push(list.slice(start, list.length))
+            //get lat lon coordinates based on indexes
+            for (var i = 0; i < newList.length; i++) {
+                for (var j = 0; j < newList[i].length; j++) {
+                    newList[i][j] = b[newList[i][j]].latlng;
+                }
+            }
+            return newList
+        }
+        var yinvert = this._y.invert(y);
+        return bisect(this._areasFlattended, yinvert);
     },
 });
 L.control.heightgraph = function(options) {
