@@ -37,6 +37,7 @@ L.Control.Heightgraph = L.Control.extend({
         return container;
     },
     onRemove: function(map) {
+        this._removeMarkedSegmentsOnMap();
         this._container = null;
         this._svg = undefined;
     },
@@ -549,9 +550,13 @@ L.Control.Heightgraph = L.Control.extend({
             d3.select(".horizontalLine")
                 .attr("y1", (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)))
                 .attr("y2", (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)));
-            self._highlightedCoords = self._findCoordsForY(d3.event.y);
+            if(d3.event.y >= 150){
+                self._highlightedCoords = [];
+            } else {
+                self._highlightedCoords = self._findCoordsForY(d3.event.y);
+            }
             d3.select(".horizontalLineText")
-                .attr("y", (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y-10)))
+                .attr("y", (d3.event.y <= 10 ? 0 : (d3.event.y > 150 ? 140 : d3.event.y-10)))
                 .text(d3.format(".0f")(self._y.invert((d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)))) + " m");
         }
 
@@ -560,9 +565,7 @@ L.Control.Heightgraph = L.Control.extend({
                 .classed("active", false);
             d3.select(".horizontalLine")
                 .classed("active", false);
-            if (self._markedSegments != undefined) {
-                self._map.removeLayer(self._markedSegments);
-            }
+            self._removeMarkedSegmentsOnMap();
             self._markSegmentsOnMap(self._highlightedCoords);
         }
     },
@@ -570,10 +573,19 @@ L.Control.Heightgraph = L.Control.extend({
      * Highlights segments on the map above given elevation value
      */
     _markSegmentsOnMap: function(coords) {
-        this._markedSegments = L.polyline(coords, {
+        if(coords){
+            this._markedSegments = L.polyline(coords, {
                 color: 'red'
-            })
-            .addTo(this._map);
+            }).addTo(this._map);
+        }
+    },
+    /**
+     * Remove the highlighted segments from the map
+     */
+    _removeMarkedSegmentsOnMap: function() {
+        if (this._markedSegments != undefined) {
+            this._map.removeLayer(this._markedSegments);
+        }
     },
     /**
      * Defines the ranges and format of x- and y- scales and appends them
