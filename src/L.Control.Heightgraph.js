@@ -66,10 +66,8 @@ L.Control.Heightgraph = L.Control.extend({
         } else {
             L.DomEvent.on(this._container, 'click', L.DomEvent.stopPropagation);
         }
-        if (!L.Browser.android) {
-            L.DomEvent.on(this._button, 'click', this._expand, this);
-            L.DomEvent.on(this._closeButton, 'click', this._expand, this);
-        }
+        L.DomEvent.on(this._button, 'click', this._expand, this);
+        L.DomEvent.on(this._closeButton, 'click', this._expand, this);
     },
     _dragHandler: function() {
         //we don´t want map events to occur here
