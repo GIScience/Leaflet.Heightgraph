@@ -22,8 +22,8 @@ L.Control.Heightgraph = L.Control.extend({
         this._showState = false;
         this._initToggle();
         this._margin = this.options.margins;
-        this._width = this.options.width - this._margin.left - this._margin.right;
-        this._height = this.options.height - this._margin.top - this._margin.bottom;
+        this._width = this.options.width;
+        this._height = this.options.height;
         this._mappings = this.options.mappings;
         this._svgWidth = this._width - this._margin.left - this._margin.right;
         this._svgHeight = this._height - this._margin.top - this._margin.bottom;
@@ -543,21 +543,22 @@ L.Control.Heightgraph = L.Control.extend({
         }
 
         function dragged(d) {
+            var maxY = self._svgHeight;
             d3.select(this)
                 .attr("transform", function(d) {
-                    return "translate(" + d.x + "," + (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)) + ") rotate(" + d.angle + ")";
+                    return "translate(" + d.x + "," + (d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)) + ") rotate(" + d.angle + ")";
                 })
             d3.select(".horizontalLine")
-                .attr("y1", (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)))
-                .attr("y2", (d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)));
-            if(d3.event.y >= 150){
+                .attr("y1", (d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)))
+                .attr("y2", (d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)));
+            if(d3.event.y >= maxY){
                 self._highlightedCoords = [];
             } else {
                 self._highlightedCoords = self._findCoordsForY(d3.event.y);
             }
             d3.select(".horizontalLineText")
-                .attr("y", (d3.event.y <= 10 ? 0 : (d3.event.y > 150 ? 140 : d3.event.y-10)))
-                .text(d3.format(".0f")(self._y.invert((d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)))) + " m");
+                .attr("y", (d3.event.y <= 10 ? 0 : (d3.event.y > maxY ? maxY-10 : d3.event.y-10)))
+                .text(d3.format(".0f")(self._y.invert((d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)))) + " m");
         }
 
         function dragended(d) {
