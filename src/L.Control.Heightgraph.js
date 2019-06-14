@@ -556,8 +556,8 @@ L.Control.Heightgraph = L.Control.extend({
                 self._highlightedCoords = self._findCoordsForY(d3.event.y);
             }
             d3.select(".horizontalLineText")
-                    .attr("y", (d3.event.y <= 10 ? 0 : (d3.event.y > 150 ? 140 : d3.event.y-10)))
-                    .text(d3.format(".0f")(self._y.invert((d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)))) + " m");
+                .attr("y", (d3.event.y <= 10 ? 0 : (d3.event.y > 150 ? 140 : d3.event.y-10)))
+                .text(d3.format(".0f")(self._y.invert((d3.event.y < 0 ? 0 : (d3.event.y > 150 ? 150 : d3.event.y)))) + " m");
         }
 
         function dragended(d) {
@@ -573,11 +573,11 @@ L.Control.Heightgraph = L.Control.extend({
      * Highlights segments on the map above given elevation value
      */
     _markSegmentsOnMap: function(coords) {
-        if(coords)
+        if(coords){
             this._markedSegments = L.polyline(coords, {
-                    color: 'red'
-                })
-                .addTo(this._map);
+                color: 'red'
+            }).addTo(this._map);
+        }
     },
     /**
      * Remove the highlighted segments from the map
