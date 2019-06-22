@@ -103,7 +103,36 @@ L.geoJson(geojson).addTo(map);
 
 Install npm dependencies with
 ```
-npm install d3-scale-chromatic --save-dev
+npm install d3
+
+// If you care about your js size, you can run:
+npm install d3-selection d3-array d3-color d3-drag d3-dispatch d3-scale d3-axis d3-format d3-shape d3-interpolate d3-path d3-scale-chromatic
+```
+
+Install Leaflet.Heightgraph
+```
+npm install leaflet.heightgraph
+```
+
+When using NPM you can reguire all needed libraries like this
+```
+require ('d3');
+
+// If you selected the single modules
+require('d3-selection');
+require('d3-array');
+require('d3-color');
+require('d3-drag');
+require('d3-dispatch');
+require('d3-scale');
+require('d3-axis');
+require('d3-format');
+require('d3-shape');
+require('d3-interpolate');
+require('d3-path');
+require('d3-scale-chromatic');
+
+require('leaflet.heightgraph');
 ```
 
 Run jasmine tests with

@@ -1,6 +1,6 @@
 {
   "name": "leaflet.heightgraph",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Leaflet plugin to visualize height information and road attributes",
   "main": "src/L.Control.Heightgraph.js",
   "scripts": {
@@ -8,16 +8,11 @@
     "lite": "lite-server"
   },
   "license": "ISC",
-  "dependencies": {
-    "grunt-contrib-connect": "0.8.0",
-    "grunt-contrib-jasmine": "^1.1.0",
-    "grunt-contrib-watch": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "bower": "^1.3.1",
     "concurrently": "^2.0.0",
     "connect-modrewrite": "^0.9.0",
-    "d3-scale-chromatic": "^1.1.1",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
@@ -26,11 +21,14 @@
     "grunt-contrib-cssmin": "^0.13.0",
     "grunt-contrib-jshint": "^0.11.2",
     "grunt-contrib-uglify": "^0.9.1",
+    "grunt-contrib-connect": "0.8.0",
+    "grunt-contrib-jasmine": "^1.1.0",
+    "grunt-contrib-watch": "^1.0.0",
     "grunt-htmlhint": "^0.4.1",
-    "grunt-jsdoc": "^2.1.0",
+    "grunt-jsdoc": "^2.4.0",
     "grunt-script-link-tags": "^1.0.2",
     "grunt-usemin": "^3.0.0",
-    "lite-server": "^2.2.0",
+    "lite-server": "^2.5.3",
     "time-grunt": "^1.4.0"
   }
 }

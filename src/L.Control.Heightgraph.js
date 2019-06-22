@@ -193,6 +193,7 @@ L.Control.Heightgraph = L.Control.extend({
                     .remove();
                 this._svg.selectAll(".horizontalLineText")
                     .remove();
+                this._removeMarkedSegmentsOnMap();
                 this._createChart(selectedOption);
             }
         }
