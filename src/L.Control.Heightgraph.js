@@ -10,7 +10,15 @@ L.Control.Heightgraph = L.Control.extend({
             left: 50
         },
         mappings: undefined,
-        expand: true
+        expand: true,
+        translation: {}
+    },
+    _defaultTranslation: {
+        distance: "Distance",
+        elevation: "Elevation",
+        segment_length: "Segment length",
+        type: "Type",
+        legend: "Legend"
     },
     onAdd: function(map) {
         var opts = this.options;
@@ -442,25 +450,25 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("x", 7)
             .attr("y", -this._y(boxPosition) + 1 * textDistance)
             .attr("id", "distance")
-            .text('Distance:');
+            .text(this._getTranslation('distance')+':');
         // text line 2
         this._focusHeight = this._focus.append("text")
             .attr("x", 7)
             .attr("y", -this._y(boxPosition) + 2 * textDistance)
             .attr("id", "height")
-            .text('Elevation:');
+            .text(this._getTranslation('elevation')+':');
         // text line 3
         this._focusBlockDistance = this._focus.append("text")
             .attr("x", 7)
             .attr("y", -this._y(boxPosition) + 3 * textDistance)
             .attr("id", "blockdistance")
-            .text('Segment length:');
+            .text(this._getTranslation('segment_length')+':');
         // text line 4
         this._focusType = this._focus.append("text")
             .attr("x", 7)
             .attr("y", -this._y(boxPosition) + 4 * textDistance)
             .attr("id", "type")
-            .text('Type:');
+            .text(this._getTranslation('type')+':');
         this._areaTspan = this._focusBlockDistance.append('tspan')
             .attr("class", "tspan");
         this._typeTspan = this._focusType.append('tspan')
@@ -818,7 +826,7 @@ L.Control.Heightgraph = L.Control.extend({
             width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom;
         var leg = [{
-            "text": "Legend"
+            "text": this._getTranslation('legend')
         }];
         var legendRectSize = 7;
         var legendSpacing = 7;
@@ -1015,6 +1023,17 @@ L.Control.Heightgraph = L.Control.extend({
         var yinvert = this._y.invert(y);
         return bisect(this._areasFlattended, yinvert);
     },
+    /*
+     * Checks the user passed translations, if they don't exist, fallback to the default translations
+     */
+    _getTranslation: function(key){
+        if(this.options.translation[key])
+            return this.options.translation[key];
+        if(this._defaultTranslation[key])
+            return this._defaultTranslation[key];
+        console.error("Unexpected error when looking up the translation for "+key);
+        return 'No translation found';
+    }
 });
 L.control.heightgraph = function(options) {
     return new L.Control.Heightgraph(options);
