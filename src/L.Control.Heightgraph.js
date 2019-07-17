@@ -11,7 +11,8 @@ L.Control.Heightgraph = L.Control.extend({
         },
         mappings: undefined,
         expand: true,
-        translation: {}
+        translation: {},
+        expandCallback: undefined
     },
     _defaultTranslation: {
         distance: "Distance",
@@ -175,6 +176,9 @@ L.Control.Heightgraph = L.Control.extend({
                 .style("display", "none");
         }
         this._showState = !this._showState;
+        if(typeof this.options.expandCallback === "function"){
+            this.options.expandCallback(this._showState);
+        }
     },
     /**
      * reacts on changes in selection box and updates heightprofile
