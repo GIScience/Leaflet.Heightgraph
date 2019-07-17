@@ -120,7 +120,6 @@ L.Control.Heightgraph = L.Control.extend({
             this._dragRectangleG.remove();
             this._dragRectangleG = null;
             this._dragRectangle = null;
-            this._map.fitBounds(bounds);
         }
     },
     /**
