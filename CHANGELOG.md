@@ -1,3 +1,7 @@
+**Improvements**
+
+* Allow defining translations for labels ([#53](https://github.com/GIScience/Leaflet.Heightgraph/pull/53) by [boldtrn](https://github.com/boldtrn)).
+
 0.1.0 (2019-06-22)
 
 **Improvements**

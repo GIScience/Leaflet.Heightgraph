@@ -99,6 +99,21 @@ hg.addData(geojson);
 L.geoJson(geojson).addTo(map);
 ```
 
+#### Translations
+
+You can change the labels of the HeightGraph by passing a translation config (see the index.html for an example).
+
+The default configuration is:
+```
+translation: {
+    distance: "Distance",
+    elevation: "Elevation",
+    segment_length: "Segment length",
+    type: "Type",
+    legend: "Legend"
+}
+```
+
 ### Dependencies:
 
 Install npm dependencies with. The latest version of d3 is not compatible with older broswers like IE9, you can try d3 v4 in this case.
