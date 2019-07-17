@@ -1,5 +1,5 @@
 .heightgraph-container {
-    background-color: #FFF;
+    background-color: rgba(250,250,250,.8);
     border-radius: 10px;
     display: none;
     cursor: default;
@@ -36,8 +36,6 @@
 }
 
 .border-top {
-    stroke-width: 1;
-    stroke: #999;
     fill: none;
 }
 
@@ -52,7 +50,7 @@
 }
 
 .tick, .tick text {
-    fill: #999;
+    fill: #000;
     pointer-events: none;
 }
 
@@ -66,7 +64,6 @@
     fill: none;
     stroke-width: 2px;
     shape-rendering: crispEdges;
-    stroke: lightgrey;
     pointer-events: none;
 }
 
@@ -113,6 +110,10 @@
 .height-focus.circle {
     stroke: #FFF;
     stroke-width: 1px;
+}
+
+.mouse-height-box-text{
+    font-size: 12px;
 }
 
 .grid .tick {
