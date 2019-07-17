@@ -1,3 +1,11 @@
+0.1.2 (2019-07-17)
+
+**Improvements**
+
+* Callback for the expand state ([#58](https://github.com/GIScience/Leaflet.Heightgraph/pull/58) by [boldtrn](https://github.com/boldtrn)).
+
+0.1.1 (2019-07-17)
+
 **Improvements**
 
 * Allow defining translations for labels ([#53](https://github.com/GIScience/Leaflet.Heightgraph/pull/53) by [boldtrn](https://github.com/boldtrn)).
