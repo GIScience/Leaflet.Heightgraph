@@ -406,11 +406,11 @@ L.Control.Heightgraph = L.Control.extend({
         this._mouseHeightFocusLabelTextElev.attr("x", layerpoint.x + 5)
             .attr("y", normalizedY + 12)
             .text(height + " m")
-            .attr("class", "tspan");
+            .attr("class", "tspan mouse-height-box-text");
         this._mouseHeightFocusLabelTextType.attr("x", layerpoint.x + 5)
             .attr("y", normalizedY + 24)
             .text(type)
-            .attr("class", "tspan");
+            .attr("class", "tspan mouse-height-box-text");
         var maxWidth = this._dynamicBoxSize('text.tspan')[1];
         // box size should change for profile none (no type)
         var maxHeight = (type === "") ? 12 + 6 : 2 * 12 + 6;
@@ -693,6 +693,7 @@ L.Control.Heightgraph = L.Control.extend({
             .attr('class', 'x axis')
             .call(this._xAxis);
         this._svg.append('g')
+            .attr("transform", "translate(-2,0)")
             .attr('class', 'y axis')
             .call(this._yAxis);
     },
