@@ -1,3 +1,9 @@
+0.1.3 (2019-07-17)
+
+**Improvements**
+
+* Allow customizing x and y axis ticks ([#61](https://github.com/GIScience/Leaflet.Heightgraph/pull/61) by [boldtrn](https://github.com/boldtrn)).
+
 0.1.2 (2019-07-17)
 
 **Improvements**

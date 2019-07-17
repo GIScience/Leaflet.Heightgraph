@@ -12,7 +12,9 @@ L.Control.Heightgraph = L.Control.extend({
         mappings: undefined,
         expand: true,
         translation: {},
-        expandCallback: undefined
+        expandCallback: undefined,
+        xTicks: undefined,
+        yTicks: undefined
     },
     _defaultTranslation: {
         distance: "Distance",
@@ -602,7 +604,7 @@ L.Control.Heightgraph = L.Control.extend({
      * Defines the ranges and format of x- and y- scales and appends them
      */
     _appendScales: function() {
-        var shortDist = Boolean(this._profile.totalDistance <= 5);
+        var shortDist = Boolean(this._profile.totalDistance <= 10);
         var yHeightMin = this._profile.yElevationMin;
         var yHeightMax = this._profile.yElevationMax;
         var margin = this._margins,
@@ -624,21 +626,26 @@ L.Control.Heightgraph = L.Control.extend({
             this._xAxis = d3.axisBottom()
                 .scale(this._x)
                 .tickFormat(function(d) {
-                    return d3.format(".1f")(d) + " km";
+                    return d3.format(".0f")(d) + " km";
                 });
+        }
+        if(this.options.xTicks){
+            this._xAxis.ticks(this.options.xTicks)
         }
         this._yAxis = d3.axisLeft()
             .scale(this._y)
-            .ticks(5)
             .tickFormat(function(d) {
                 return d + " m";
             });
+        if(this.options.yTicks){
+            this._yAxis.ticks(this.options.yTicks)
+        }
         this._yEndAxis = d3.axisRight()
             .scale(this._yEnd)
             .ticks(0);
     },
     /**
-     * Appends a background an adds mouse handlers 
+     * Appends a background and adds mouse handlers 
      */
     _appendBackground: function() {
         var background = this._background = d3.select(this._container)
