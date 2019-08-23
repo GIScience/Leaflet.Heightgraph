@@ -1,3 +1,9 @@
+0.2.0 (2019-08-23)
+
+**API Changes**
+
+* The class name `focus` was renamed to `focusbox`. `focus` might be used in many other frameworks and could lead to css conflicts. Please make sure you update the .css when updating the .js! ([#43](https://github.com/GIScience/Leaflet.Heightgraph/pull/64) by [boldtrn](https://github.com/boldtrn)).
+
 0.1.3 (2019-07-17)
 
 **Improvements**

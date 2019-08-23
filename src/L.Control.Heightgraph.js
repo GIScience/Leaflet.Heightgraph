@@ -444,7 +444,7 @@ L.Control.Heightgraph = L.Control.extend({
             this._focusLineGroup.remove();
         }
         this._focus = this._svg.append("g")
-            .attr("class", "focus");
+            .attr("class", "focusbox");
         // background box
         this._focusRect = this._focus.append("rect")
             .attr("x", 3)
@@ -478,8 +478,8 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("class", "tspan");
         this._typeTspan = this._focusType.append('tspan')
             .attr("class", "tspan");
-        var height = this._dynamicBoxSize('.focus text')[0];
-        d3.selectAll('.focus rect')
+        var height = this._dynamicBoxSize('.focusbox text')[0];
+        d3.selectAll('.focusbox rect')
             .attr("height", height * textDistance + (textDistance / 2))
             .attr("display", "block");
         this._focusLineGroup = this._svg.append("g")
@@ -657,16 +657,16 @@ L.Control.Heightgraph = L.Control.extend({
             .style("fill", "none")
             .style("stroke", "none")
             .style("pointer-events", "all")
-            .on("mousemove.focus", this._mousemoveHandler.bind(this))
-            .on("mouseout.focus", this._mouseoutHandler.bind(this));
+            .on("mousemove.focusbox", this._mousemoveHandler.bind(this))
+            .on("mouseout.focusbox", this._mouseoutHandler.bind(this));
         if (L.Browser.android) {
             background.on("touchstart.drag", this._dragHandler.bind(this))
                 .on("touchstart.drag", this._dragStartHandler.bind(this))
-                .on("touchstart.focus", this._mousemoveHandler.bind(this));
+                .on("touchstart.focusbox", this._mousemoveHandler.bind(this));
             L.DomEvent.on(this._container, 'touchend', this._dragEndHandler, this);
         } else {
-            background.on("mousemove.focus", this._mousemoveHandler.bind(this))
-                .on("mouseout.focus", this._mouseoutHandler.bind(this))
+            background.on("mousemove.focusbox", this._mousemoveHandler.bind(this))
+                .on("mouseout.focusbox", this._mouseoutHandler.bind(this))
                 .on("mousedown.drag", this._dragStartHandler.bind(this))
                 .on("mousemove.drag", this._dragHandler.bind(this));
             L.DomEvent.on(this._container, 'mouseup', this._dragEndHandler, this);
@@ -962,7 +962,7 @@ L.Control.Heightgraph = L.Control.extend({
             ll = item.latlng,
             areaIdx = item.areaIdx,
             type = item.type;
-        var boxWidth = this._dynamicBoxSize('.focus text')[1] + 10;
+        var boxWidth = this._dynamicBoxSize('.focusbox text')[1] + 10;
         if (areaIdx === 0) {
             areaLength = this._profile.blocks[this._selectedOption].distances[areaIdx];
         } else {

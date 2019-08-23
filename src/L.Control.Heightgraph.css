@@ -67,21 +67,21 @@
     pointer-events: none;
 }
 
-.focus {
+.focusbox {
     display: none;
     font-size: 10px;
     fill: #000;
     pointer-events: none;
 }
 
-.focus rect {
+.focusbox rect {
     fill: rgba(255, 255, 255, 0.8);
     stroke-width: 1px;
     stroke: #888;
     pointer-events: none;
 }
 
-.focus text {
+.focusbox text {
     font-size: 12px;
 }
 
