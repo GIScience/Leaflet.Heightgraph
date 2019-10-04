@@ -148,7 +148,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._dragStartCoords = d3.mouse(this._background.node());
     },
     /**
-     * Make the map fit the route section between given indexes. 
+     * Make the map fit the route section between given indexes.
      */
     _fitSection: function(index1, index2) {
         var start = Math.min(index1, index2),
@@ -323,7 +323,7 @@ L.Control.Heightgraph = L.Control.extend({
                         }
                         cnt += 1;
                     }
-                    // save the position which corresponds to the distance along the route. 
+                    // save the position which corresponds to the distance along the route.
                     var position;
                     if (j == coordsLength - 1 && i < data[y].features.length - 1) {
                         position = this._profile.cumDistances[cnt];
@@ -559,7 +559,7 @@ L.Control.Heightgraph = L.Control.extend({
             d3.select(this)
                 .attr("transform", function(d) {
                     return "translate(" + d.x + "," + (d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)) + ") rotate(" + d.angle + ")";
-                })
+                });
             d3.select(".horizontalLine")
                 .attr("y1", (d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)))
                 .attr("y2", (d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)));
@@ -596,7 +596,7 @@ L.Control.Heightgraph = L.Control.extend({
      * Remove the highlighted segments from the map
      */
     _removeMarkedSegmentsOnMap: function() {
-        if (this._markedSegments != undefined) {
+        if (this._markedSegments !== undefined) {
             this._map.removeLayer(this._markedSegments);
         }
     },
@@ -616,7 +616,7 @@ L.Control.Heightgraph = L.Control.extend({
             .range([height, 0]);
         this._x.domain([0, this._profile.totalDistance]);
         this._y.domain([yHeightMin, yHeightMax]);
-        if (shortDist == true) {
+        if (shortDist === true) {
             this._xAxis = d3.axisBottom()
                 .scale(this._x)
                 .tickFormat(function(d) {
@@ -630,7 +630,7 @@ L.Control.Heightgraph = L.Control.extend({
                 });
         }
         if(this.options.xTicks){
-            this._xAxis.ticks(this.options.xTicks)
+            this._xAxis.ticks(this.options.xTicks);
         }
         this._yAxis = d3.axisLeft()
             .scale(this._y)
@@ -638,14 +638,14 @@ L.Control.Heightgraph = L.Control.extend({
                 return d + " m";
             });
         if(this.options.yTicks){
-            this._yAxis.ticks(this.options.yTicks)
+            this._yAxis.ticks(this.options.yTicks);
         }
         this._yEndAxis = d3.axisRight()
             .scale(this._yEnd)
             .ticks(0);
     },
     /**
-     * Appends a background and adds mouse handlers 
+     * Appends a background and adds mouse handlers
      */
     _appendBackground: function() {
         var background = this._background = d3.select(this._container)
@@ -673,7 +673,7 @@ L.Control.Heightgraph = L.Control.extend({
         }
     },
     /**
-     * Appends a grid to the graph 
+     * Appends a grid to the graph
      */
     _appendGrid: function() {
         this._svg.append("g")
@@ -900,7 +900,7 @@ L.Control.Heightgraph = L.Control.extend({
             });
     },
     /**
-     * calculates the margins of boxes 
+     * calculates the margins of boxes
      * @param {String} className: name of the class
      * @return {array} borders: number of text lines, widest range of text
      */
@@ -919,7 +919,7 @@ L.Control.Heightgraph = L.Control.extend({
         return borders;
     },
     /**
-     * Creates top border line on graph 
+     * Creates top border line on graph
      */
     _createBorderTopLine: function() {
         var self = this;
@@ -1016,20 +1016,20 @@ L.Control.Heightgraph = L.Control.extend({
             //split index list into coherent blocks of coordinates
             var newList = [];
             var start = 0;
-            for (var i = 0; i < list.length - 1; i++) {
-                if (list[i + 1] != list[i] + 1) {
-                    newList.push(list.slice(start, i + 1));
-                    start = i + 1;
+            for (var j = 0; j < list.length - 1; j++) {
+                if (list[j + 1] != list[j] + 1) {
+                    newList.push(list.slice(start, j + 1));
+                    start = j + 1;
                 }
             }
-            newList.push(list.slice(start, list.length))
+            newList.push(list.slice(start, list.length));
             //get lat lon coordinates based on indexes
-            for (var i = 0; i < newList.length; i++) {
-                for (var j = 0; j < newList[i].length; j++) {
-                    newList[i][j] = b[newList[i][j]].latlng;
+            for (var k = 0; k < newList.length; k++) {
+                for (var l = 0; l < newList[k].length; l++) {
+                    newList[k][l] = b[newList[k][l]].latlng;
                 }
             }
-            return newList
+            return newList;
         }
         var yinvert = this._y.invert(y);
         return bisect(this._areasFlattended, yinvert);
