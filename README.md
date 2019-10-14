@@ -1,12 +1,11 @@
-Leaflet.HeightProfile
-=====================
+# Leaflet.HeightProfile
 
 ![preview](https://cloud.githubusercontent.com/assets/10322094/22474104/472bcc88-e7db-11e6-8c9e-7e1d53cd0b57.png)
 
 1. [What is this?](https://github.com/GIScience/Leaflet.Heightgraph#what-is-this)
 2. [How to use this library](https://github.com/GIScience/Leaflet.Heightgraph#how-to-use)
 
-### What is this?
+## What is this?
 
 This plugin is under development and is inspired by [MrMufflon/Leaflet.Elevation](https://github.com/MrMufflon/Leaflet.Elevation).
 You may use this plugin to view an interactive height profile of linestring segments using d3js.
@@ -16,6 +15,71 @@ Supported Browsers:
 - Chrome
 - Firefox
 - Opera
+
+[Demo](https://giscience.github.io/Leaflet.Heightgraph)
+
+## Install with Bower
+
+`` bower install leaflet.heightgraph ``
+
+
+## Install with npm:
+
+[`nodejs`](https://nodejs.org/en/download/) (version >=8)
+or use [`nvm`](https://github.com/nvm-sh/nvm/blob/master/README.md) to install specific node versions
+
+Install dependencies with npm. The latest version of d3 is not compatible with older browsers like IE9, you can try d3 v4 in this case.
+```
+npm install d3
+```
+
+Install Leaflet.Heightgraph
+```
+npm install leaflet.heightgraph
+```
+
+When using NPM you can require all needed libraries like this.
+```
+require ('d3');
+require('leaflet.heightgraph');
+```
+
+## Local setup
+
+```bash
+# clone the repository
+$ git clone https://github.com/GIScience/Leaflet.Heightgraph.git
+
+# install dependencies using a node-version >= 8
+$ npm install
+
+# install bower_components
+$ node_modules/bower/bin/bower install
+
+# run jasmine tests with
+$ grunt
+```
+
+### How to use:
+
+```javascript
+// all used options are the default values
+var hg = L.control.heightgraph({
+    width: 800,
+    height: 280,
+    margins: {
+        top: 10,
+        right: 30,
+        bottom: 55,
+        left: 50
+    },
+    position: "bottomright",
+    mappings: undefined || colorMappings
+});
+hg.addTo(map);
+hg.addData(geojson);
+L.geoJson(geojson).addTo(map);
+```
 
 ### Supported data:
 Input data has to be of type [GeoJSON-Format](http://geojson.org/).
@@ -63,12 +127,6 @@ var FeatureCollections = [{
 }];
 ```
 
-[Demo](https://giscience.github.io/Leaflet.Heightgraph)
-
-### Install with Bower
-
-`` bower install leaflet.heightgraph ``
-
 ### Optional:
 You may add a mappings object to customize the colors and labels in the height graph.
 Without adding custom mappings the segments and labels within the graph will be displayed in random colors.
@@ -87,28 +145,7 @@ colorMappings.Steepness = {
 };
 ```
 
-### How to use:
-
-```javascript
-// all used options are the default values
-var hg = L.control.heightgraph({
-    width: 800,
-    height: 280,
-    margins: {
-        top: 10,
-        right: 30,
-        bottom: 55,
-        left: 50
-    },
-    position: "bottomright",
-    mappings: undefined || colorMappings
-});
-hg.addTo(map);
-hg.addData(geojson);
-L.geoJson(geojson).addTo(map);
-```
-
-#### Translations
+### Translations
 
 You can change the labels of the HeightGraph by passing a translation config (see the index.html for an example).
 
@@ -123,25 +160,22 @@ translation: {
 }
 ```
 
-### Dependencies:
+## Debug configurations (WebStorm)
 
-Install npm dependencies with. The latest version of d3 is not compatible with older browsers like IE9, you can try d3 v4 in this case.
-```
-npm install d3
-```
+Debug jasmine tests with karma in WebStorm
 
-Install Leaflet.Heightgraph
-```
-npm install leaflet.heightgraph
-```
+- open `Run -> Edit Configurations...`
+- click `+` to add a new configuration and choose the karma template
+- give the Configuration a name e.g. `Test`
+- the other parameters should be filled correctly by default
+    - Configuration File: `{path to repository root}/karma.conf.js`
+    - Node interpreter: `{path to node interpreter}`
+    - Karma package: `{path to repository root}/node_modules/karma`
+    - Working directory: `{path to repository root}`
+    - Browsers to start / Node Options / Environment Variables: - leave empty -
+- click the run button or setup breakpoints and click the debug button
 
-When using NPM you can require all needed libraries like this.
-```
-require ('d3');
-require('leaflet.heightgraph');
-```
+Run karma with coverage
 
-Run jasmine tests with
-```
-grunt jasmine
-```
+- once you have a karma task configured just click the run with coverage button 
+- analyse coverage in Webstorm or Browser (open ./coverage/html/index.html)

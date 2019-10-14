@@ -28,6 +28,12 @@
     "grunt-jsdoc": "^2.4.0",
     "grunt-script-link-tags": "^1.0.2",
     "grunt-usemin": "^3.0.0",
+    "jasmine-core": "^3.5.0",
+    "karma": "^4.3.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-coverage": "^2.0.1",
+    "karma-jasmine": "^2.0.1",
+    "karma-jasmine-html-reporter": "^1.4.2",
     "lite-server": "^2.5.3",
     "time-grunt": "^1.4.0"
   }
