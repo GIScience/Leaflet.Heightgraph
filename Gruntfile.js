@@ -18,9 +18,12 @@ module.exports = function(grunt) {
             pivotal: {
                 src: ['src/**/*.js'],
                 options: {
-                    specs: 'spec/*Spec.js',
-                    helpers: 'spec/*Helper.js',
-                    vendor: ['https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js', 'https://d3js.org/d3.v4.min.js', "https://d3js.org/d3-scale-chromatic.v0.3.min.js"],
+                    specs: ['spec/*Spec.js'],
+                    helpers: ['spec/*Helper.js'],
+                    vendor: [
+                        'bower_components/leaflet/dist/leaflet.js',
+                        'bower_components/d3/d3.min.js'
+                    ],
                     '--local-to-remote-url-access': true
                 }
             }
