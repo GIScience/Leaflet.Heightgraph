@@ -23,8 +23,16 @@ L.Control.Heightgraph = L.Control.extend({
         type: "Type",
         legend: "Legend"
     },
+    _init_options: (context) => {
+        context._margin = context.options.margins;
+        context._width = context.options.width;
+        context._height = context.options.height;
+        context._mappings = context.options.mappings;
+        context._svgWidth = context._width - context._margin.left - context._margin.right;
+        context._svgHeight = context._height - context._margin.top - context._margin.bottom;
+        return context;
+    },
     onAdd: function(map) {
-        var opts = this.options;
         var container = this._container = L.DomUtil.create('div', 'heightgraph');
         L.DomEvent.disableClickPropagation(container);
         var buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
@@ -32,12 +40,7 @@ L.Control.Heightgraph = L.Control.extend({
         var closeButton = this._closeButton = L.DomUtil.create('a', "heightgraph-close-icon", container);
         this._showState = false;
         this._initToggle();
-        this._margin = this.options.margins;
-        this._width = this.options.width;
-        this._height = this.options.height;
-        this._mappings = this.options.mappings;
-        this._svgWidth = this._width - this._margin.left - this._margin.right;
-        this._svgHeight = this._height - this._margin.top - this._margin.bottom;
+        this._init_options(this);
         var svg = this._svg = d3.select(this._container)
             .append("svg")
             .attr("class", "heightgraph-container")
@@ -62,6 +65,7 @@ L.Control.Heightgraph = L.Control.extend({
                 .remove();
         }
         this._data = data;
+        this._init_options(this);
         this._selection();
         this._prepareData();
         this._computeStats();
@@ -269,7 +273,7 @@ L.Control.Heightgraph = L.Control.extend({
             var i, cnt = 0,
                 usedColors = {};
             for (i = 0; i < data[y].features.length; i++) {
-                // data is redundant in every elemtent of data which is why we collect it once
+                // data is redundant in every element of data which is why we collect it once
                 var altitude, ptA, ptB, ptDistance,
                     geometry = [];
                 var coordsLength = data[y].features[i].geometry.coordinates.length;
@@ -316,7 +320,7 @@ L.Control.Heightgraph = L.Control.extend({
                             this._profile.cumDistances.push(cumDistance);
                         }
                         cnt += 1;
-                    } else if (j == coordsLength - 1 && i == data[y].features.length - 1) {
+                    } else if (j === coordsLength - 1 && i === data[y].features.length - 1) {
                         if (y === 0) {
                             this._profile.elevations.push(altitude);
                             this._profile.coordinates.push(ptB);
@@ -325,7 +329,7 @@ L.Control.Heightgraph = L.Control.extend({
                     }
                     // save the position which corresponds to the distance along the route.
                     var position;
-                    if (j == coordsLength - 1 && i < data[y].features.length - 1) {
+                    if (j === coordsLength - 1 && i < data[y].features.length - 1) {
                         position = this._profile.cumDistances[cnt];
                     } else {
                         position = this._profile.cumDistances[cnt - 1];
@@ -343,7 +347,7 @@ L.Control.Heightgraph = L.Control.extend({
                 this._profile.blocks[y].distances.push(cumDistance);
                 this._profile.blocks[y].geometries.push(geometry);
             }
-            if (y == data.length - 1) {
+            if (y === data.length - 1) {
                 this._profile.totalDistance = cumDistance;
             }
         }
@@ -603,6 +607,7 @@ L.Control.Heightgraph = L.Control.extend({
     /**
      * Defines the ranges and format of x- and y- scales and appends them
      */
+
     _appendScales: function() {
         var shortDist = Boolean(this._profile.totalDistance <= 10);
         var yHeightMin = this._profile.yElevationMin;
@@ -915,8 +920,7 @@ L.Control.Heightgraph = L.Control.extend({
                 .width);
         }
         var maxWidth = d3.max(widths);
-        var borders = [cnt, maxWidth];
-        return borders;
+        return [cnt, maxWidth];
     },
     /**
      * Creates top border line on graph
@@ -1005,11 +1009,11 @@ L.Control.Heightgraph = L.Control.extend({
     _findCoordsForY: function(y) {
         var self = this;
 
-        function bisect(b, yinvert) {
+        function bisect(b, yInvert) {
             //save indexes of elevation values above the horizontal line
             var list = [];
             for (var i = 0; i < b.length; i++) {
-                if (b[i].altitude >= yinvert) {
+                if (b[i].altitude >= yInvert) {
                     list.push(i);
                 }
             }
@@ -1017,7 +1021,7 @@ L.Control.Heightgraph = L.Control.extend({
             var newList = [];
             var start = 0;
             for (var j = 0; j < list.length - 1; j++) {
-                if (list[j + 1] != list[j] + 1) {
+                if (list[j + 1] !== list[j] + 1) {
                     newList.push(list.slice(start, j + 1));
                     start = j + 1;
                 }
