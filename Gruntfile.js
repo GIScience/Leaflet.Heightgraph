@@ -8,6 +8,8 @@ module.exports = function(grunt) {
             // configure JSHint (documented at http://www.jshint.com/docs/)
             options: {
                 // more options here if you want to override JSHint defaults
+                asi: true,
+                esnext: true,
                 globals: {
                     console: true,
                     module: true

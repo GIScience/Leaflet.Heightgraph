@@ -1,6 +1,6 @@
-describe('L.Control.Heightgraph', function() {
-    var el, geojson, data;
-    beforeEach(function () {
+describe('L.Control.Heightgraph', () => {
+    let el, geojson, data;
+    beforeEach(() => {
         el = new L.control.heightgraph({
          width: 800,
          height: 280,
@@ -17,7 +17,7 @@ describe('L.Control.Heightgraph', function() {
                 top: 20,
                 right: 50,
                 bottom: 25,
-                left: 50  
+                left: 50
         }
         el._container = L.DomUtil.create('div', 'heightgraph');
         el._svg = d3.select(el._container)
@@ -114,11 +114,11 @@ describe('L.Control.Heightgraph', function() {
         el.addData(geojson);
         data = el._data;
     });
-    it('reads number of features of data correctly', function() { 
-        // features 
+    it('reads number of features of data correctly', () => {
+        // features
         expect(el._profile.blocks.length).toEqual(data.length);
     });
-    it('reads number of blocks of data correctly', function() {
+    it('reads number of blocks of data correctly', () => {
         //blocks
         //1st feature
         expect(el._profile.blocks[0].attributes.length).toEqual(data[0].features.length);
@@ -129,14 +129,14 @@ describe('L.Control.Heightgraph', function() {
         expect(el._profile.blocks[1].distances.length).toEqual(data[1].features.length);
         expect(el._profile.blocks[1].geometries.length).toEqual(data[1].features.length);
     });
-    it('reads feature types of data correctly', function() {
-        //feature types (waytypes, srufaces)
+    it('reads feature types of data correctly', () => {
+        //feature types (waytypes, surfaces)
         //1st feature
         expect(el._profile.blocks[0].info.text).toEqual(data[0].properties.summary);
         //2nd feature
         expect(el._profile.blocks[1].info.text).toEqual(data[1].properties.summary);
     });
-    it('reads coordinates of data correctly', function() {
+    it('reads coordinates of data correctly', () => {
         //1st block of 1st and 2nd feature
         expect(el._profile.blocks[0].geometries[0].length).toEqual(data[0].features[0].geometry.coordinates.length);
         expect(el._profile.blocks[1].geometries[0].length).toEqual(data[1].features[0].geometry.coordinates.length);
