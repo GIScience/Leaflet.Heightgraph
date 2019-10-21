@@ -147,13 +147,26 @@ L.Control.Heightgraph = L.Control.extend({
         this._gotDragged = false;
         this._dragStartCoords = d3.mouse(this._background.node());
     },
+    /*
+     * Calculates the full extent of the data array
+     */
+    _calculateFullExtent: function(data) {
+        if (!data || data.length < 1) {
+            throw new Error("no data in parameters");
+        }
+        var ext = new L.latLngBounds(data[0].latlng, data[0].latlng);
+        data.forEach(function(item) {
+            ext.extend(item.latlng);
+        });
+        return ext;
+    },
     /**
      * Make the map fit the route section between given indexes. 
      */
     _fitSection: function(index1, index2) {
         var start = Math.min(index1, index2),
             end = Math.max(index1, index2);
-        var ext = [this._areasFlattended[start].latlng, this._areasFlattended[end].latlng];
+        var ext = this._calculateFullExtent(this._areasFlattended.slice(start, end));
         this._map.fitBounds(ext);
     },
     /**
