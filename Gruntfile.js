@@ -23,8 +23,8 @@ module.exports = function(grunt) {
                     specs: ['spec/*Spec.js'],
                     helpers: ['spec/*Helper.js'],
                     vendor: [
-                        'bower_components/leaflet/dist/leaflet.js',
-                        'bower_components/d3/d3.min.js'
+                        'node_modules/leaflet/dist/leaflet.js',
+                        'node_modules/d3/dist/d3.min.js'
                     ],
                     '--local-to-remote-url-access': true
                 }

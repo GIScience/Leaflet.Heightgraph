@@ -53,9 +53,6 @@ $ git clone https://github.com/GIScience/Leaflet.Heightgraph.git
 # install dependencies using a node-version >= 8
 $ npm install
 
-# install bower_components
-$ node_modules/bower/bin/bower install
-
 # run jasmine tests with
 $ grunt
 ```

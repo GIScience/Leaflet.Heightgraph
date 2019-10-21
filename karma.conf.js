@@ -9,9 +9,9 @@ module.exports = (config) => {
         frameworks: ["jasmine"],
         browsers: ["Chrome"],
         files: [
-            "./bower_components/d3/d3.js",
-            "./bower_components/leaflet/dist/leaflet.js",
-            "./bower_components/leaflet/dist/leaflet.css",
+            "./node_modules/d3/dist/d3.js",
+            "./node_modules/leaflet/dist/leaflet.js",
+            "./node_modules/leaflet/dist/leaflet.css",
             {
                 pattern: "./node_modules/jasmine-core/images/jasmine_favicon.png",
                 watched: false,
