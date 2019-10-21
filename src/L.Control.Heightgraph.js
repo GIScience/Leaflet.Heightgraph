@@ -166,7 +166,11 @@ L.Control.Heightgraph = L.Control.extend({
     _fitSection: function(index1, index2) {
         var start = Math.min(index1, index2),
             end = Math.max(index1, index2);
-        var ext = this._calculateFullExtent(this._areasFlattended.slice(start, end));
+        if (start != end) {
+            var ext = this._calculateFullExtent(this._areasFlattended.slice(start, end));
+        } else {
+            var ext = [this._areasFlattended[start].latlng, this._areasFlattended[end].latlng];   
+        }
         this._map.fitBounds(ext);
     },
     /**
