@@ -1,28 +1,47 @@
-0.2.0 (2019-08-23)
+## v0.3.0 (2019-10-29)
+
+**Added**
+- Karma test runner
+- Coverage report
+- ES6 Support
+- height selection on drag
+
+**Fixed**
+- option initialization on `addData()` call
+- `_fitSection()` not working with round-trips
+- index.html not working with undefined mappings
+- horizontal line for height selection jumping on reselect
+
+**Changed**
+- version of `d3`, `grunt-contrib-jasmine` and `Leaflet` to latest
+- eol to LF in all files
+- dependency source from bower to node
+
+## 0.2.0 (2019-08-23)
 
 **API Changes**
 
 * The class name `focus` was renamed to `focusbox`. `focus` might be used in many other frameworks and could lead to css conflicts. Please make sure you update the .css when updating the .js! ([#43](https://github.com/GIScience/Leaflet.Heightgraph/pull/64) by [boldtrn](https://github.com/boldtrn)).
 
-0.1.3 (2019-07-17)
+## 0.1.3 (2019-07-17)
 
 **Improvements**
 
 * Allow customizing x and y axis ticks ([#61](https://github.com/GIScience/Leaflet.Heightgraph/pull/61) by [boldtrn](https://github.com/boldtrn)).
 
-0.1.2 (2019-07-17)
+## 0.1.2 (2019-07-17)
 
 **Improvements**
 
 * Callback for the expand state ([#58](https://github.com/GIScience/Leaflet.Heightgraph/pull/58) by [boldtrn](https://github.com/boldtrn)).
 
-0.1.1 (2019-07-17)
+## 0.1.1 (2019-07-17)
 
 **Improvements**
 
 * Allow defining translations for labels ([#53](https://github.com/GIScience/Leaflet.Heightgraph/pull/53) by [boldtrn](https://github.com/boldtrn)).
 
-0.1.0 (2019-06-22)
+## 0.1.0 (2019-06-22)
 
 **Improvements**
 

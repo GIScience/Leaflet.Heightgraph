@@ -1,8 +1,12 @@
 {
   "name": "leaflet.heightgraph",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Leaflet plugin to visualize height information and road attributes",
   "main": "src/L.Control.Heightgraph.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GIScience/Leaflet.Heightgraph.git"
+  },
   "scripts": {
     "start": "npm run lite",
     "lite": "lite-server"
