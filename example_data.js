@@ -1,4 +1,4 @@
-var geojson = [{
+const geojson = [{
     "type": "FeatureCollection",
     "features": [{
         "type": "Feature",

@@ -30,6 +30,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._mappings = this.options.mappings;
         this._svgWidth = this._width - this._margin.left - this._margin.right;
         this._svgHeight = this._height - this._margin.top - this._margin.bottom;
+        this._selectedOption = 0
     },
     onAdd(map) {
         let container = this._container = L.DomUtil.create("div", "heightgraph")
@@ -62,7 +63,6 @@ L.Control.Heightgraph = L.Control.extend({
         }
         this._data = data;
         this._init_options();
-        this._selection();
         this._prepareData();
         this._computeStats();
         this._appendScales();
@@ -200,32 +200,26 @@ L.Control.Heightgraph = L.Control.extend({
         }
     },
     /**
-     * reacts on changes in selection box and updates heightprofile
-     * @param {integer} selectedOption
+     * Removes the svg elements from the d3 chart
      */
-    _selection(selectedOption) {
-        this._selectedOption = selectedOption === undefined ? 0 : this._selectedOption;
-        if (selectedOption !== undefined) {
-            if (this._svg !== undefined) {
-                // remove areas
-                this._svg.selectAll("path.area")
-                    .remove();
-                // remove top border
-                this._svg.selectAll("path.border-top")
-                    .remove();
-                // remove legend
-                this._svg.selectAll(".legend")
-                    .remove();
-                // remove horizontal Line
-                this._svg.selectAll(".lineSelection")
-                    .remove();
-                this._svg.selectAll(".horizontalLine")
-                    .remove();
-                this._svg.selectAll(".horizontalLineText")
-                    .remove();
-                this._removeMarkedSegmentsOnMap();
-                this._createChart(selectedOption);
-            }
+    _removeChart() {
+        if (this._svg !== undefined) {
+            // remove areas
+            this._svg.selectAll("path.area")
+                .remove();
+            // remove top border
+            this._svg.selectAll("path.border-top")
+                .remove();
+            // remove legend
+            this._svg.selectAll(".legend")
+                .remove();
+            // remove horizontal Line
+            this._svg.selectAll(".lineSelection")
+                .remove();
+            this._svg.selectAll(".horizontalLine")
+                .remove();
+            this._svg.selectAll(".horizontalLineText")
+                .remove();
         }
     },
     /**
@@ -522,7 +516,7 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("fill", "black");
         //<text x="20" y="20" font-family="sans-serif" font-size="20px" fill="red">Hello!</text>
         //triangle symbol as controller
-        const jsonCircles = [
+        const jsonTriangle = [
             {
                 "x": this._width - this._margin.left - this._margin.right + 7,
                 "y": this._y(this._profile.yElevationMin),
@@ -532,12 +526,12 @@ L.Control.Heightgraph = L.Control.extend({
                 "size": 100
             }
         ]
-        const dragstarted = (d) => {
+        const dragstarted = function (d) {
             d3.select(this).raise().classed("active", true)
             d3.select(".horizontalLine").raise().classed("active", true)
         }
 
-        const dragged = (d) => {
+        const dragged = function (d) {
             const maxY = self._svgHeight
             d3.select(this)
             .attr("transform", d => "translate(" + d.x + "," + (d3.event.y < 0 ? 0
@@ -556,7 +550,7 @@ L.Control.Heightgraph = L.Control.extend({
             .text(d3.format(".0f")(self._y.invert((d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)))) + " m");
         }
 
-        const dragended = (d) => {
+        const dragended = function (d) {
             d3.select(this)
             .classed("active", false);
             d3.select(".horizontalLine")
@@ -565,8 +559,13 @@ L.Control.Heightgraph = L.Control.extend({
             self._markSegmentsOnMap(self._highlightedCoords);
         }
 
-        const horizontalDrag = this._svg.selectAll(".horizontal-symbol").data(jsonCircles).enter().append("path").
-            attr("class", "lineSelection").attr("d", d3.symbol().type(d => d.type).size(d => d.size)).attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")").attr("id", d => d.id).style("fill", d => d.color).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended))
+        const horizontalDrag = this._svg.selectAll(".horizontal-symbol").data(jsonTriangle).enter().append("path").
+            attr("class", "lineSelection")
+            .attr("d", d3.symbol().type(d => d.type).size(d => d.size))
+            .attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")")
+            .attr("id", d => d.id)
+            .style("fill", d => d.color)
+            .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended))
     },
     /**
      * Highlights segments on the map above given elevation value
@@ -628,10 +627,17 @@ L.Control.Heightgraph = L.Control.extend({
      * Appends a background and adds mouse handlers
      */
     _appendBackground() {
-        const background = this._background = d3.select(this._container).select("svg").select("g").append("rect").
-            attr("width", this._svgWidth).attr("height", this._svgHeight).style("fill", "none").style("stroke", "none").
-            style("pointer-events", "all").on("mousemove.focusbox", this._mousemoveHandler.bind(this)).
-            on("mouseout.focusbox", this._mouseoutHandler.bind(this))
+        const background = this._background = d3.select(this._container)
+            .select("svg")
+            .select("g")
+            .append("rect")
+            .attr("width", this._svgWidth)
+            .attr("height", this._svgHeight)
+            .style("fill", "none")
+            .style("stroke", "none")
+            .style("pointer-events", "all")
+            .on("mousemove.focusbox", this._mousemoveHandler.bind(this))
+            .on("mouseout.focusbox", this._mouseoutHandler.bind(this))
         if (L.Browser.android) {
             background.on("touchstart.drag", this._dragHandler.bind(this))
                 .on("touchstart.drag", this._dragStartHandler.bind(this))
@@ -707,7 +713,7 @@ L.Control.Heightgraph = L.Control.extend({
         const svg = d3.select(this._container).select("svg")
         const margin = this._margin, width = this._width - this._margin.left - this._margin.right,
             height = this._height - this._margin.top - this._margin.bottom
-        const jsonCircles = [
+        const jsonTriangles = [
             {
                 "x": width - 50,
                 "y": height + 48,
@@ -724,7 +730,7 @@ L.Control.Heightgraph = L.Control.extend({
                 "angle": 180
             }
         ]
-        const selectionSign = svg.selectAll(".select-symbol").data(jsonCircles).enter().append("path").
+        const selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles).enter().append("path").
             attr("class", "select-symbol").attr("d", d3.symbol().type(d => d.type)).attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")").attr("id", d => d.id).style("fill", d => d.color).on("click", d => {
                 if (d.id === "rightArrowSelection") arrowRight()
                 if (d.id === "leftArrowSelection") arrowLeft()
@@ -738,14 +744,14 @@ L.Control.Heightgraph = L.Control.extend({
             ]
             if (self._selectionText) self._selectionText.remove();
             self._selectionText = svg.selectAll('selection_text')
-            .data(data)
-            .enter()
-            .append('text')
-            .attr("x", width - 20)
-            .attr("y", height + 50)
-            .text(d => d.selection)
-            .attr("class", "select-info")
-            .attr("id", "selectionText");
+                .data(data)
+                .enter()
+                .append('text')
+                .attr("x", width - 20)
+                .attr("y", height + 50)
+                .text(d => d.selection)
+                .attr("class", "select-info")
+                .attr("id", "selectionText")
         }
         const length = this._profile.blocks.length
         const id = this._selectedOption
@@ -753,23 +759,25 @@ L.Control.Heightgraph = L.Control.extend({
         chooseSelection(id);
 
         let arrowRight = () => {
-            let counter = self._selectedOption += 1
-            if (counter === self._profile.blocks.length) {
-                counter = 0;
-                self._selectedOption = 0;
+            let idx = self._selectedOption += 1
+            if (idx === self._profile.blocks.length) {
+                self._selectedOption = idx = 0
             }
-            chooseSelection(counter);
-            self._selection(self._selectedOption);
+            chooseSelection(idx)
+            self._removeChart()
+            self._removeMarkedSegmentsOnMap()
+            self._createChart(idx)
         }
 
         let arrowLeft = () => {
-            let counter = self._selectedOption -= 1
-            if (counter === -1) {
-                counter = self._profile.blocks.length - 1
-                self._selectedOption = self._profile.blocks.length - 1
+            let idx = self._selectedOption -= 1
+            if (idx === -1) {
+                self._selectedOption = idx = self._profile.blocks.length - 1
             }
-            chooseSelection(counter)
-            self._selection(self._selectedOption)
+            chooseSelection(idx)
+            self._removeChart()
+            self._removeMarkedSegmentsOnMap()
+            self._createChart(idx)
         }
     },
     /**
@@ -777,8 +785,6 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _createLegend() {
         const self = this
-        //console.log(Object.values(self._profile.blocks[this._selectedOption].legend), self._profile.blocks[this._selectedOption].legend, true);
-        //var data = Object.values(self._profile.blocks[this._selectedOption].legend);
         const data = []
         for (let item in this._profile.blocks[this._selectedOption].legend) {
             data.push(this._profile.blocks[this._selectedOption].legend[item]);
@@ -813,9 +819,9 @@ L.Control.Heightgraph = L.Control.extend({
             .attr('x', 30)
             .attr('y', 6 * 7)
             .text((d, i) => {
-            const textProp = d.text
-            self._boxBoundY = (height - (2 * height / 3) + 7) * i;
-                return textProp;
+                const textProp = d.text
+                self._boxBoundY = (height - (2 * height / 3) + 7) * i;
+                    return textProp;
             });
         let legendHover = this._svg.selectAll('.legend-hover')
             .data(leg)
@@ -862,13 +868,16 @@ L.Control.Heightgraph = L.Control.extend({
     _createBorderTopLine() {
         const self = this
         const data = this._areasFlattended
-        const borderTopLine = d3.line().x(d => {
-            const x = self._x
-            return x(d.position)
-        }).y(d => {
-            const y = self._y
-            return y(d.altitude)
-        }).curve(d3.curveBasis)
+        const borderTopLine = d3.line()
+            .x(d => {
+                const x = self._x
+                return x(d.position)
+            })
+            .y(d => {
+                const y = self._y
+                return y(d.altitude)
+            })
+            .curve(d3.curveBasis)
         this._svg.append("svg:path")
             .attr("d", borderTopLine(data))
             .attr('class', 'border-top');

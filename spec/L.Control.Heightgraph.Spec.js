@@ -1,5 +1,5 @@
 describe('L.Control.Heightgraph', () => {
-    let el, geojson, data;
+    let el, geojson;
     beforeEach(() => {
         el = new L.control.heightgraph({
          width: 800,
@@ -112,40 +112,41 @@ describe('L.Control.Heightgraph', () => {
             }
         }];
         el.addData(geojson);
-        data = el._data;
     });
-    it('reads number of features of data correctly', () => {
+    it('reads data of geojson correctly', () => {
+        expect(el._data).toEqual(geojson);
+    });
+    it('reads number of features of geojson correctly', () => {
         // features
-        expect(el._profile.blocks.length).toEqual(data.length);
+        expect(el._profile.blocks.length).toEqual(geojson.length);
     });
-    it('reads number of blocks of data correctly', () => {
-        //blocks
-        //1st feature
-        expect(el._profile.blocks[0].attributes.length).toEqual(data[0].features.length);
-        expect(el._profile.blocks[0].distances.length).toEqual(data[0].features.length);
-        expect(el._profile.blocks[0].geometries.length).toEqual(data[0].features.length);
-        //2nd feature
-        expect(el._profile.blocks[1].attributes.length).toEqual(data[1].features.length);
-        expect(el._profile.blocks[1].distances.length).toEqual(data[1].features.length);
-        expect(el._profile.blocks[1].geometries.length).toEqual(data[1].features.length);
+    it('reads number of blocks of geojson correctly', () => {
+        // blocks
+        // feature 1 & 2
+        for (let i in [0,1]) {
+            expect(el._profile.blocks[i].attributes.length).toEqual(geojson[i].features.length);
+            expect(el._profile.blocks[i].distances.length).toEqual(geojson[i].features.length);
+            expect(el._profile.blocks[i].geometries.length).toEqual(geojson[i].features.length);
+        }
     });
-    it('reads feature types of data correctly', () => {
+    it('reads feature types of geojson correctly', () => {
         //feature types (waytypes, surfaces)
         //1st feature
-        expect(el._profile.blocks[0].info.text).toEqual(data[0].properties.summary);
+        expect(el._profile.blocks[0].info.text).toEqual(geojson[0].properties.summary);
         //2nd feature
-        expect(el._profile.blocks[1].info.text).toEqual(data[1].properties.summary);
+        expect(el._profile.blocks[1].info.text).toEqual(geojson[1].properties.summary);
     });
-    it('reads coordinates of data correctly', () => {
+    it('reads coordinates of geojson correctly', () => {
         //1st block of 1st and 2nd feature
-        expect(el._profile.blocks[0].geometries[0].length).toEqual(data[0].features[0].geometry.coordinates.length);
-        expect(el._profile.blocks[1].geometries[0].length).toEqual(data[1].features[0].geometry.coordinates.length);
+        expect(el._profile.blocks[0].geometries[0].length).toEqual(geojson[0].features[0].geometry.coordinates.length);
+        expect(el._profile.blocks[1].geometries[0].length).toEqual(geojson[1].features[0].geometry.coordinates.length);
         //2nd block second block
-        expect(el._profile.blocks[0].geometries[1].length).toEqual(data[0].features[1].geometry.coordinates.length);
+        expect(el._profile.blocks[0].geometries[1].length).toEqual(geojson[0].features[1].geometry.coordinates.length);
         //x,y,z coordinates of 1st block and 1st feature
-        expect(el._profile.blocks[0].geometries[0][0].x).toEqual(data[0].features[0].geometry.coordinates[0][0]);
-        expect(el._profile.blocks[0].geometries[0][0].y).toEqual(data[0].features[0].geometry.coordinates[0][1]);
-        expect(el._profile.blocks[0].geometries[0][0].altitude).toEqual(data[0].features[0].geometry.coordinates[0][2]);
+        let block1_feature1 = el._profile.blocks[0].geometries[0][0]
+        expect(el._profile.blocks[0].geometries[0][0].x).toEqual(geojson[0].features[0].geometry.coordinates[0][0]);
+        expect(el._profile.blocks[0].geometries[0][0].y).toEqual(geojson[0].features[0].geometry.coordinates[0][1]);
+        expect(el._profile.blocks[0].geometries[0][0].altitude).toEqual(geojson[0].features[0].geometry.coordinates[0][2]);
     });
 });
 
