@@ -10,7 +10,7 @@ module.exports = (config) => {
         browsers: ["Chrome"],
         files: [
             "./node_modules/d3/dist/d3.js",
-            "./node_modules/leaflet/dist/leaflet.js",
+            "./node_modules/leaflet/dist/leaflet-src.js",
             "./node_modules/leaflet/dist/leaflet.css",
             {
                 pattern: "./node_modules/jasmine-core/images/jasmine_favicon.png",
