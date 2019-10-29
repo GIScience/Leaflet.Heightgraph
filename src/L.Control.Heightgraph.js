@@ -533,21 +533,24 @@ L.Control.Heightgraph = L.Control.extend({
 
         const dragged = function (d) {
             const maxY = self._svgHeight
+            let eventY = d3.mouse(self._container)[1] - 10
             d3.select(this)
-            .attr("transform", d => "translate(" + d.x + "," + (d3.event.y < 0 ? 0
-                : (d3.event.y > maxY ? maxY
-                    : d3.event.y)) + ") rotate(" + d.angle + ")");
+            .attr("transform", d => "translate(" + d.x + "," + (eventY < 0 ? 0
+                : eventY > maxY ? maxY
+                    : eventY) + ") rotate(" + d.angle + ")");
             d3.select(".horizontalLine")
-            .attr("y1", (d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)))
-            .attr("y2", (d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)));
-            if(d3.event.y >= maxY){
+            .attr("y1", (eventY < 0 ? 0 : (eventY > maxY ? maxY : eventY)))
+            .attr("y2", (eventY < 0 ? 0 : (eventY > maxY ? maxY : eventY)));
+            if(eventY >= maxY){
                 self._highlightedCoords = [];
             } else {
-                self._highlightedCoords = self._findCoordsForY(d3.event.y);
+                self._highlightedCoords = self._findCoordsForY(eventY);
             }
             d3.select(".horizontalLineText")
-            .attr("y", (d3.event.y <= 10 ? 0 : (d3.event.y > maxY ? maxY-10 : d3.event.y-10)))
-            .text(d3.format(".0f")(self._y.invert((d3.event.y < 0 ? 0 : (d3.event.y > maxY ? maxY : d3.event.y)))) + " m");
+            .attr("y", (eventY <= 10 ? 0 : (eventY > maxY ? maxY-10 : eventY-10)))
+            .text(d3.format(".0f")(self._y.invert((eventY < 0 ? 0 : (eventY > maxY ? maxY : eventY)))) + " m");
+            self._removeMarkedSegmentsOnMap();
+            self._markSegmentsOnMap(self._highlightedCoords);
         }
 
         const dragended = function (d) {
