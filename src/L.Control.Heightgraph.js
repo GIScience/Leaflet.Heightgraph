@@ -14,7 +14,8 @@ L.Control.Heightgraph = L.Control.extend({
         translation: {},
         expandCallback: undefined,
         xTicks: undefined,
-        yTicks: undefined
+        yTicks: undefined,
+        highlightStyle: undefined
     },
     _defaultTranslation: {
         distance: "Distance",
@@ -31,6 +32,7 @@ L.Control.Heightgraph = L.Control.extend({
         this._svgWidth = this._width - this._margin.left - this._margin.right;
         this._svgHeight = this._height - this._margin.top - this._margin.bottom;
         this._selectedOption = 0
+        this._highlightStyle = this.options.highlightStyle || {color: 'red'}
     },
     onAdd(map) {
         let container = this._container = L.DomUtil.create("div", "heightgraph")
@@ -575,9 +577,21 @@ L.Control.Heightgraph = L.Control.extend({
      */
     _markSegmentsOnMap(coords) {
         if(coords){
-            this._markedSegments = L.polyline(coords, {
-                color: 'red'
-            }).addTo(this._map);
+            if (coords.length > 1) {
+                // some other leaflet plugins can't deal with multi-Polylines very well
+                // therefore multiple single polylines are used here
+                this._markedSegments = L.featureGroup()
+                for (let linePart of coords) {
+                    L.polyline(
+                        linePart,
+                        this._highlightStyle
+                    ).addTo(this._markedSegments)
+                }
+                this._markedSegments.addTo(this._map)
+                .bringToFront()
+            } else {
+                this._markedSegments = L.polyline(coords, this._highlightStyle).addTo(this._map);
+            }
         }
     },
     /**

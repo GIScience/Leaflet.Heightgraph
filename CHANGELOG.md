@@ -1,3 +1,11 @@
+## Unreleased
+
+**Added**
+- `highlightStyle` options parameter to customize the highlighting style for the 'elevation above' feature (horizontal line)
+
+**Changed**
+- highlighting geometry type from multiPolyline to multiple L.polylines
+
 ## v0.3.0 (2019-10-29)
 
 **Added**

@@ -57,7 +57,7 @@ $ npm install
 $ grunt
 ```
 
-### How to use:
+## Usage
 
 ```javascript
 // all used options are the default values
@@ -71,14 +71,16 @@ var hg = L.control.heightgraph({
         left: 50
     },
     position: "bottomright",
-    mappings: undefined || colorMappings
+    mappings: undefined || colorMappings,
+    highlightStyle: undefined || customStyle,
+    translation: undefined || customTranslation
 });
 hg.addTo(map);
 hg.addData(geojson);
 L.geoJson(geojson).addTo(map);
 ```
 
-### Supported data:
+## Supported data
 Input data has to be of type [GeoJSON-Format](http://geojson.org/).
 This must consist of feature collection(s) corresponding to a certain attribute which could - as an example - be surface or gradient information.
 Each `FeatureCollection` comprises a certain `attribute` in its `properties` (e.g. `'summary': 'steepness'`) and has a list of
@@ -124,10 +126,15 @@ var FeatureCollections = [{
 }];
 ```
 
-### Optional:
+## Optional settings
+These additional options can be set to customize your heightgraph
+
+### mappings
 You may add a mappings object to customize the colors and labels in the height graph.
 Without adding custom mappings the segments and labels within the graph will be displayed in random colors.
 Each key of the object must correspond to the `summary` key in `properties` within the `FeatureCollection`.
+
+Example:
 
 ```javascript
 colorMappings.Steepness = {
@@ -142,18 +149,30 @@ colorMappings.Steepness = {
 };
 ```
 
-### Translations
+### highlightStyle
+You can customize the highlight style when using the horizontal line to 
+find parts of the route above an elevation value.
+Use any [Leaflet Path options](https://leafletjs.com/reference-1.5.0.html#path-option)
+as value of the `highlightStyle` parameter e.g:
 
-You can change the labels of the HeightGraph by passing a translation config (see the index.html for an example).
+```javascript
+highlightStyle = {
+   weight: 10,
+   opacity: 0.8,
+   color: 'orange'
+ }
+```
 
-The default configuration is:
+### Translation
+You can change the labels of the HeightGraph info field by passing a translation config e.g:
+
 ```
 translation: {
-    distance: "Distance",
-    elevation: "Elevation",
-    segment_length: "Segment length",
-    type: "Type",
-    legend: "Legend"
+    distance: "Distanz",
+    elevation: "Höhe",
+    segment_length: "Segment-Länge",
+    type: "Typ",
+    legend: "Legende"
 }
 ```
 
