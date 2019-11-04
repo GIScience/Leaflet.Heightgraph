@@ -116,7 +116,7 @@ L.Control.Heightgraph = L.Control.extend({
         }
     },
     /**
-     * Removes the drag rectangle and zoms back to the total extent of the data.
+     * Removes the drag rectangle and zooms back to the total extent of the data.
      */
     _resetDrag() {
         if (this._dragRectangleG) {
@@ -126,7 +126,7 @@ L.Control.Heightgraph = L.Control.extend({
         }
     },
     /**
-     * Handles end of dragg operations. Zooms the map to the selected items extent.
+     * Handles end of drag operations. Zooms the map to the selected items extent.
      */
     _dragEndHandler() {
         if (!this._dragStartCoords || !this._gotDragged) {
@@ -516,7 +516,6 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("x", this._width - this._margin.left - this._margin.right - 20)
             .attr("y", this._y(this._profile.yElevationMin)-10)
             .attr("fill", "black");
-        //<text x="20" y="20" font-family="sans-serif" font-size="20px" fill="red">Hello!</text>
         //triangle symbol as controller
         const jsonTriangle = [
             {
@@ -528,7 +527,7 @@ L.Control.Heightgraph = L.Control.extend({
                 "size": 100
             }
         ]
-        const dragstarted = function (d) {
+        const dragstart = function (d) {
             d3.select(this).raise().classed("active", true)
             d3.select(".horizontalLine").raise().classed("active", true)
         }
@@ -555,7 +554,7 @@ L.Control.Heightgraph = L.Control.extend({
             self._markSegmentsOnMap(self._highlightedCoords);
         }
 
-        const dragended = function (d) {
+        const dragend = function (d) {
             d3.select(this)
             .classed("active", false);
             d3.select(".horizontalLine")
@@ -570,7 +569,7 @@ L.Control.Heightgraph = L.Control.extend({
             .attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")")
             .attr("id", d => d.id)
             .style("fill", d => d.color)
-            .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended))
+            .call(d3.drag().on("start", dragstart).on("drag", dragged).on("end", dragend))
     },
     /**
      * Highlights segments on the map above given elevation value
@@ -903,13 +902,10 @@ L.Control.Heightgraph = L.Control.extend({
      * Handles the mouseout event when the mouse leaves the background
      */
     _mouseoutHandler() {
-        if (this._focusLine) {
-            this._pointG.style('display', 'none');
-            this._focus.style('display', 'none');
-            this._focusLine.style('display', 'none');
-            this._mouseHeightFocus.style('display', 'none');
-            this._mouseHeightFocusLabel.style('display', 'none');
-        }
+        for (let param of ['_focusLine', '_focus', '_pointG', '_mouseHeightFocus', '_mouseHeightFocusLabel'])
+            if (this[param]) {
+                this[param].style('display', 'none');
+            }
     },
     /*
      * Handles the mouseover the chart and displays distance and altitude level
@@ -957,8 +953,6 @@ L.Control.Heightgraph = L.Control.extend({
      * Finds data entries above a given y-elevation value and returns geo-coordinates
      */
     _findCoordsForY(y) {
-        const self = this
-
         let bisect = (b, yInvert) => {
             //save indexes of elevation values above the horizontal line
             const list = []

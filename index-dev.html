@@ -8,8 +8,8 @@
              html, body, #map {
                  height:100%;
                  width:100%;
-                 padding:0px;
-                 margin:0px;
+                 padding:0;
+                 margin:0;
              }
          </style>
          <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
@@ -25,21 +25,19 @@
      <div id="map"></div>
      </body>
      <script type="text/javascript">
-         var map = new L.Map('map');
+         const map = new L.Map('map')
 
+         const url = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+             attr = "Map data © <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors"
 
-         var url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-             attr = 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+         const openstreetmap = L.tileLayer(url, {
+             id: "openstreetmap",
+             attribution: attr
+         })
 
+         const bounds = new L.LatLngBounds(new L.LatLng(47.323989, 8.108683), new L.LatLng(46.96485, 8.029803))
 
-         var openstreetmap = L.tileLayer(url, {
-             id: 'openstreetmap',
-             attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
-         });
-
-         var bounds = new L.LatLngBounds(new L.LatLng(47.323989,8.108683), new L.LatLng(46.96485, 8.029803 ));
-
-         var hg = L.control.heightgraph({
+         const hg = L.control.heightgraph({
              width: 800,
              height: 280,
              margins: {
@@ -51,18 +49,23 @@
              translation: {
                  distance: "My custom distance"
              },
-             expandCallback: function(expand){console.log("Expand: "+expand)},
+             expandCallback(expand) {
+                 console.log("Expand: "+expand)
+             },
              position: "bottomright",
-             mappings: colorMappings
-         });
+             mappings: colorMappings,
+             highlightStyle: {
+                 color: "purple"
+             }
+         })
 
-         hg.addTo(map);
+         hg.addTo(map)
 
-         hg.addData(geojson);
+         hg.addData(geojson)
 
-         L.geoJson(geojson).addTo(map);
+         L.geoJson(geojson).addTo(map)
 
-         map.addLayer(openstreetmap).fitBounds(bounds);
+         map.addLayer(openstreetmap).fitBounds(bounds)
 
      </script>
  </html>
