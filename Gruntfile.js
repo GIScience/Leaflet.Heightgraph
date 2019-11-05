@@ -1,10 +1,11 @@
 module.exports = function(grunt) {
+    require('load-grunt-tasks')(grunt);
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         jshint: {
             // define the files to lint
-            files: ['src/**/*.js'],
+            files: ['src/**/*.js', 'spec/**/*.js'],
             // configure JSHint (documented at http://www.jshint.com/docs/)
             options: {
                 // more options here if you want to override JSHint defaults
@@ -37,10 +38,27 @@ module.exports = function(grunt) {
                     base: 'spec'
                 }
             }
+        },
+        babel: {
+            options: {
+                sourceMap: true,
+                presets: ['@babel/preset-env']
+            },
+            dist: {
+                files: {
+                    'dist/L.Control.Heightgraph.js': 'src/L.Control.Heightgraph.js'
+                }
+            }
+        },
+        uglify: {
+            heightgraph: {
+                files: {
+                    'dist/L.Control.Heightgraph.min.js': 'dist/L.Control.Heightgraph.js'
+                }
+            }
         }
+
     });
-    grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-jasmine');
-    grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.registerTask('default', ['jshint', 'connect', 'jasmine']);
+    grunt.registerTask('build', ['babel', 'uglify']);
 };
