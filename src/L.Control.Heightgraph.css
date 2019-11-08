@@ -17,7 +17,7 @@
 }
 
 .heightgraph-toggle-icon {
-    background: url(images/area-chart.svg) no-repeat center center;
+    background: url(img/area-chart.svg) no-repeat center center;
     background-size: 14px 14px;
     width: 26px;
     height: 26px;
@@ -25,7 +25,7 @@
 }
 
 .heightgraph-close-icon {
-    background: url(images/remove.svg) no-repeat center center;
+    background: url(img/remove.svg) no-repeat center center;
     background-size: 14px 14px;
     width: 26px;
     height: 26px;

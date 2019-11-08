@@ -56,9 +56,27 @@ module.exports = function(grunt) {
                     'dist/L.Control.Heightgraph.min.js': 'dist/L.Control.Heightgraph.js'
                 }
             }
+        },
+        cssmin: {
+            target: {
+                files: {
+                    'dist/L.Control.Heightgraph.min.css': 'src/L.Control.Heightgraph.css'
+                }
+            }
+        },
+        copy: {
+            img: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'src/',
+                        src: 'img/*',
+                        dest: 'dist/'
+                    }
+                ]
+            }
         }
-
     });
     grunt.registerTask('default', ['jshint', 'connect', 'jasmine']);
-    grunt.registerTask('build', ['babel', 'uglify']);
+    grunt.registerTask('build', ['babel', 'copy', 'uglify', 'cssmin']);
 };
