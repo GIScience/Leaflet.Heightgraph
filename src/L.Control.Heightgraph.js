@@ -2,11 +2,11 @@ L.Control.Heightgraph = L.Control.extend({
     options: {
         position: "bottomright",
         width: 800,
-        height: 125,
+        height: 280,
         margins: {
-            top: 20,
-            right: 50,
-            bottom: 25,
+            top: 10,
+            right: 30,
+            bottom: 55,
             left: 50
         },
         mappings: undefined,
