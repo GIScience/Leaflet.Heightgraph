@@ -626,14 +626,14 @@ L.Control.Heightgraph = L.Control.extend({
                 .scale(this._x)
                 .tickFormat(d => d3.format(".0f")(d) + " km");
         }
-        if(this.options.xTicks){
-            this._xAxis.ticks(this.options.xTicks);
+        if(this.options.xTicks !== undefined){
+            this._xAxis.ticks(Math.pow(2, this.options.xTicks));
         }
         this._yAxis = d3.axisLeft()
             .scale(this._y)
             .tickFormat(d => d + " m");
-        if(this.options.yTicks){
-            this._yAxis.ticks(this.options.yTicks);
+        if(this.options.yTicks !== undefined){
+            this._yAxis.ticks(Math.pow(2, this.options.yTicks));
         }
         this._yEndAxis = d3.axisRight()
             .scale(this._yEnd)

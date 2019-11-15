@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+**Added**
+- `xTick` and `yTick` option to set axis tick frequency
+
 ## v0.4.0
 
 **Added**

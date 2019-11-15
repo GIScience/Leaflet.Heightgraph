@@ -162,11 +162,6 @@ Boolean value that defines if the heightgraph should be expanded on creation.
 
 default: `true`
 
-        expandCallback: undefined,
-        xTicks: undefined,
-        yTicks: undefined,
-    }
-
 ### expandCallback
 Function to be called if the heightgraph is expanded or reduced. The state of
 the heightgraph is passed as an argument. It is `true` when expanded and
@@ -234,6 +229,18 @@ translation: {
     legend: "Legend"
     }
 ```
+
+### xTicks
+Specify the tick frequency in the *x axis* of the graph. Corresponds approximately to 
+2 to the power of `value` ticks.
+
+default: `xTicks: 3`
+
+### yTicks
+Specify the tick frequency in the *y axis* of the graph. Corresponds approximately to 
+2 to the power of `value` ticks.
+
+default: `yTicks: 3`
 
 ## Debug configurations (WebStorm)
 
