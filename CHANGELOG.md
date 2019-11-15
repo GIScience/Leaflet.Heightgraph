@@ -1,12 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v0.4.1 (2019-11-15)
 
 **Added**
 - `xTick` and `yTick` option to set axis tick frequency
 
-## v0.4.0
+## v0.4.0 (2019-11-14)
 
 **Added**
 - `highlightStyle` options parameter to customize the highlighting style
