@@ -1,14 +1,11 @@
 module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
-    // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         jshint: {
-            // define the files to lint
             files: ['src/**/*.js', 'spec/**/*.js'],
             // configure JSHint (documented at http://www.jshint.com/docs/)
             options: {
-                // more options here if you want to override JSHint defaults
                 asi: true,
                 esnext: true,
                 globals: {
@@ -49,34 +46,7 @@ module.exports = function(grunt) {
                     'dist/L.Control.Heightgraph.js': 'src/L.Control.Heightgraph.js'
                 }
             }
-        },
-        uglify: {
-            heightgraph: {
-                files: {
-                    'dist/L.Control.Heightgraph.min.js': 'dist/L.Control.Heightgraph.js'
-                }
-            }
-        },
-        cssmin: {
-            target: {
-                files: {
-                    'dist/L.Control.Heightgraph.min.css': 'src/L.Control.Heightgraph.css'
-                }
-            }
-        },
-        copy: {
-            img: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: 'src/',
-                        src: 'img/*',
-                        dest: 'dist/'
-                    }
-                ]
-            }
         }
     });
     grunt.registerTask('default', ['jshint', 'connect', 'jasmine']);
-    grunt.registerTask('build', ['babel', 'copy', 'uglify', 'cssmin']);
 };
