@@ -81,7 +81,8 @@ import {
             this._showState = false;
             this._initToggle();
             this._init_options();
-            const svg = this._svg = select(this._container).append("svg").attr("class", "heightgraph-container").
+            // Note: this._svg really contains the <g> inside the <svg>
+            this._svg = select(this._container).append("svg").attr("class", "heightgraph-container").
                 attr("width", this._svgWidth + this._margin.left + this._margin.right).
                 attr("height", this._svgHeight + this._margin.top + this._margin.bottom).append("g").
                 attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")")
