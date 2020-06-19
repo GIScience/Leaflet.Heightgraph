@@ -66,6 +66,13 @@ module.exports = function(grunt) {
                 }
             }
         },
+        exorcise: {
+            target: {
+                files: {
+                    'dist/L.Control.Heightgraph.js.map': 'dist/L.Control.Heightgraph.js'
+                },
+            }
+        },
         copy: {
             img: {
                 files: [
@@ -80,5 +87,5 @@ module.exports = function(grunt) {
         }
     });
     grunt.registerTask('default', ['jshint', 'connect', 'jasmine']);
-    grunt.registerTask('build', ['browserify', 'copy', 'uglify', 'cssmin']);
+    grunt.registerTask('build', ['browserify', 'exorcise', 'copy', 'uglify', 'cssmin']);
 };
