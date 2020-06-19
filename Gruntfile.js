@@ -39,17 +39,6 @@ module.exports = function(grunt) {
                 }
             }
         },
-        babel: {
-            options: {
-                sourceMap: true,
-                presets: ['@babel/preset-env']
-            },
-            dist: {
-                files: {
-                    'dist/L.Control.Heightgraph.js': 'src/L.Control.Heightgraph.js'
-                }
-            }
-        },
         uglify: {
             heightgraph: {
                 files: {
@@ -61,6 +50,19 @@ module.exports = function(grunt) {
             target: {
                 files: {
                     'dist/L.Control.Heightgraph.min.css': 'src/L.Control.Heightgraph.css'
+                }
+            }
+        },
+        browserify: {
+            target: {
+                files: {
+                    'dist/L.Control.Heightgraph.js': 'src/L.Control.Heightgraph.js'
+                },
+                options: {
+                    browserifyOptions: {
+                        debug: true
+                    },
+                    transform: [ [ 'babelify', { presets: ["@babel/preset-env"] } ] ]
                 }
             }
         },
@@ -78,5 +80,5 @@ module.exports = function(grunt) {
         }
     });
     grunt.registerTask('default', ['jshint', 'connect', 'jasmine']);
-    grunt.registerTask('build', ['babel', 'copy', 'uglify', 'cssmin']);
+    grunt.registerTask('build', ['browserify', 'copy', 'uglify', 'cssmin']);
 };

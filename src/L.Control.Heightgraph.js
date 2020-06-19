@@ -1,3 +1,5 @@
+var d3 = require('d3');
+
 L.Control.Heightgraph = L.Control.extend({
     options: {
         position: "bottomright",
