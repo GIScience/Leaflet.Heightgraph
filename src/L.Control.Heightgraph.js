@@ -47,6 +47,7 @@ import {
             },
             mappings: undefined,
             expand: true,
+            expandControls: true,
             translation: {},
             expandCallback: undefined,
             xTicks: undefined,
@@ -75,9 +76,11 @@ import {
         onAdd(map) {
             let container = this._container = L.DomUtil.create("div", "heightgraph")
             L.DomEvent.disableClickPropagation(container);
-            let buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
-            const link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer)
-            const closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container)
+            if (this.options.expandControls) {
+                let buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
+                const link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer)
+                const closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container)
+            }
             this._showState = false;
             this._initToggle();
             this._init_options();
@@ -102,10 +105,17 @@ import {
                 this._svg.selectAll("*")
                     .remove();
             }
+
             this._data = data;
-            this._init_options();
             this._prepareData();
             this._computeStats();
+            this._onAddData();
+        },
+        /**
+         * Trigger a re-render of the chart based on the existing data (e.g. on container resize).
+         */
+        _onAddData() {
+            this._init_options();
             this._appendScales();
             this._appendGrid();
             this._createChart(this._selectedOption);
@@ -134,8 +144,10 @@ import {
             } else {
                 L.DomEvent.on(this._container, 'click', L.DomEvent.stopPropagation);
             }
-            L.DomEvent.on(this._button, 'click', this._expand, this);
-            L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+            if (this.options.expandControls) {
+                L.DomEvent.on(this._button, 'click', this._expand, this);
+                L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+            }
         },
         _dragHandler() {
             //we don´t want map events to occur here
@@ -178,6 +190,10 @@ import {
                 this._dragRectangleG.remove();
                 this._dragRectangleG = null;
                 this._dragRectangle = null;
+
+                // Performance improvement: we could cache the full extend when addData() is called
+                let fullExtent = this._calculateFullExtent(this._areasFlattended);
+                fullExtent && this._map.fitBounds(fullExtent);
             }
         },
         /**
@@ -207,7 +223,7 @@ import {
          */
         _calculateFullExtent(data) {
             if (!data || data.length < 1) {
-                throw new Error("no data in parameters");
+                return null;
             }
             let full_extent = new L.latLngBounds(data[0].latlng, data[0].latlng);
             data.forEach((item) => {
@@ -225,15 +241,19 @@ import {
             let ext
             if (start !== end) {
                 ext = this._calculateFullExtent(this._areasFlattended.slice(start, end + 1));
-            } else {
+            } else if (this._areasFlattended.length > 0) {
                 ext = [this._areasFlattended[start].latlng, this._areasFlattended[end].latlng];
             }
-            this._map.fitBounds(ext);
+            ext && this._map.fitBounds(ext);
         },
         /**
          * Expand container when button clicked and shrink when close-Button clicked
          */
         _expand() {
+            if (this.options.expandControls !== true) {
+                // always expand, never collapse
+                this._showState = false;
+            }
             if (!this._showState) {
                 select(this._button)
                     .style("display", "none");
@@ -469,7 +489,9 @@ import {
          * Creates the elevation profile
          */
         _createChart(idx) {
-            let areas = this._profile.blocks[idx].geometries;
+            let areas = this._profile.blocks.length == 0
+                ? []
+                : this._profile.blocks[idx].geometries;
             this._areasFlattended = [].concat.apply([], areas);
             for (let i = 0; i < areas.length; i++) {
                 this._appendAreas(areas[i], idx, i);
@@ -501,25 +523,25 @@ import {
             this._focusDistance = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + textDistance)
-                .attr("id", "distance")
+                .attr("id", "heightgraph.distance")
                 .text(this._getTranslation('distance')+':');
             // text line 2
             this._focusHeight = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + 2 * textDistance)
-                .attr("id", "height")
+                .attr("id", "heightgraph.height")
                 .text(this._getTranslation('elevation')+':');
             // text line 3
             this._focusBlockDistance = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + 3 * textDistance)
-                .attr("id", "blockdistance")
+                .attr("id", "heightgraph.blockdistance")
                 .text(this._getTranslation('segment_length')+':');
             // text line 4
             this._focusType = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + 4 * textDistance)
-                .attr("id", "type")
+                .attr("id", "heightgraph.type")
                 .text(this._getTranslation('type')+':');
             this._areaTspan = this._focusBlockDistance.append('tspan')
                 .attr("class", "tspan");
@@ -845,8 +867,10 @@ import {
         _createLegend() {
             const self = this
             const data = []
-            for (let item in this._profile.blocks[this._selectedOption].legend) {
-                data.push(this._profile.blocks[this._selectedOption].legend[item]);
+            if (this._profile.blocks.length > 0) {
+                for (let item in this._profile.blocks[this._selectedOption].legend) {
+                    data.push(this._profile.blocks[this._selectedOption].legend[item]);
+                }
             }
             const margin = this._margin, width = this._width - this._margin.left - this._margin.right,
                 height = this._height - this._margin.top - this._margin.bottom
@@ -951,12 +975,57 @@ import {
                 }
         },
         /*
+         * Handles the mouseover the map and displays distance and altitude level.
+         * Since this does a lookup of the point on the graph
+         * the closest to the given latlng on the provided event, it could be slow.
+         */
+        _mapMousemoveHandler(evt) {
+            if (this._areasFlattended == false) {
+                return;
+            }
+
+            // initialize the vars for the closest item calculation
+            let closestItem = null;
+            // large enough to be trumped by any point on the chart
+            let closestDistance = 2 * Math.pow(100, 2);
+
+            for (i = 0; i < this._areasFlattended.length; i++) {
+                let item = this._areasFlattended[i];
+
+                let latDiff = evt.latlng.lat - item.latlng.lat;
+                let lngDiff = evt.latlng.lng - item.latlng.lng;
+
+                // first check for an exact match; it's simple and avoid further calculations
+                if (latDiff == 0 && lngDiff == 0) {
+                    this._internalMousemoveHandler(item);
+                    break;
+                }
+
+                // calculate the squared distance from the current to the given;
+                // it's the squared distance, to avoid the expensive square root
+                const distance = Math.pow(latDiff, 2) + Math.pow(lngDiff, 2);
+                if (distance < closestDistance) {
+                    closestItem = item;
+                    closestDistance = distance;
+                }
+            }
+
+            closestItem && this._internalMousemoveHandler(closestItem);
+        },
+        /*
          * Handles the mouseover the chart and displays distance and altitude level
          */
         _mousemoveHandler(d, i, ctx) {
             const coords = mouse(this._svg.node())
+            const item = this._areasFlattended[this._findItemForX(coords[0])];
+            item && this._internalMousemoveHandler(item);
+        },
+        /*
+         * Handles the mouseover, given the current item the mouse is over
+         */
+        _internalMousemoveHandler(item) {
             let areaLength
-            const item = this._areasFlattended[this._findItemForX(coords[0])], alt = item.altitude, dist = item.position,
+            const alt = item.altitude, dist = item.position,
                 ll = item.latlng, areaIdx = item.areaIdx, type = item.type
             const boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10
             if (areaIdx === 0) {
