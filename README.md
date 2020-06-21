@@ -162,6 +162,13 @@ Boolean value that defines if the heightgraph should be expanded on creation.
 
 default: `true`
 
+### expandControls
+Boolean value that defines if the expand controls (i.e. toggle and close) should be visible.
+To be set to false when the heightgraph is embedded in another component
+and that controls when and how the heightgraph is expanded.
+
+default: `true`
+
 ### expandCallback
 Function to be called if the heightgraph is expanded or reduced. The state of
 the heightgraph is passed as an argument. It is `true` when expanded and
