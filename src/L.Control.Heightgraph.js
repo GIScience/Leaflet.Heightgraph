@@ -995,8 +995,8 @@ import {
                 let latDiff = evt.latlng.lat - item.latlng.lat;
                 let lngDiff = evt.latlng.lng - item.latlng.lng;
 
-                // first check for an exact match; it's simple and avoid further calculations
-                if (latDiff == 0 && lngDiff == 0) {
+                // first check for an almost exact match; it's simple and avoid further calculations
+                if (Math.abs(latDiff) < exactMatchRounding && Math.abs(lngDiff) < exactMatchRounding) {
                     this._internalMousemoveHandler(item);
                     break;
                 }
