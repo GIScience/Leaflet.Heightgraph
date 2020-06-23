@@ -947,14 +947,18 @@ L.Control.Heightgraph = L.Control.extend({
         // large enough to be trumped by any point on the chart
         let closestDistance = 2 * Math.pow(100, 2);
 
+        // consider a good enough match if the given point (lat and lng) is within
+        // 1.1 meters of a point on the chart (there are 111,111 meters in a degree)
+        const exactMatchRounding = 1.1 / 111111;
+
         for (i = 0; i < this._areasFlattended.length; i++) {
             let item = this._areasFlattended[i];
 
             let latDiff = evt.latlng.lat - item.latlng.lat;
             let lngDiff = evt.latlng.lng - item.latlng.lng;
 
-            // first check for an exact match; it's simple and avoid further calculations
-            if (latDiff == 0 && lngDiff == 0) {
+            // first check for an almost exact match; it's simple and avoid further calculations
+            if (Math.abs(latDiff) < exactMatchRounding && Math.abs(lngDiff) < exactMatchRounding) {
                 this._internalMousemoveHandler(item);
                 break;
             }
