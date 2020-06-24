@@ -1,6 +1,8 @@
 'use strict';
 
 function _typeof(obj) {
+  "@babel/helpers - typeof";
+
   if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
     _typeof = function (obj) {
       return typeof obj;
@@ -14,6 +16,80 @@ function _typeof(obj) {
   return _typeof(obj);
 }
 
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+  return arr2;
+}
+
+function _createForOfIteratorHelper(o, allowArrayLike) {
+  var it;
+
+  if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {
+    if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+      if (it) o = it;
+      var i = 0;
+
+      var F = function () {};
+
+      return {
+        s: F,
+        n: function () {
+          if (i >= o.length) return {
+            done: true
+          };
+          return {
+            done: false,
+            value: o[i++]
+          };
+        },
+        e: function (e) {
+          throw e;
+        },
+        f: F
+      };
+    }
+
+    throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+
+  var normalCompletion = true,
+      didErr = false,
+      err;
+  return {
+    s: function () {
+      it = o[Symbol.iterator]();
+    },
+    n: function () {
+      var step = it.next();
+      normalCompletion = step.done;
+      return step;
+    },
+    e: function (e) {
+      didErr = true;
+      err = e;
+    },
+    f: function () {
+      try {
+        if (!normalCompletion && it.return != null) it.return();
+      } finally {
+        if (didErr) throw err;
+      }
+    }
+  };
+}
+
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function unwrapExports (x) {
@@ -25,10 +101,10 @@ function createCommonjsModule(fn, module) {
 }
 
 var d3Selection = createCommonjsModule(function (module, exports) {
-// https://d3js.org/d3-selection/ v1.4.0 Copyright 2019 Mike Bostock
+// https://d3js.org/d3-selection/ v1.4.1 Copyright 2019 Mike Bostock
 (function (global, factory) {
  factory(exports) ;
-}(commonjsGlobal, (function (exports) {
+}(commonjsGlobal, function (exports) {
 var xhtml = "http://www.w3.org/1999/xhtml";
 
 var namespaces = {
@@ -293,9 +369,9 @@ function selection_join(onenter, onupdate, onexit) {
   return enter && update ? enter.merge(update).order() : update;
 }
 
-function selection_merge(selection$$1) {
+function selection_merge(selection) {
 
-  for (var groups0 = this._groups, groups1 = selection$$1._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {
+  for (var groups0 = this._groups, groups1 = selection._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {
     for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge = merges[j] = new Array(n), node, i = 0; i < n; ++i) {
       if (node = group0[i] || group1[i]) {
         merge[i] = node;
@@ -691,11 +767,13 @@ function selection_remove() {
 }
 
 function selection_cloneShallow() {
-  return this.parentNode.insertBefore(this.cloneNode(false), this.nextSibling);
+  var clone = this.cloneNode(false), parent = this.parentNode;
+  return parent ? parent.insertBefore(clone, this.nextSibling) : clone;
 }
 
 function selection_cloneDeep() {
-  return this.parentNode.insertBefore(this.cloneNode(true), this.nextSibling);
+  var clone = this.cloneNode(true), parent = this.parentNode;
+  return parent ? parent.insertBefore(clone, this.nextSibling) : clone;
 }
 
 function selection_clone(deep) {
@@ -987,14 +1065,15 @@ function touches(node, touches) {
   return points;
 }
 
+exports.clientPoint = point;
 exports.create = create;
 exports.creator = creator;
+exports.customEvent = customEvent;
 exports.local = local;
 exports.matcher = matcher;
 exports.mouse = mouse;
 exports.namespace = namespace;
 exports.namespaces = namespaces;
-exports.clientPoint = point;
 exports.select = select;
 exports.selectAll = selectAll;
 exports.selection = selection;
@@ -1004,11 +1083,10 @@ exports.style = styleValue;
 exports.touch = touch;
 exports.touches = touches;
 exports.window = defaultView;
-exports.customEvent = customEvent;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 });
 
 unwrapExports(d3Selection);
@@ -1832,7 +1910,7 @@ var d3Array_3 = d3Array.max;
 var d3Array_4 = d3Array.bisector;
 
 var d3Color = createCommonjsModule(function (module, exports) {
-// https://d3js.org/d3-color/ v1.4.0 Copyright 2019 Mike Bostock
+// https://d3js.org/d3-color/ v1.4.1 Copyright 2020 Mike Bostock
 (function (global, factory) {
  factory(exports) ;
 }(commonjsGlobal, function (exports) {
@@ -2045,8 +2123,8 @@ function color(format) {
   format = (format + "").trim().toLowerCase();
   return (m = reHex.exec(format)) ? (l = m[1].length, m = parseInt(m[1], 16), l === 6 ? rgbn(m) // #ff0000
       : l === 3 ? new Rgb((m >> 8 & 0xf) | (m >> 4 & 0xf0), (m >> 4 & 0xf) | (m & 0xf0), ((m & 0xf) << 4) | (m & 0xf), 1) // #f00
-      : l === 8 ? new Rgb(m >> 24 & 0xff, m >> 16 & 0xff, m >> 8 & 0xff, (m & 0xff) / 0xff) // #ff000000
-      : l === 4 ? new Rgb((m >> 12 & 0xf) | (m >> 8 & 0xf0), (m >> 8 & 0xf) | (m >> 4 & 0xf0), (m >> 4 & 0xf) | (m & 0xf0), (((m & 0xf) << 4) | (m & 0xf)) / 0xff) // #f000
+      : l === 8 ? rgba(m >> 24 & 0xff, m >> 16 & 0xff, m >> 8 & 0xff, (m & 0xff) / 0xff) // #ff000000
+      : l === 4 ? rgba((m >> 12 & 0xf) | (m >> 8 & 0xf0), (m >> 8 & 0xf) | (m >> 4 & 0xf0), (m >> 4 & 0xf) | (m & 0xf0), (((m & 0xf) << 4) | (m & 0xf)) / 0xff) // #f000
       : null) // invalid hex
       : (m = reRgbInteger.exec(format)) ? new Rgb(m[1], m[2], m[3], 1) // rgb(255, 0, 0)
       : (m = reRgbPercent.exec(format)) ? new Rgb(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, 1) // rgb(100%, 0%, 0%)
@@ -2415,10 +2493,10 @@ Object.defineProperty(exports, '__esModule', { value: true });
 unwrapExports(d3Color);
 
 var d3Interpolate = createCommonjsModule(function (module, exports) {
-// https://d3js.org/d3-interpolate/ v1.3.2 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-interpolate/ v1.4.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
  factory(exports, d3Color) ;
-}(commonjsGlobal, (function (exports,d3Color) {
+}(commonjsGlobal, function (exports, d3Color) {
 function basis(t1, v0, v1, v2, v3) {
   var t2 = t1 * t1, t3 = t2 * t1;
   return ((1 - 3 * t1 + 3 * t2 - t3) * v0
@@ -2536,7 +2614,26 @@ function rgbSpline(spline) {
 var rgbBasis = rgbSpline(basis$1);
 var rgbBasisClosed = rgbSpline(basisClosed);
 
+function numberArray(a, b) {
+  if (!b) b = [];
+  var n = a ? Math.min(b.length, a.length) : 0,
+      c = b.slice(),
+      i;
+  return function(t) {
+    for (i = 0; i < n; ++i) c[i] = a[i] * (1 - t) + b[i] * t;
+    return c;
+  };
+}
+
+function isNumberArray(x) {
+  return ArrayBuffer.isView(x) && !(x instanceof DataView);
+}
+
 function array(a, b) {
+  return (isNumberArray(b) ? numberArray : genericArray)(a, b);
+}
+
+function genericArray(a, b) {
   var nb = b ? b.length : 0,
       na = a ? Math.min(nb, a.length) : 0,
       x = new Array(na),
@@ -2554,14 +2651,14 @@ function array(a, b) {
 
 function date(a, b) {
   var d = new Date;
-  return a = +a, b -= a, function(t) {
-    return d.setTime(a + b * t), d;
+  return a = +a, b = +b, function(t) {
+    return d.setTime(a * (1 - t) + b * t), d;
   };
 }
 
 function number(a, b) {
-  return a = +a, b -= a, function(t) {
-    return a + b * t;
+  return a = +a, b = +b, function(t) {
+    return a * (1 - t) + b * t;
   };
 }
 
@@ -2657,7 +2754,8 @@ function value(a, b) {
       : t === "string" ? ((c = d3Color.color(b)) ? (b = c, rgb) : string)
       : b instanceof d3Color.color ? rgb
       : b instanceof Date ? date
-      : Array.isArray(b) ? array
+      : isNumberArray(b) ? numberArray
+      : Array.isArray(b) ? genericArray
       : typeof b.valueOf !== "function" && typeof b.toString !== "function" || isNaN(b) ? object
       : number)(a, b);
 }
@@ -2678,8 +2776,8 @@ function hue$1(a, b) {
 }
 
 function round(a, b) {
-  return a = +a, b -= a, function(t) {
-    return Math.round(a + b * t);
+  return a = +a, b = +b, function(t) {
+    return Math.round(a * (1 - t) + b * t);
   };
 }
 
@@ -2860,9 +2958,9 @@ function zoom(p0, p1) {
   return i;
 }
 
-function hsl(hue$$1) {
+function hsl(hue) {
   return function(start, end) {
-    var h = hue$$1((start = d3Color.hsl(start)).h, (end = d3Color.hsl(end)).h),
+    var h = hue((start = d3Color.hsl(start)).h, (end = d3Color.hsl(end)).h),
         s = nogamma(start.s, end.s),
         l = nogamma(start.l, end.l),
         opacity = nogamma(start.opacity, end.opacity);
@@ -2893,9 +2991,9 @@ function lab(start, end) {
   };
 }
 
-function hcl(hue$$1) {
+function hcl(hue) {
   return function(start, end) {
-    var h = hue$$1((start = d3Color.hcl(start)).h, (end = d3Color.hcl(end)).h),
+    var h = hue((start = d3Color.hcl(start)).h, (end = d3Color.hcl(end)).h),
         c = nogamma(start.c, end.c),
         l = nogamma(start.l, end.l),
         opacity = nogamma(start.opacity, end.opacity);
@@ -2912,12 +3010,12 @@ function hcl(hue$$1) {
 var hcl$1 = hcl(hue);
 var hclLong = hcl(nogamma);
 
-function cubehelix(hue$$1) {
+function cubehelix(hue) {
   return (function cubehelixGamma(y) {
     y = +y;
 
     function cubehelix(start, end) {
-      var h = hue$$1((start = d3Color.cubehelix(start)).h, (end = d3Color.cubehelix(end)).h),
+      var h = hue((start = d3Color.cubehelix(start)).h, (end = d3Color.cubehelix(end)).h),
           s = nogamma(start.s, end.s),
           l = nogamma(start.l, end.l),
           opacity = nogamma(start.opacity, end.opacity);
@@ -2958,38 +3056,39 @@ exports.interpolate = value;
 exports.interpolateArray = array;
 exports.interpolateBasis = basis$1;
 exports.interpolateBasisClosed = basisClosed;
+exports.interpolateCubehelix = cubehelix$1;
+exports.interpolateCubehelixLong = cubehelixLong;
 exports.interpolateDate = date;
 exports.interpolateDiscrete = discrete;
+exports.interpolateHcl = hcl$1;
+exports.interpolateHclLong = hclLong;
+exports.interpolateHsl = hsl$1;
+exports.interpolateHslLong = hslLong;
 exports.interpolateHue = hue$1;
+exports.interpolateLab = lab;
 exports.interpolateNumber = number;
+exports.interpolateNumberArray = numberArray;
 exports.interpolateObject = object;
+exports.interpolateRgb = rgb;
+exports.interpolateRgbBasis = rgbBasis;
+exports.interpolateRgbBasisClosed = rgbBasisClosed;
 exports.interpolateRound = round;
 exports.interpolateString = string;
 exports.interpolateTransformCss = interpolateTransformCss;
 exports.interpolateTransformSvg = interpolateTransformSvg;
 exports.interpolateZoom = zoom;
-exports.interpolateRgb = rgb;
-exports.interpolateRgbBasis = rgbBasis;
-exports.interpolateRgbBasisClosed = rgbBasisClosed;
-exports.interpolateHsl = hsl$1;
-exports.interpolateHslLong = hslLong;
-exports.interpolateLab = lab;
-exports.interpolateHcl = hcl$1;
-exports.interpolateHclLong = hclLong;
-exports.interpolateCubehelix = cubehelix$1;
-exports.interpolateCubehelixLong = cubehelixLong;
 exports.piecewise = piecewise;
 exports.quantize = quantize;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 });
 
 unwrapExports(d3Interpolate);
 
 var d3Format = createCommonjsModule(function (module, exports) {
-// https://d3js.org/d3-format/ v1.4.1 Copyright 2019 Mike Bostock
+// https://d3js.org/d3-format/ v1.4.4 Copyright 2020 Mike Bostock
 (function (global, factory) {
  factory(exports) ;
 }(commonjsGlobal, function (exports) {
@@ -3093,7 +3192,7 @@ function formatTrim(s) {
     switch (s[i]) {
       case ".": i0 = i1 = i; break;
       case "0": if (i0 === 0) i0 = i; i1 = i; break;
-      default: if (i0 > 0) { if (!+s[i]) break out; i0 = 0; } break;
+      default: if (!+s[i]) break out; if (i0 > 0) i0 = 0; break;
     }
   }
   return i0 > 0 ? s.slice(0, i0) + s.slice(i1 + 1) : s;
@@ -3210,19 +3309,20 @@ function formatLocale(locale) {
       } else {
         value = +value;
 
+        // Determine the sign. -0 is not less than 0, but 1 / -0 is!
+        var valueNegative = value < 0 || 1 / value < 0;
+
         // Perform the initial formatting.
-        var valueNegative = value < 0;
         value = isNaN(value) ? nan : formatType(Math.abs(value), precision);
 
         // Trim insignificant zeros.
         if (trim) value = formatTrim(value);
 
-        // If a negative value rounds to zero during formatting, treat as positive.
-        if (valueNegative && +value === 0) valueNegative = false;
+        // If a negative value rounds to zero after formatting, and no explicit positive sign is requested, hide the sign.
+        if (valueNegative && +value === 0 && sign !== "+") valueNegative = false;
 
         // Compute the prefix and suffix.
         valuePrefix = (valueNegative ? (sign === "(" ? sign : minus) : sign === "-" || sign === "(" ? "" : sign) + valuePrefix;
-
         valueSuffix = (type === "s" ? prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign === "(" ? ")" : "");
 
         // Break the formatted value into the integer “value” part that can be
@@ -3705,10 +3805,10 @@ Object.defineProperty(exports, '__esModule', { value: true });
 unwrapExports(d3Time);
 
 var d3TimeFormat = createCommonjsModule(function (module, exports) {
-// https://d3js.org/d3-time-format/ v2.1.3 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-time-format/ v2.2.3 Copyright 2019 Mike Bostock
 (function (global, factory) {
  factory(exports, d3Time) ;
-}(commonjsGlobal, (function (exports,d3Time) {
+}(commonjsGlobal, function (exports, d3Time) {
 function localDate(d) {
   if (0 <= d.y && d.y < 100) {
     var date = new Date(-1, d.m, d.d, d.H, d.M, d.S, d.L);
@@ -3727,8 +3827,8 @@ function utcDate(d) {
   return new Date(Date.UTC(d.y, d.m, d.d, d.H, d.M, d.S, d.L));
 }
 
-function newYear(y) {
-  return {y: y, m: 0, d: 1, H: 0, M: 0, S: 0, L: 0};
+function newDate(y, m, d) {
+  return {y: y, m: m, d: d, H: 0, M: 0, S: 0, L: 0};
 }
 
 function formatLocale(locale) {
@@ -3768,6 +3868,7 @@ function formatLocale(locale) {
     "m": formatMonthNumber,
     "M": formatMinutes,
     "p": formatPeriod,
+    "q": formatQuarter,
     "Q": formatUnixTimestamp,
     "s": formatUnixTimestampSeconds,
     "S": formatSeconds,
@@ -3800,6 +3901,7 @@ function formatLocale(locale) {
     "m": formatUTCMonthNumber,
     "M": formatUTCMinutes,
     "p": formatUTCPeriod,
+    "q": formatUTCQuarter,
     "Q": formatUnixTimestamp,
     "s": formatUnixTimestampSeconds,
     "S": formatUTCSeconds,
@@ -3832,6 +3934,7 @@ function formatLocale(locale) {
     "m": parseMonthNumber,
     "M": parseMinutes,
     "p": parsePeriod,
+    "q": parseQuarter,
     "Q": parseUnixTimestamp,
     "s": parseUnixTimestampSeconds,
     "S": parseSeconds,
@@ -3884,32 +3987,39 @@ function formatLocale(locale) {
     };
   }
 
-  function newParse(specifier, newDate) {
+  function newParse(specifier, Z) {
     return function(string) {
-      var d = newYear(1900),
+      var d = newDate(1900, undefined, 1),
           i = parseSpecifier(d, specifier, string += "", 0),
           week, day;
       if (i != string.length) return null;
 
       // If a UNIX timestamp is specified, return it.
       if ("Q" in d) return new Date(d.Q);
+      if ("s" in d) return new Date(d.s * 1000 + ("L" in d ? d.L : 0));
+
+      // If this is utcParse, never use the local timezone.
+      if (Z && !("Z" in d)) d.Z = 0;
 
       // The am-pm flag is 0 for AM, and 1 for PM.
       if ("p" in d) d.H = d.H % 12 + d.p * 12;
+
+      // If the month was not specified, inherit from the quarter.
+      if (d.m === undefined) d.m = "q" in d ? d.q : 0;
 
       // Convert day-of-week and week-of-year to day-of-year.
       if ("V" in d) {
         if (d.V < 1 || d.V > 53) return null;
         if (!("w" in d)) d.w = 1;
         if ("Z" in d) {
-          week = utcDate(newYear(d.y)), day = week.getUTCDay();
+          week = utcDate(newDate(d.y, 0, 1)), day = week.getUTCDay();
           week = day > 4 || day === 0 ? d3Time.utcMonday.ceil(week) : d3Time.utcMonday(week);
           week = d3Time.utcDay.offset(week, (d.V - 1) * 7);
           d.y = week.getUTCFullYear();
           d.m = week.getUTCMonth();
           d.d = week.getUTCDate() + (d.w + 6) % 7;
         } else {
-          week = newDate(newYear(d.y)), day = week.getDay();
+          week = localDate(newDate(d.y, 0, 1)), day = week.getDay();
           week = day > 4 || day === 0 ? d3Time.timeMonday.ceil(week) : d3Time.timeMonday(week);
           week = d3Time.timeDay.offset(week, (d.V - 1) * 7);
           d.y = week.getFullYear();
@@ -3918,7 +4028,7 @@ function formatLocale(locale) {
         }
       } else if ("W" in d || "U" in d) {
         if (!("w" in d)) d.w = "u" in d ? d.u % 7 : "W" in d ? 1 : 0;
-        day = "Z" in d ? utcDate(newYear(d.y)).getUTCDay() : newDate(newYear(d.y)).getDay();
+        day = "Z" in d ? utcDate(newDate(d.y, 0, 1)).getUTCDay() : localDate(newDate(d.y, 0, 1)).getDay();
         d.m = 0;
         d.d = "W" in d ? (d.w + 6) % 7 + d.W * 7 - (day + 5) % 7 : d.w + d.U * 7 - (day + 6) % 7;
       }
@@ -3932,7 +4042,7 @@ function formatLocale(locale) {
       }
 
       // Otherwise, all fields are in local time.
-      return newDate(d);
+      return localDate(d);
     };
   }
 
@@ -4015,6 +4125,10 @@ function formatLocale(locale) {
     return locale_periods[+(d.getHours() >= 12)];
   }
 
+  function formatQuarter(d) {
+    return 1 + ~~(d.getMonth() / 3);
+  }
+
   function formatUTCShortWeekday(d) {
     return locale_shortWeekdays[d.getUTCDay()];
   }
@@ -4035,6 +4149,10 @@ function formatLocale(locale) {
     return locale_periods[+(d.getUTCHours() >= 12)];
   }
 
+  function formatUTCQuarter(d) {
+    return 1 + ~~(d.getUTCMonth() / 3);
+  }
+
   return {
     format: function(specifier) {
       var f = newFormat(specifier += "", formats);
@@ -4042,7 +4160,7 @@ function formatLocale(locale) {
       return f;
     },
     parse: function(specifier) {
-      var p = newParse(specifier += "", localDate);
+      var p = newParse(specifier += "", false);
       p.toString = function() { return specifier; };
       return p;
     },
@@ -4052,7 +4170,7 @@ function formatLocale(locale) {
       return f;
     },
     utcParse: function(specifier) {
-      var p = newParse(specifier, utcDate);
+      var p = newParse(specifier += "", true);
       p.toString = function() { return specifier; };
       return p;
     }
@@ -4125,6 +4243,11 @@ function parseZone(d, string, i) {
   return n ? (d.Z = n[1] ? 0 : -(n[2] + (n[3] || "00")), i + n[0].length) : -1;
 }
 
+function parseQuarter(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 1));
+  return n ? (d.q = n[0] * 3 - 3, i + n[0].length) : -1;
+}
+
 function parseMonthNumber(d, string, i) {
   var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.m = n[0] - 1, i + n[0].length) : -1;
@@ -4177,7 +4300,7 @@ function parseUnixTimestamp(d, string, i) {
 
 function parseUnixTimestampSeconds(d, string, i) {
   var n = numberRe.exec(string.slice(i));
-  return n ? (d.Q = (+n[0]) * 1000, i + n[0].length) : -1;
+  return n ? (d.s = +n[0], i + n[0].length) : -1;
 }
 
 function formatDayOfMonth(d, p) {
@@ -4222,7 +4345,7 @@ function formatWeekdayNumberMonday(d) {
 }
 
 function formatWeekNumberSunday(d, p) {
-  return pad(d3Time.timeSunday.count(d3Time.timeYear(d), d), p, 2);
+  return pad(d3Time.timeSunday.count(d3Time.timeYear(d) - 1, d), p, 2);
 }
 
 function formatWeekNumberISO(d, p) {
@@ -4236,7 +4359,7 @@ function formatWeekdayNumberSunday(d) {
 }
 
 function formatWeekNumberMonday(d, p) {
-  return pad(d3Time.timeMonday.count(d3Time.timeYear(d), d), p, 2);
+  return pad(d3Time.timeMonday.count(d3Time.timeYear(d) - 1, d), p, 2);
 }
 
 function formatYear(d, p) {
@@ -4296,7 +4419,7 @@ function formatUTCWeekdayNumberMonday(d) {
 }
 
 function formatUTCWeekNumberSunday(d, p) {
-  return pad(d3Time.utcSunday.count(d3Time.utcYear(d), d), p, 2);
+  return pad(d3Time.utcSunday.count(d3Time.utcYear(d) - 1, d), p, 2);
 }
 
 function formatUTCWeekNumberISO(d, p) {
@@ -4310,7 +4433,7 @@ function formatUTCWeekdayNumberSunday(d) {
 }
 
 function formatUTCWeekNumberMonday(d, p) {
-  return pad(d3Time.utcMonday.count(d3Time.utcYear(d), d), p, 2);
+  return pad(d3Time.utcMonday.count(d3Time.utcYear(d) - 1, d), p, 2);
 }
 
 function formatUTCYear(d, p) {
@@ -4378,14 +4501,14 @@ var parseIso = +new Date("2000-01-01T00:00:00.000Z")
     ? parseIsoNative
     : exports.utcParse(isoSpecifier);
 
-exports.timeFormatDefaultLocale = defaultLocale;
-exports.timeFormatLocale = formatLocale;
 exports.isoFormat = formatIso;
 exports.isoParse = parseIso;
+exports.timeFormatDefaultLocale = defaultLocale;
+exports.timeFormatLocale = formatLocale;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 });
 
 unwrapExports(d3TimeFormat);
@@ -5560,15 +5683,15 @@ var d3Scale_1 = d3Scale.scaleOrdinal;
 var d3Scale_2 = d3Scale.scaleLinear;
 
 var d3Dispatch = createCommonjsModule(function (module, exports) {
-// https://d3js.org/d3-dispatch/ v1.0.5 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-dispatch/ v1.0.6 Copyright 2019 Mike Bostock
 (function (global, factory) {
  factory(exports) ;
-}(commonjsGlobal, (function (exports) {
+}(commonjsGlobal, function (exports) {
 var noop = {value: function() {}};
 
 function dispatch() {
   for (var i = 0, n = arguments.length, _ = {}, t; i < n; ++i) {
-    if (!(t = arguments[i] + "") || (t in _)) throw new Error("illegal type: " + t);
+    if (!(t = arguments[i] + "") || (t in _) || /[\s.]/.test(t)) throw new Error("illegal type: " + t);
     _[t] = [];
   }
   return new Dispatch(_);
@@ -5651,13 +5774,13 @@ exports.dispatch = dispatch;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 });
 
 unwrapExports(d3Dispatch);
 
 var d3Drag = createCommonjsModule(function (module, exports) {
-// https://d3js.org/d3-drag/ v1.2.4 Copyright 2019 Mike Bostock
+// https://d3js.org/d3-drag/ v1.2.5 Copyright 2019 Mike Bostock
 (function (global, factory) {
  factory(exports, d3Dispatch, d3Selection) ;
 }(commonjsGlobal, function (exports, d3Dispatch, d3Selection) {
@@ -6092,7 +6215,7 @@ var d3Axis_2 = d3Axis.axisBottom;
 var d3Axis_3 = d3Axis.axisRight;
 
 var d3Path = createCommonjsModule(function (module, exports) {
-// https://d3js.org/d3-path/ v1.0.8 Copyright 2019 Mike Bostock
+// https://d3js.org/d3-path/ v1.0.9 Copyright 2019 Mike Bostock
 (function (global, factory) {
  factory(exports) ;
 }(commonjsGlobal, function (exports) {
@@ -6235,10 +6358,10 @@ Object.defineProperty(exports, '__esModule', { value: true });
 unwrapExports(d3Path);
 
 var d3Shape = createCommonjsModule(function (module, exports) {
-// https://d3js.org/d3-shape/ v1.3.5 Copyright 2019 Mike Bostock
+// https://d3js.org/d3-shape/ v1.3.7 Copyright 2019 Mike Bostock
 (function (global, factory) {
  factory(exports, d3Path) ;
-}(commonjsGlobal, (function (exports,d3Path) {
+}(commonjsGlobal, function (exports, d3Path) {
 function constant(x) {
   return function constant() {
     return x;
@@ -6565,8 +6688,8 @@ function y(p) {
 }
 
 function line() {
-  var x$$1 = x,
-      y$$1 = y,
+  var x$1 = x,
+      y$1 = y,
       defined = constant(true),
       context = null,
       curve = curveLinear,
@@ -6586,18 +6709,18 @@ function line() {
         if (defined0 = !defined0) output.lineStart();
         else output.lineEnd();
       }
-      if (defined0) output.point(+x$$1(d, i, data), +y$$1(d, i, data));
+      if (defined0) output.point(+x$1(d, i, data), +y$1(d, i, data));
     }
 
     if (buffer) return output = null, buffer + "" || null;
   }
 
   line.x = function(_) {
-    return arguments.length ? (x$$1 = typeof _ === "function" ? _ : constant(+_), line) : x$$1;
+    return arguments.length ? (x$1 = typeof _ === "function" ? _ : constant(+_), line) : x$1;
   };
 
   line.y = function(_) {
-    return arguments.length ? (y$$1 = typeof _ === "function" ? _ : constant(+_), line) : y$$1;
+    return arguments.length ? (y$1 = typeof _ === "function" ? _ : constant(+_), line) : y$1;
   };
 
   line.defined = function(_) {
@@ -6897,14 +7020,14 @@ function linkTarget(d) {
 function link(curve) {
   var source = linkSource,
       target = linkTarget,
-      x$$1 = x,
-      y$$1 = y,
+      x$1 = x,
+      y$1 = y,
       context = null;
 
   function link() {
     var buffer, argv = slice.call(arguments), s = source.apply(this, argv), t = target.apply(this, argv);
     if (!context) context = buffer = d3Path.path();
-    curve(context, +x$$1.apply(this, (argv[0] = s, argv)), +y$$1.apply(this, argv), +x$$1.apply(this, (argv[0] = t, argv)), +y$$1.apply(this, argv));
+    curve(context, +x$1.apply(this, (argv[0] = s, argv)), +y$1.apply(this, argv), +x$1.apply(this, (argv[0] = t, argv)), +y$1.apply(this, argv));
     if (buffer) return context = null, buffer + "" || null;
   }
 
@@ -6917,11 +7040,11 @@ function link(curve) {
   };
 
   link.x = function(_) {
-    return arguments.length ? (x$$1 = typeof _ === "function" ? _ : constant(+_), link) : x$$1;
+    return arguments.length ? (x$1 = typeof _ === "function" ? _ : constant(+_), link) : x$1;
   };
 
   link.y = function(_) {
-    return arguments.length ? (y$$1 = typeof _ === "function" ? _ : constant(+_), link) : y$$1;
+    return arguments.length ? (y$1 = typeof _ === "function" ? _ : constant(+_), link) : y$1;
   };
 
   link.context = function(_) {
@@ -7421,15 +7544,15 @@ CardinalClosed.prototype = {
 
 var cardinalClosed = (function custom(tension) {
 
-  function cardinal$$1(context) {
+  function cardinal(context) {
     return new CardinalClosed(context, tension);
   }
 
-  cardinal$$1.tension = function(tension) {
+  cardinal.tension = function(tension) {
     return custom(+tension);
   };
 
-  return cardinal$$1;
+  return cardinal;
 })(0);
 
 function CardinalOpen(context, tension) {
@@ -7469,15 +7592,15 @@ CardinalOpen.prototype = {
 
 var cardinalOpen = (function custom(tension) {
 
-  function cardinal$$1(context) {
+  function cardinal(context) {
     return new CardinalOpen(context, tension);
   }
 
-  cardinal$$1.tension = function(tension) {
+  cardinal.tension = function(tension) {
     return custom(+tension);
   };
 
-  return cardinal$$1;
+  return cardinal;
 })(0);
 
 function point$2(that, x, y) {
@@ -7626,15 +7749,15 @@ CatmullRomClosed.prototype = {
 
 var catmullRomClosed = (function custom(alpha) {
 
-  function catmullRom$$1(context) {
+  function catmullRom(context) {
     return alpha ? new CatmullRomClosed(context, alpha) : new CardinalClosed(context, 0);
   }
 
-  catmullRom$$1.alpha = function(alpha) {
+  catmullRom.alpha = function(alpha) {
     return custom(+alpha);
   };
 
-  return catmullRom$$1;
+  return catmullRom;
 })(0.5);
 
 function CatmullRomOpen(context, alpha) {
@@ -7686,15 +7809,15 @@ CatmullRomOpen.prototype = {
 
 var catmullRomOpen = (function custom(alpha) {
 
-  function catmullRom$$1(context) {
+  function catmullRom(context) {
     return alpha ? new CatmullRomOpen(context, alpha) : new CardinalOpen(context, 0);
   }
 
-  catmullRom$$1.alpha = function(alpha) {
+  catmullRom.alpha = function(alpha) {
     return custom(+alpha);
   };
 
-  return catmullRom$$1;
+  return catmullRom;
 })(0.5);
 
 function LinearClosed(context) {
@@ -8028,12 +8151,12 @@ function diverging(series, order) {
   if (!((n = series.length) > 0)) return;
   for (var i, j = 0, d, dy, yp, yn, n, m = series[order[0]].length; j < m; ++j) {
     for (yp = yn = 0, i = 0; i < n; ++i) {
-      if ((dy = (d = series[order[i]][j])[1] - d[0]) >= 0) {
+      if ((dy = (d = series[order[i]][j])[1] - d[0]) > 0) {
         d[0] = yp, d[1] = yp += dy;
       } else if (dy < 0) {
         d[1] = yn, d[0] = yn += dy;
       } else {
-        d[0] = yp;
+        d[0] = 0, d[1] = dy;
       }
     }
   }
@@ -8128,46 +8251,37 @@ function reverse(series) {
 
 exports.arc = arc;
 exports.area = area;
-exports.line = line;
-exports.pie = pie;
 exports.areaRadial = areaRadial;
-exports.radialArea = areaRadial;
-exports.lineRadial = lineRadial$1;
-exports.radialLine = lineRadial$1;
-exports.pointRadial = pointRadial;
-exports.linkHorizontal = linkHorizontal;
-exports.linkVertical = linkVertical;
-exports.linkRadial = linkRadial;
-exports.symbol = symbol;
-exports.symbols = symbols;
-exports.symbolCircle = circle;
-exports.symbolCross = cross;
-exports.symbolDiamond = diamond;
-exports.symbolSquare = square;
-exports.symbolStar = star;
-exports.symbolTriangle = triangle;
-exports.symbolWye = wye;
+exports.curveBasis = basis;
 exports.curveBasisClosed = basisClosed;
 exports.curveBasisOpen = basisOpen;
-exports.curveBasis = basis;
 exports.curveBundle = bundle;
+exports.curveCardinal = cardinal;
 exports.curveCardinalClosed = cardinalClosed;
 exports.curveCardinalOpen = cardinalOpen;
-exports.curveCardinal = cardinal;
+exports.curveCatmullRom = catmullRom;
 exports.curveCatmullRomClosed = catmullRomClosed;
 exports.curveCatmullRomOpen = catmullRomOpen;
-exports.curveCatmullRom = catmullRom;
-exports.curveLinearClosed = linearClosed;
 exports.curveLinear = curveLinear;
+exports.curveLinearClosed = linearClosed;
 exports.curveMonotoneX = monotoneX;
 exports.curveMonotoneY = monotoneY;
 exports.curveNatural = natural;
 exports.curveStep = step;
 exports.curveStepAfter = stepAfter;
 exports.curveStepBefore = stepBefore;
+exports.line = line;
+exports.lineRadial = lineRadial$1;
+exports.linkHorizontal = linkHorizontal;
+exports.linkRadial = linkRadial;
+exports.linkVertical = linkVertical;
+exports.pie = pie;
+exports.pointRadial = pointRadial;
+exports.radialArea = areaRadial;
+exports.radialLine = lineRadial$1;
 exports.stack = stack;
-exports.stackOffsetExpand = expand;
 exports.stackOffsetDiverging = diverging;
+exports.stackOffsetExpand = expand;
 exports.stackOffsetNone = none;
 exports.stackOffsetSilhouette = silhouette;
 exports.stackOffsetWiggle = wiggle;
@@ -8177,10 +8291,19 @@ exports.stackOrderDescending = descending$1;
 exports.stackOrderInsideOut = insideOut;
 exports.stackOrderNone = none$1;
 exports.stackOrderReverse = reverse;
+exports.symbol = symbol;
+exports.symbolCircle = circle;
+exports.symbolCross = cross;
+exports.symbolDiamond = diamond;
+exports.symbolSquare = square;
+exports.symbolStar = star;
+exports.symbolTriangle = triangle;
+exports.symbolWye = wye;
+exports.symbols = symbols;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 });
 
 unwrapExports(d3Shape);
@@ -9005,7 +9128,7 @@ var d3ScaleChromatic_6 = d3ScaleChromatic.schemePaired;
       var colorScale;
 
       if (this._mappings === undefined) {
-        var randomNumber = this._randomNumber(this._d3ColorCategorical.length);
+        var randomNumber = this._randomNumber(this._d3ColorCategorical.length - 1);
 
         colorScale = d3Scale_1(this._d3ColorCategorical[randomNumber]);
       }
@@ -9311,28 +9434,19 @@ var d3ScaleChromatic_6 = d3ScaleChromatic.schemePaired;
           // some other leaflet plugins can't deal with multi-Polylines very well
           // therefore multiple single polylines are used here
           this._markedSegments = L.featureGroup();
-          var _iteratorNormalCompletion = true;
-          var _didIteratorError = false;
-          var _iteratorError = undefined;
+
+          var _iterator = _createForOfIteratorHelper(coords),
+              _step;
 
           try {
-            for (var _iterator = coords[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            for (_iterator.s(); !(_step = _iterator.n()).done;) {
               var linePart = _step.value;
               L.polyline(linePart, this._highlightStyle).addTo(this._markedSegments);
             }
           } catch (err) {
-            _didIteratorError = true;
-            _iteratorError = err;
+            _iterator.e(err);
           } finally {
-            try {
-              if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-                _iterator["return"]();
-              }
-            } finally {
-              if (_didIteratorError) {
-                throw _iteratorError;
-              }
-            }
+            _iterator.f();
           }
 
           this._markedSegments.addTo(this._map).bringToFront();

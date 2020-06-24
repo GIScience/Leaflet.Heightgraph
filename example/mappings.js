@@ -1,4 +1,4 @@
-var colorMappings = {
+const colorMappings = {
     steepness: {
         '-5': {
             text: '16%+',

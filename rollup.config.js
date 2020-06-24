@@ -48,7 +48,6 @@ export default {
             targets: [
                 { src: 'src/img/**/*', dest: 'dist/img'}
             ]
-
         })
     ],
     external: ['leaflet']

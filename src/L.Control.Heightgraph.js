@@ -1,10 +1,10 @@
-import {select, selectAll, mouse} from '../node_modules/d3-selection/src/index.js'
-import {scaleOrdinal,scaleLinear} from '../node_modules/d3-scale/src/index.js'
-import {quantile as d3Quantile, min as d3Min, max as d3Max, bisector} from '../node_modules/d3-array/src/index.js'
-import {drag} from '../node_modules/d3-drag/src/index.js'
-import {axisLeft, axisBottom, axisRight} from '../node_modules/d3-axis/src/index.js'
-import {format} from '../node_modules/d3-format/src/index.js'
-import {curveBasis, curveLinear, line, area as d3Area, symbol, symbolTriangle} from '../node_modules/d3-shape/src/index.js'
+import {select, selectAll, mouse} from 'd3-selection'
+import {scaleOrdinal,scaleLinear} from 'd3-scale'
+import {quantile as d3Quantile, min as d3Min, max as d3Max, bisector} from 'd3-array'
+import {drag} from 'd3-drag'
+import {axisLeft, axisBottom, axisRight} from 'd3-axis'
+import {format} from 'd3-format'
+import {curveBasis, curveLinear, line, area as d3Area, symbol, symbolTriangle} from 'd3-shape'
 import {
     schemeAccent,
     schemeDark2,
@@ -12,7 +12,7 @@ import {
     schemeCategory10,
     schemeSet3,
     schemePaired
-} from '../node_modules/d3-scale-chromatic/src/index.js'
+} from 'd3-scale-chromatic'
 (function (factory, window) {
 
     // define an AMD module that relies on 'leaflet'
@@ -283,7 +283,7 @@ import {
             const data = this._data
             let colorScale
             if (this._mappings === undefined) {
-                const randomNumber = this._randomNumber(this._d3ColorCategorical.length)
+                const randomNumber = this._randomNumber(this._d3ColorCategorical.length - 1)
                 colorScale = scaleOrdinal(this._d3ColorCategorical[randomNumber]);
             }
             for (let y = 0; y < data.length; y++) {
@@ -1021,4 +1021,3 @@ import {
 
     return L.Control.Heightgraph
 }, window))
-export default L.control.heightgraph

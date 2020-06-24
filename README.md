@@ -23,42 +23,41 @@ Install Leaflet.Heightgraph and dependencies with npm.
 npm install leaflet.heightgraph
 ```
 
-When using NPM you can require all needed libraries like this.
-```
-require('d3');
-require('leaflet');
-require('leaflet.heightgraph');
-```
+## Import
 
-Alternatively you can add the required libraries in the head of your index.html file
+You can import the required libraries in the head of your index.html file
 ```html
  <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
  <script src="node_modules/leaflet/dist/leaflet.js"></script>
  <link rel="stylesheet" href="src/L.Control.Heightgraph.css"/>
- <script src="node_modules/d3/dist/d3.js"></script>
  <script type="text/javascript" src="src/L.Control.Heightgraph.js"></script>
 ```
 
-The latest version of d3 is not compatible with older browsers, you can try d3 v4 in this case.
+When using NPM you can require all needed libraries like this.
+```
+require('leaflet');
+require('leaflet.heightgraph');
+```
 
-## Local setup
+After importing Leaflet correctly, ES 6 Module import is possible as well:
+```html
+<script type="module">
+    import 'leaflet.heightgraph'
+</script>
+```
 
-```bash
-# clone the repository
-$ git clone https://github.com/GIScience/Leaflet.Heightgraph.git
-
-# install dependencies using a node-version >= 8
-$ npm install
-
-# run jasmine tests with
-$ grunt
+The stylesheet can alternatively be imported in a style tag:
+```html
+<style>
+    @import "../node_modules/leaflet.heightgraph/dist/L.Control.Heightgraph.min.css";
+</style>
 ```
 
 ## Usage
 Initialize the heightgraph, add it to your Leaflet map object and add your
 Data to the heightgraph object.
 ```javascript
-var hg = L.control.heightgraph();
+let hg = L.control.heightgraph();
 hg.addTo(map);
 hg.addData(geojson);
 L.geoJson(geojson).addTo(map);
@@ -79,7 +78,7 @@ Notice that the list of coordinates has to start with the last coordinate
 of the previous `LineString`.
 
 ```javascript
-var FeatureCollections = [{
+const FeatureCollections = [{
     "type": "FeatureCollection",
     "features": [{
         "type": "Feature",
@@ -242,20 +241,41 @@ Specify the tick frequency in the *y axis* of the graph. Corresponds approximate
 
 default: `yTicks: 3`
 
-## Debug configurations (WebStorm)
+## Development setup
+
+```bash
+# clone the repository
+$ git clone https://github.com/GIScience/Leaflet.Heightgraph.git
+
+# install dependencies using a node-version >= 8
+$ npm install
+
+# start development server
+$ npm start
+```
+
+## Configurations (WebStorm)
+
+You can create run configurations for different tasks:
+
+### Starting development server
+
+- open `Run -> Edit Configurations...`
+- click `+` to add a new configuration and choose the npm template
+- give the Configuration a name e.g. `Dev`
+- choose `start` as command
+- press `OK`
+
+### Testing
 
 Debug jasmine tests with karma in WebStorm
 
 - open `Run -> Edit Configurations...`
 - click `+` to add a new configuration and choose the karma template
 - give the Configuration a name e.g. `Test`
-- the other parameters should be filled correctly by default
-    - Configuration File: `{path to repository root}/karma.conf.js`
-    - Node interpreter: `{path to node interpreter}`
-    - Karma package: `{path to repository root}/node_modules/karma`
-    - Working directory: `{path to repository root}`
-    - Browsers to start / Node Options / Environment Variables: - leave empty -
-- click the run button or setup breakpoints and click the debug button
+- press `OK`
+
+### Coverage
 
 Run karma with coverage
 

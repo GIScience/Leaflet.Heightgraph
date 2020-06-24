@@ -6,38 +6,39 @@ module.exports = (config) => {
             clearContext: false
         },
         basePath: "./",
-        frameworks: ["jasmine"],
-        browsers: ["Chrome"],
+        frameworks: ["jasmine", "esm"],
         files: [
-            "./node_modules/d3/dist/d3.js",
             "./node_modules/leaflet/dist/leaflet-src.js",
             "./node_modules/leaflet/dist/leaflet.css",
-            {
-                pattern: "./node_modules/jasmine-core/images/jasmine_favicon.png",
-                watched: false,
-                included: false,
-                served: true
-            },
-            "./src/L.Control.Heightgraph.js",
+            { pattern: "./src/L.Control.Heightgraph.js", type: 'module' },
             "./src/L.Control.Heightgraph.css",
-            "./spec/L.Control.Heightgraph.Spec.js"
+            { pattern: 'spec/**/*.Spec.js', type: 'module' }
         ],
+        plugins: [
+            // load plugin
+            require.resolve('@open-wc/karma-esm'),
+            // fallback: resolve any karma- plugins
+            'karma-*',
+        ],
+        browsers: ["Chrome"],
         autoWatch: true,
         reporters: [
             "progress",
             "kjhtml",
             "coverage"
         ],
-        preprocessors: {
-            "src/**/*.js": "coverage"
-        },
+        // TODO: coverage reports currently not working
         coverageReporter: {
-            dir: "coverage/", reporters: [
+            dir: "coverage/",
+            reporters: [
                 {type: "html", subdir: "html"},
                 {type: "lcovonly", subdir: "../coverage"},
                 {type: "json", subdir: "../coverage"},
                 {type: "text-summary"}
-            ]
+            ],
+        },
+        esm: {
+            nodeResolve: true
         },
         logLevel: config.LOG_DEBUG, failOnEmptyTestSuite: true
     })
