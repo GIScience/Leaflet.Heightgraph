@@ -1,6 +1,6 @@
 {
   "name": "leaflet.heightgraph",
-  "version": "0.4.1",
+  "version": "1.0.0",
   "description": "Leaflet plugin to visualize height information and road attributes",
   "main": "dist/L.Control.Heightgraph.min.js",
   "module": "src/L.Control.Heightgraph.js",
