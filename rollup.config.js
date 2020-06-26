@@ -1,10 +1,10 @@
-import commonjs  from 'rollup-plugin-commonjs'
-import nodeResolve from 'rollup-plugin-node-resolve'
+import nodeResolve from '@rollup/plugin-node-resolve'
 import {terser} from 'rollup-plugin-terser'
-import babel from 'rollup-plugin-babel'
+import babel from '@rollup/plugin-babel'
 import css from 'rollup-plugin-css-porter'
 import copy from 'rollup-plugin-copy'
 
+// noinspection JSUnusedGlobalSymbols
 export default {
     input: 'src/L.Control.Heightgraph.js',
     output: [
@@ -14,31 +14,19 @@ export default {
         },
         {
             file: 'dist/L.Control.Heightgraph.min.js',
-            format: 'cjs',
+            format: 'iife',
+            name: 'version',
             plugins: [terser()]
         }
 
     ],
     plugins: [
         nodeResolve({
-            mainFields: ['jsnext', 'main']
-        }),
-        commonjs({
-            namedExports: {
-                "d3-selection": ["select", "selectAll", "mouse"],
-                "d3-scale-chromatic": [
-                    "schemeAccent", "schemeDark2", "schemeSet2", "schemeCategory10", "schemeSet3", "schemePaired"
-                ],
-                "d3-scale": ["scaleOrdinal", "scaleLinear"],
-                "d3-array": ["quantile", "min", "max", "bisector"],
-                "d3-shape": ["curveBasis", "curveLinear", "line", "area", "symbol", "symbolTriangle"],
-                "d3-format": ["format"],
-                "d3-drag": ["drag"],
-                "d3-axis": ["axisLeft", "axisBottom", "axisRight"]
-            }
+            mainFields: ['module','jsnext', 'main']
         }),
         babel({
-            exclude: "node_modules/**" // only transpile our source code
+            exclude: "node_modules/**", // only transpile our source code
+            babelHelpers: 'bundled'
         }),
         css({
             raw: 'dist/L.Control.Heightgraph.css',
@@ -50,5 +38,10 @@ export default {
             ]
         })
     ],
-    external: ['leaflet']
+    external: ['leaflet'],
+    // see e.g. https://github.com/rollup/rollup/issues/2271
+    onwarn (warning, warn) {
+        if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+        warn(warning);
+    }
 };
