@@ -17,14 +17,33 @@
          <link rel="stylesheet" href="src/L.Control.Heightgraph.css"/>
          <script src="node_modules/d3/dist/d3.js"></script>
          <script type="text/javascript" src="example_data.js"></script>
+         <script type="text/javascript" src="example_data_2.js"></script>
+         <script type="text/javascript" src="example_data_3.js"></script>
          <script type="text/javascript" src="example_mappings.js"></script>
          <script type="text/javascript" src="src/L.Control.Heightgraph.js"></script>
 
      </head>
      <body>
+     <div id="overlay" style="position:absolute; bottom:10px; left:10px; background-color:white; width:100px; height:100px; z-index: 1000 ; opacity: 0.7">
+         Change data:
+         <button onclick="changeData('1')">Route</button>
+         <button onclick="changeData('2')">Seabed</button>
+         <button onclick="changeData('3')">Flight altitude</button>
+     </div>
      <div id="map"></div>
      </body>
      <script type="text/javascript">
+         function changeData(setNumber) {
+             let dataSet = setNumber === '1' ? geojson1 : setNumber === '2' ? geojson2 : setNumber === 3 ? geojson3 : []
+             displayGroup.clearLayers()
+             if (dataSet.length !== 0) {
+                 let newLayer = L.geoJson(dataSet)
+                 let newBounds = newLayer.getBounds()
+                 displayGroup.addLayer(newLayer)
+                 map.fitBounds(newBounds)
+             }
+             hg.addData(dataSet)
+         }
          const map = new L.Map('map')
 
          const url = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -35,6 +54,9 @@
              attribution: attr
          })
 
+         const displayGroup = new L.LayerGroup()
+         displayGroup.addTo(map)
+
          const bounds = new L.LatLngBounds(new L.LatLng(47.323989, 8.108683), new L.LatLng(46.96485, 8.029803))
 
          const hg = L.control.heightgraph({
@@ -44,6 +66,7 @@
              expandCallback(expand) {
                  console.log("Expand: "+expand)
              },
+             expandControls: false,
              mappings: colorMappings,
              highlightStyle: {
                  color: "purple"
@@ -52,11 +75,12 @@
 
          hg.addTo(map)
 
-         hg.addData(geojson)
+         hg.addData(geojson1)
 
-         L.geoJson(geojson).addTo(map)
+         L.geoJson(geojson1).addTo(displayGroup)
 
          map.addLayer(openstreetmap).fitBounds(bounds)
+
 
      </script>
  </html>

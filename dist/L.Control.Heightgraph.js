@@ -13,6 +13,7 @@ L.Control.Heightgraph = L.Control.extend({
     },
     mappings: undefined,
     expand: true,
+    expandControls: true,
     translation: {},
     expandCallback: undefined,
     xTicks: undefined,
@@ -41,9 +42,13 @@ L.Control.Heightgraph = L.Control.extend({
   onAdd: function onAdd(map) {
     var container = this._container = L.DomUtil.create("div", "heightgraph");
     L.DomEvent.disableClickPropagation(container);
-    var buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
-    var link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer);
-    var closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container);
+
+    if (this.options.expandControls) {
+      var buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
+      var link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer);
+      var closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container);
+    }
+
     this._showState = false;
 
     this._initToggle();
@@ -71,11 +76,18 @@ L.Control.Heightgraph = L.Control.extend({
 
     this._data = data;
 
-    this._init_options();
-
     this._prepareData();
 
     this._computeStats();
+
+    this._onAddData();
+  },
+
+  /**
+   * Trigger a re-render of the chart based on the existing data (e.g. on container resize).
+   */
+  _onAddData: function _onAddData() {
+    this._init_options();
 
     this._appendScales();
 
@@ -93,8 +105,10 @@ L.Control.Heightgraph = L.Control.extend({
       L.DomEvent.on(this._container, 'click', L.DomEvent.stopPropagation);
     }
 
-    L.DomEvent.on(this._button, 'click', this._expand, this);
-    L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+    if (this.options.expandControls) {
+      L.DomEvent.on(this._button, 'click', this._expand, this);
+      L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+    }
   },
   _dragHandler: function _dragHandler() {
     //we don´t want map events to occur here
@@ -134,7 +148,11 @@ L.Control.Heightgraph = L.Control.extend({
       this._dragRectangleG.remove();
 
       this._dragRectangleG = null;
-      this._dragRectangle = null;
+      this._dragRectangle = null; // Performance improvement: we could cache the full extend when addData() is called
+
+      var fullExtent = this._calculateFullExtent(this._areasFlattended);
+
+      fullExtent && this._map.fitBounds(fullExtent);
     }
   },
 
@@ -171,7 +189,7 @@ L.Control.Heightgraph = L.Control.extend({
    */
   _calculateFullExtent: function _calculateFullExtent(data) {
     if (!data || data.length < 1) {
-      throw new Error("no data in parameters");
+      return null;
     }
 
     var full_extent = new L.latLngBounds(data[0].latlng, data[0].latlng);
@@ -193,17 +211,22 @@ L.Control.Heightgraph = L.Control.extend({
 
     if (start !== end) {
       ext = this._calculateFullExtent(this._areasFlattended.slice(start, end + 1));
-    } else {
+    } else if (this._areasFlattended.length > 0) {
       ext = [this._areasFlattended[start].latlng, this._areasFlattended[end].latlng];
     }
 
-    this._map.fitBounds(ext);
+    ext && this._map.fitBounds(ext);
   },
 
   /**
    * Expand container when button clicked and shrink when close-Button clicked
    */
   _expand: function _expand() {
+    if (this.options.expandControls !== true) {
+      // always expand, never collapse
+      this._showState = false;
+    }
+
     if (!this._showState) {
       d3.select(this._button).style("display", "none");
       d3.select(this._container).selectAll('svg').style("display", "block");
@@ -305,20 +328,22 @@ L.Control.Heightgraph = L.Control.extend({
       this._profile.blocks[y].attributes = [];
       this._profile.blocks[y].geometries = [];
       this._profile.blocks[y].legend = {};
-      var i = void 0,
+
+      var _i = void 0,
           cnt = 0;
+
       var usedColors = {};
 
-      for (i = 0; i < data[y].features.length; i++) {
+      for (_i = 0; _i < data[y].features.length; _i++) {
         // data is redundant in every element of data which is why we collect it once
         var altitude = void 0,
             ptA = void 0,
             ptB = void 0,
             ptDistance = void 0;
         var geometry = [];
-        var coordsLength = data[y].features[i].geometry.coordinates.length; // save attribute types related to blocks
+        var coordsLength = data[y].features[_i].geometry.coordinates.length; // save attribute types related to blocks
 
-        var attributeType = data[y].features[i].properties.attributeType; // check if mappings are defined, otherwise random colors
+        var attributeType = data[y].features[_i].properties.attributeType; // check if mappings are defined, otherwise random colors
 
         var text = void 0,
             color = void 0;
@@ -329,7 +354,7 @@ L.Control.Heightgraph = L.Control.extend({
             color = usedColors[attributeType];
           } else {
             text = attributeType;
-            color = colorScale(i);
+            color = colorScale(_i);
             usedColors[attributeType] = color;
           }
         } else {
@@ -351,12 +376,12 @@ L.Control.Heightgraph = L.Control.extend({
         }
 
         for (var j = 0; j < coordsLength; j++) {
-          ptA = new L.LatLng(data[y].features[i].geometry.coordinates[j][1], data[y].features[i].geometry.coordinates[j][0]);
-          altitude = data[y].features[i].geometry.coordinates[j][2]; // add elevations, coordinates and point distances only once
+          ptA = new L.LatLng(data[y].features[_i].geometry.coordinates[j][1], data[y].features[_i].geometry.coordinates[j][0]);
+          altitude = data[y].features[_i].geometry.coordinates[j][2]; // add elevations, coordinates and point distances only once
           // last point in feature is first of next which is why we have to juggle with indices
 
           if (j < coordsLength - 1) {
-            ptB = new L.LatLng(data[y].features[i].geometry.coordinates[j + 1][1], data[y].features[i].geometry.coordinates[j + 1][0]);
+            ptB = new L.LatLng(data[y].features[_i].geometry.coordinates[j + 1][1], data[y].features[_i].geometry.coordinates[j + 1][0]);
             ptDistance = ptA.distanceTo(ptB) / 1000; // calculate distances of specific block
 
             cumDistance += ptDistance;
@@ -370,7 +395,7 @@ L.Control.Heightgraph = L.Control.extend({
             }
 
             cnt += 1;
-          } else if (j === coordsLength - 1 && i === data[y].features.length - 1) {
+          } else if (j === coordsLength - 1 && _i === data[y].features.length - 1) {
             if (y === 0) {
               this._profile.elevations.push(altitude);
 
@@ -383,7 +408,7 @@ L.Control.Heightgraph = L.Control.extend({
 
           var position = void 0;
 
-          if (j === coordsLength - 1 && i < data[y].features.length - 1) {
+          if (j === coordsLength - 1 && _i < data[y].features.length - 1) {
             position = this._profile.cumDistances[cnt];
           } else {
             position = this._profile.cumDistances[cnt - 1];
@@ -396,7 +421,7 @@ L.Control.Heightgraph = L.Control.extend({
             y: ptA.lat,
             latlng: ptA,
             type: text,
-            areaIdx: i
+            areaIdx: _i
           });
         }
 
@@ -467,11 +492,11 @@ L.Control.Heightgraph = L.Control.extend({
    * Creates the elevation profile
    */
   _createChart: function _createChart(idx) {
-    var areas = this._profile.blocks[idx].geometries;
+    var areas = this._profile.blocks.length == 0 ? [] : this._profile.blocks[idx].geometries;
     this._areasFlattended = [].concat.apply([], areas);
 
-    for (var i = 0; i < areas.length; i++) {
-      this._appendAreas(areas[i], idx, i);
+    for (var _i2 = 0; _i2 < areas.length; _i2++) {
+      this._appendAreas(areas[_i2], idx, _i2);
     }
 
     this._createFocus();
@@ -502,13 +527,13 @@ L.Control.Heightgraph = L.Control.extend({
 
     this._focusRect = this._focus.append("rect").attr("x", 3).attr("y", -this._y(boxPosition)).attr("display", "none"); // text line 1
 
-    this._focusDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + textDistance).attr("id", "distance").text(this._getTranslation('distance') + ':'); // text line 2
+    this._focusDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + textDistance).attr("id", "heightgraph.distance").text(this._getTranslation('distance') + ':'); // text line 2
 
-    this._focusHeight = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 2 * textDistance).attr("id", "height").text(this._getTranslation('elevation') + ':'); // text line 3
+    this._focusHeight = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 2 * textDistance).attr("id", "heightgraph.height").text(this._getTranslation('elevation') + ':'); // text line 3
 
-    this._focusBlockDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 3 * textDistance).attr("id", "blockdistance").text(this._getTranslation('segment_length') + ':'); // text line 4
+    this._focusBlockDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 3 * textDistance).attr("id", "heightgraph.blockdistance").text(this._getTranslation('segment_length') + ':'); // text line 4
 
-    this._focusType = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 4 * textDistance).attr("id", "type").text(this._getTranslation('type') + ':');
+    this._focusType = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 4 * textDistance).attr("id", "heightgraph.type").text(this._getTranslation('type') + ':');
     this._areaTspan = this._focusBlockDistance.append('tspan').attr("class", "tspan");
     this._typeTspan = this._focusType.append('tspan').attr("class", "tspan");
 
@@ -824,8 +849,10 @@ L.Control.Heightgraph = L.Control.extend({
     var self = this;
     var data = [];
 
-    for (var item in this._profile.blocks[this._selectedOption].legend) {
-      data.push(this._profile.blocks[this._selectedOption].legend[item]);
+    if (this._profile.blocks.length > 0) {
+      for (var item in this._profile.blocks[this._selectedOption].legend) {
+        data.push(this._profile.blocks[this._selectedOption].legend[item]);
+      }
     }
 
     var margin = this._margin,
@@ -876,8 +903,8 @@ L.Control.Heightgraph = L.Control.extend({
     var cnt = d3.selectAll(className).nodes().length;
     var widths = [];
 
-    for (var i = 0; i < cnt; i++) {
-      widths.push(d3.selectAll(className).nodes()[i].getBoundingClientRect().width);
+    for (var _i3 = 0; _i3 < cnt; _i3++) {
+      widths.push(d3.selectAll(className).nodes()[_i3].getBoundingClientRect().width);
     }
 
     var maxWidth = d3.max(widths);
@@ -905,8 +932,8 @@ L.Control.Heightgraph = L.Control.extend({
    * Handles the mouseout event when the mouse leaves the background
    */
   _mouseoutHandler: function _mouseoutHandler() {
-    for (var _i = 0, _arr = ['_focusLine', '_focus', '_pointG', '_mouseHeightFocus', '_mouseHeightFocusLabel']; _i < _arr.length; _i++) {
-      var param = _arr[_i];
+    for (var _i4 = 0, _arr = ['_focusLine', '_focus', '_pointG', '_mouseHeightFocus', '_mouseHeightFocusLabel']; _i4 < _arr.length; _i4++) {
+      var param = _arr[_i4];
 
       if (this[param]) {
         this[param].style('display', 'none');
@@ -915,19 +942,68 @@ L.Control.Heightgraph = L.Control.extend({
   },
 
   /*
+   * Handles the mouseover the map and displays distance and altitude level.
+   * Since this does a lookup of the point on the graph
+   * the closest to the given latlng on the provided event, it could be slow.
+   */
+  _mapMousemoveHandler: function _mapMousemoveHandler(evt) {
+    if (this._areasFlattended === false) {
+      return;
+    } // initialize the vars for the closest item calculation
+
+
+    var closestItem = null; // large enough to be trumped by any point on the chart
+
+    var closestDistance = 2 * Math.pow(100, 2); // consider a good enough match if the given point (lat and lng) is within
+    // 1.1 meters of a point on the chart (there are 111,111 meters in a degree)
+
+    var exactMatchRounding = 1.1 / 111111;
+
+    for (i = 0; i < this._areasFlattended.length; i++) {
+      var item = this._areasFlattended[i];
+      var latDiff = evt.latlng.lat - item.latlng.lat;
+      var lngDiff = evt.latlng.lng - item.latlng.lng; // first check for an almost exact match; it's simple and avoid further calculations
+
+      if (Math.abs(latDiff) < exactMatchRounding && Math.abs(lngDiff) < exactMatchRounding) {
+        this._internalMousemoveHandler(item);
+
+        break;
+      } // calculate the squared distance from the current to the given;
+      // it's the squared distance, to avoid the expensive square root
+
+
+      var distance = Math.pow(latDiff, 2) + Math.pow(lngDiff, 2);
+
+      if (distance < closestDistance) {
+        closestItem = item;
+        closestDistance = distance;
+      }
+    }
+
+    closestItem && this._internalMousemoveHandler(closestItem);
+  },
+
+  /*
    * Handles the mouseover the chart and displays distance and altitude level
    */
   _mousemoveHandler: function _mousemoveHandler(d, i, ctx) {
     var coords = d3.mouse(this._svg.node());
-    var areaLength;
 
-    var item = this._areasFlattended[this._findItemForX(coords[0])],
-        alt = item.altitude,
+    var item = this._areasFlattended[this._findItemForX(coords[0])];
+
+    item && this._internalMousemoveHandler(item);
+  },
+
+  /*
+   * Handles the mouseover, given the current item the mouse is over
+   */
+  _internalMousemoveHandler: function _internalMousemoveHandler(item) {
+    var areaLength;
+    var alt = item.altitude,
         dist = item.position,
         ll = item.latlng,
         areaIdx = item.areaIdx,
         type = item.type;
-
     var boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10;
 
     if (areaIdx === 0) {
@@ -983,9 +1059,9 @@ L.Control.Heightgraph = L.Control.extend({
       //save indexes of elevation values above the horizontal line
       var list = [];
 
-      for (var i = 0; i < b.length; i++) {
-        if (b[i].altitude >= yInvert) {
-          list.push(i);
+      for (var _i5 = 0; _i5 < b.length; _i5++) {
+        if (b[_i5].altitude >= yInvert) {
+          list.push(_i5);
         }
       } //split index list into coherent blocks of coordinates
 

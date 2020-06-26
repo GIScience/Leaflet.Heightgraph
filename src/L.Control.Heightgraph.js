@@ -139,7 +139,7 @@ L.Control.Heightgraph = L.Control.extend({
 
             // Performance improvement: we could cache the full extend when addData() is called
             let fullExtent = this._calculateFullExtent(this._areasFlattended);
-            fullExtent && this._map.fitBounds(fullExtent);
+            if (fullExtent) this._map.fitBounds(fullExtent);
         }
     },
     /**
@@ -190,7 +190,7 @@ L.Control.Heightgraph = L.Control.extend({
         } else if (this._areasFlattended.length > 0) {
             ext = [this._areasFlattended[start].latlng, this._areasFlattended[end].latlng];
         }
-        ext && this._map.fitBounds(ext);
+        if (ext) this._map.fitBounds(ext);
     },
     /**
      * Expand container when button clicked and shrink when close-Button clicked
@@ -450,8 +450,7 @@ L.Control.Heightgraph = L.Control.extend({
      * Creates the elevation profile
      */
     _createChart(idx) {
-        let areas = this._profile.blocks.length == 0
-                ? []
+        let areas = this._profile.blocks.length === 0 ? []
                 : this._profile.blocks[idx].geometries;
         this._areasFlattended = [].concat.apply([], areas);
         for (let i = 0; i < areas.length; i++) {
@@ -937,32 +936,25 @@ L.Control.Heightgraph = L.Control.extend({
      * Since this does a lookup of the point on the graph
      * the closest to the given latlng on the provided event, it could be slow.
      */
-    _mapMousemoveHandler(evt) {
-        if (this._areasFlattended == false) {
+    _mapMousemoveHandler(event) {
+        if (this._areasFlattended === false) {
             return;
         }
-
         // initialize the vars for the closest item calculation
         let closestItem = null;
         // large enough to be trumped by any point on the chart
         let closestDistance = 2 * Math.pow(100, 2);
-
         // consider a good enough match if the given point (lat and lng) is within
         // 1.1 meters of a point on the chart (there are 111,111 meters in a degree)
         const exactMatchRounding = 1.1 / 111111;
-
-        for (i = 0; i < this._areasFlattended.length; i++) {
-            let item = this._areasFlattended[i];
-
-            let latDiff = evt.latlng.lat - item.latlng.lat;
-            let lngDiff = evt.latlng.lng - item.latlng.lng;
-
+        for (let item of this._areasFlattended) {
+            let latDiff = event.latlng.lat - item.latlng.lat;
+            let lngDiff = event.latlng.lng - item.latlng.lng;
             // first check for an almost exact match; it's simple and avoid further calculations
             if (Math.abs(latDiff) < exactMatchRounding && Math.abs(lngDiff) < exactMatchRounding) {
                 this._internalMousemoveHandler(item);
                 break;
             }
-
             // calculate the squared distance from the current to the given;
             // it's the squared distance, to avoid the expensive square root
             const distance = Math.pow(latDiff, 2) + Math.pow(lngDiff, 2);
@@ -972,7 +964,7 @@ L.Control.Heightgraph = L.Control.extend({
             }
         }
 
-        closestItem && this._internalMousemoveHandler(closestItem);
+        if (closestItem) this._internalMousemoveHandler(closestItem);
     },
     /*
      * Handles the mouseover the chart and displays distance and altitude level
@@ -980,7 +972,7 @@ L.Control.Heightgraph = L.Control.extend({
     _mousemoveHandler(d, i, ctx) {
         const coords = d3.mouse(this._svg.node());
         const item = this._areasFlattended[this._findItemForX(coords[0])];
-        item && this._internalMousemoveHandler(item);
+        if (item) this._internalMousemoveHandler(item);
     },
     /*
      * Handles the mouseover, given the current item the mouse is over
