@@ -4606,6 +4606,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       },
       mappings: undefined,
       expand: true,
+      expandControls: true,
       translation: {},
       expandCallback: undefined,
       xTicks: undefined,
@@ -4636,9 +4637,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     onAdd: function onAdd(map) {
       var container = this._container = L.DomUtil.create("div", "heightgraph");
       L.DomEvent.disableClickPropagation(container);
-      var buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
-      var link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer);
-      var closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container);
+
+      if (this.options.expandControls) {
+        var buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
+        var link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer);
+        var closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container);
+      }
+
       this._showState = false;
 
       this._initToggle();
@@ -4667,11 +4672,18 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._data = data;
 
-      this._init_options();
-
       this._prepareData();
 
       this._computeStats();
+
+      this._onAddData();
+    },
+
+    /**
+     * Trigger a re-render of the chart based on the existing data (e.g. on container resize).
+     */
+    _onAddData: function _onAddData() {
+      this._init_options();
 
       this._appendScales();
 
@@ -4699,8 +4711,10 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         L.DomEvent.on(this._container, 'click', L.DomEvent.stopPropagation);
       }
 
-      L.DomEvent.on(this._button, 'click', this._expand, this);
-      L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+      if (this.options.expandControls) {
+        L.DomEvent.on(this._button, 'click', this._expand, this);
+        L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+      }
     },
     _dragHandler: function _dragHandler() {
       //we don´t want map events to occur here
@@ -4740,7 +4754,11 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         this._dragRectangleG.remove();
 
         this._dragRectangleG = null;
-        this._dragRectangle = null;
+        this._dragRectangle = null; // Performance improvement: we could cache the full extend when addData() is called
+
+        var fullExtent = this._calculateFullExtent(this._areasFlattended);
+
+        if (fullExtent) this._map.fitBounds(fullExtent);
       }
     },
 
@@ -4777,7 +4795,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      */
     _calculateFullExtent: function _calculateFullExtent(data) {
       if (!data || data.length < 1) {
-        throw new Error("no data in parameters");
+        return null;
       }
 
       var full_extent = new L.latLngBounds(data[0].latlng, data[0].latlng);
@@ -4799,17 +4817,22 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       if (start !== end) {
         ext = this._calculateFullExtent(this._areasFlattended.slice(start, end + 1));
-      } else {
+      } else if (this._areasFlattended.length > 0) {
         ext = [this._areasFlattended[start].latlng, this._areasFlattended[end].latlng];
       }
 
-      this._map.fitBounds(ext);
+      if (ext) this._map.fitBounds(ext);
     },
 
     /**
      * Expand container when button clicked and shrink when close-Button clicked
      */
     _expand: function _expand() {
+      if (this.options.expandControls !== true) {
+        // always expand, never collapse
+        this._showState = false;
+      }
+
       if (!this._showState) {
         select(this._button).style("display", "none");
         select(this._container).selectAll('svg').style("display", "block");
@@ -5052,7 +5075,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Creates the elevation profile
      */
     _createChart: function _createChart(idx) {
-      var areas = this._profile.blocks[idx].geometries;
+      var areas = this._profile.blocks.length == 0 ? [] : this._profile.blocks[idx].geometries;
       this._areasFlattended = [].concat.apply([], areas);
 
       for (var i = 0; i < areas.length; i++) {
@@ -5087,13 +5110,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._focusRect = this._focus.append("rect").attr("x", 3).attr("y", -this._y(boxPosition)).attr("display", "none"); // text line 1
 
-      this._focusDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + textDistance).attr("id", "distance").text(this._getTranslation('distance') + ':'); // text line 2
+      this._focusDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + textDistance).attr("id", "heightgraph.distance").text(this._getTranslation('distance') + ':'); // text line 2
 
-      this._focusHeight = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 2 * textDistance).attr("id", "height").text(this._getTranslation('elevation') + ':'); // text line 3
+      this._focusHeight = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 2 * textDistance).attr("id", "heightgraph.height").text(this._getTranslation('elevation') + ':'); // text line 3
 
-      this._focusBlockDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 3 * textDistance).attr("id", "blockdistance").text(this._getTranslation('segment_length') + ':'); // text line 4
+      this._focusBlockDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 3 * textDistance).attr("id", "heightgraph.blockdistance").text(this._getTranslation('segment_length') + ':'); // text line 4
 
-      this._focusType = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 4 * textDistance).attr("id", "type").text(this._getTranslation('type') + ':');
+      this._focusType = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 4 * textDistance).attr("id", "heightgraph.type").text(this._getTranslation('type') + ':');
       this._areaTspan = this._focusBlockDistance.append('tspan').attr("class", "tspan");
       this._typeTspan = this._focusType.append('tspan').attr("class", "tspan");
 
@@ -5402,8 +5425,10 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       var self = this;
       var data = [];
 
-      for (var item in this._profile.blocks[this._selectedOption].legend) {
-        data.push(this._profile.blocks[this._selectedOption].legend[item]);
+      if (this._profile.blocks.length > 0) {
+        for (var item in this._profile.blocks[this._selectedOption].legend) {
+          data.push(this._profile.blocks[this._selectedOption].legend[item]);
+        }
       }
 
       var margin = this._margin,
@@ -5493,19 +5518,77 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     },
 
     /*
+     * Handles the mouseover the map and displays distance and altitude level.
+     * Since this does a lookup of the point on the graph
+     * the closest to the given latlng on the provided event, it could be slow.
+     */
+    _mapMousemoveHandler: function _mapMousemoveHandler(event) {
+      if (this._areasFlattended === false) {
+        return;
+      } // initialize the vars for the closest item calculation
+
+
+      var closestItem = null; // large enough to be trumped by any point on the chart
+
+      var closestDistance = 2 * Math.pow(100, 2); // consider a good enough match if the given point (lat and lng) is within
+      // 1.1 meters of a point on the chart (there are 111,111 meters in a degree)
+
+      var exactMatchRounding = 1.1 / 111111;
+
+      var _iterator2 = _createForOfIteratorHelper(this._areasFlattended),
+          _step2;
+
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var item = _step2.value;
+          var latDiff = event.latlng.lat - item.latlng.lat;
+          var lngDiff = event.latlng.lng - item.latlng.lng; // first check for an almost exact match; it's simple and avoid further calculations
+
+          if (Math.abs(latDiff) < exactMatchRounding && Math.abs(lngDiff) < exactMatchRounding) {
+            this._internalMousemoveHandler(item);
+
+            break;
+          } // calculate the squared distance from the current to the given;
+          // it's the squared distance, to avoid the expensive square root
+
+
+          var distance = Math.pow(latDiff, 2) + Math.pow(lngDiff, 2);
+
+          if (distance < closestDistance) {
+            closestItem = item;
+            closestDistance = distance;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+
+      if (closestItem) this._internalMousemoveHandler(closestItem);
+    },
+
+    /*
      * Handles the mouseover the chart and displays distance and altitude level
      */
     _mousemoveHandler: function _mousemoveHandler(d, i, ctx) {
       var coords = mouse(this._svg.node());
-      var areaLength;
 
-      var item = this._areasFlattended[this._findItemForX(coords[0])],
-          alt = item.altitude,
+      var item = this._areasFlattended[this._findItemForX(coords[0])];
+
+      if (item) this._internalMousemoveHandler(item);
+    },
+
+    /*
+     * Handles the mouseover, given the current item the mouse is over
+     */
+    _internalMousemoveHandler: function _internalMousemoveHandler(item) {
+      var areaLength;
+      var alt = item.altitude,
           dist = item.position,
           ll = item.latlng,
           areaIdx = item.areaIdx,
           type = item.type;
-
       var boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10;
 
       if (areaIdx === 0) {

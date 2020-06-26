@@ -202,5 +202,15 @@ const colorMappings = {
             text: '10/10',
             color: '#ADADAD'
         }
+    },
+    conditionally_closed: {
+        'true': {
+            text: 'true',
+            color: '#ff6f45'
+        },
+        'false': {
+            text: 'false',
+            color: '#6788ff'
+        }
     }
 };
