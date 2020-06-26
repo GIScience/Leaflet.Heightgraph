@@ -1,4 +1,4 @@
-const geojson = [{
+const geojson1 = [{
     "type": "FeatureCollection",
     "features": [{
         "type": "Feature",
