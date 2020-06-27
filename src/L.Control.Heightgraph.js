@@ -933,11 +933,12 @@ L.Control.Heightgraph = L.Control.extend({
             }
     },
     /*
-     * Handles the mouseover the map and displays distance and altitude level.
+     * Handles the mouseover the map event and displays distance and altitude level.
+     * The given event contains the latitude and longitude attributes.
      * Since this does a lookup of the point on the graph
      * the closest to the given latlng on the provided event, it could be slow.
      */
-    _mapMousemoveHandler(evt) {
+    _mapMousemoveHandler(event) {
         if (this._areasFlattended == false) {
             return;
         }
@@ -954,8 +955,8 @@ L.Control.Heightgraph = L.Control.extend({
         for (i = 0; i < this._areasFlattended.length; i++) {
             let item = this._areasFlattended[i];
 
-            let latDiff = evt.latlng.lat - item.latlng.lat;
-            let lngDiff = evt.latlng.lng - item.latlng.lng;
+            let latDiff = event.latlng.lat - item.latlng.lat;
+            let lngDiff = event.latlng.lng - item.latlng.lng;
 
             // first check for an almost exact match; it's simple and avoid further calculations
             if (Math.abs(latDiff) < exactMatchRounding && Math.abs(lngDiff) < exactMatchRounding) {
