@@ -1,4 +1,5 @@
 import {select, selectAll, mouse} from 'd3-selection'
+import 'd3-selection-multi'
 import {scaleOrdinal,scaleLinear} from 'd3-scale'
 import {quantile as d3Quantile, min as d3Min, max as d3Max, bisector} from 'd3-array'
 import {drag} from 'd3-drag'
@@ -50,7 +51,8 @@ import {
             expandCallback: undefined,
             xTicks: undefined,
             yTicks: undefined,
-            highlightStyle: undefined
+            highlightStyle: undefined,
+            graphStyle: undefined
         },
         _defaultTranslation: {
             distance: "Distance",
@@ -68,6 +70,7 @@ import {
             this._svgHeight = this._height - this._margin.top - this._margin.bottom;
             this._selectedOption = 0
             this._highlightStyle = this.options.highlightStyle || {color: 'red'}
+            this._graphStyle = this.options.graphStyle || {}
         },
         onAdd(map) {
             let container = this._container = L.DomUtil.create("div", "heightgraph")
@@ -728,6 +731,7 @@ import {
             this._areapath.datum(block)
                 .attr("d", this._area)
                 .attr("stroke", c)
+                .styles(this._graphStyle)
                 .style("fill", c)
                 .style("pointer-events", "none");
         },

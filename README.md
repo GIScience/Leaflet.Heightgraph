@@ -214,6 +214,22 @@ highlightStyle = {
  }
 ```
 
+### graphStyle
+Allows customizing the style of the height graph.
+You may specify the [<path> element presentation attributes](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path) in the form of a JavaScript object.
+Note that in case of conflict the `mappings` attributes take precedence over the `graphStyle` attributes.
+
+default: `graphStyle: {}`
+
+Example:
+```javascript
+graphStyle = {
+    opacity: 0.8,
+    'fill-opacity': 0.5,
+    'stroke-width': '2px'
+};
+```
+
 ### translation
 You can change the labels of the heightgraph info field by passing translations
 for `distance`, `elevation`, `segment_length`, `type` and `legend`.
