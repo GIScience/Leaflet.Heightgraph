@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+ <html lang="en">
+     <head>
+         <meta charset="utf-8"/>
+         <title>Height Graph Development Example</title>
+         <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+         <style>
+             html, body, #map {
+                 height:100%;
+                 width:100%;
+                 padding:0;
+                 margin:0;
+             }
+         </style>
+         <link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css" />
+         <script src="../node_modules/leaflet/dist/leaflet.js"></script>
+         <link rel="stylesheet" href="../src/L.Control.Heightgraph.css"/>
+         <script type="text/javascript" src="../example/data.js"></script>
+         <script type="text/javascript" src="../example/mappings.js"></script>
+         <script type="module" src="../src/L.Control.Heightgraph.js"></script>
+         <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/hot-sneaks/jquery-ui.css" />
+         <script src='https://code.jquery.com/jquery-3.5.1.min.js'></script>
+         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+     </head>
+     <body>
+     <div id="map"></div>
+     </body>
+<!-- This script is run as a module to resolve sub-dependencies of L.Control.Heightgraph.js before running-->
+    <script type="module" src="../example/example-resizable.js"></script>
+ </html>
