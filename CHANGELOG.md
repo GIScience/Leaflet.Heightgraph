@@ -1,10 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+**Added**
+- graphStyle option to customize the graph style ([PR #85](https://github.com/GIScience/Leaflet.Heightgraph/pull/85))
+
 ## v1.0.0 (2020-06-26)
 
 **Added**
-- rollup for building and bundling d3 ([#](https://github.com/GIScience/Leaflet.Heightgraph/issues/45))
+- rollup for building and bundling d3 ([#45](https://github.com/GIScience/Leaflet.Heightgraph/issues/45))
 - modularization
 - `es-dev-server` (replaces lite-server) for development
 

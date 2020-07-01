@@ -12,6 +12,11 @@ const bounds = new L.LatLngBounds(new L.LatLng(47.323989, 8.108683), new L.LatLn
 
 const hg = L.control.heightgraph({
     mappings: colorMappings,
+    graphStyle: {
+        opacity: 0.8,
+        'fill-opacity': 0.5,
+        'stroke-width': '2px'
+    },
     translation: {
         distance: "My custom distance"
     },

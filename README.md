@@ -223,7 +223,7 @@ default: `graphStyle: {}`
 
 Example:
 ```javascript
-graphStyle = {
+graphStyle: {
     opacity: 0.8,
     'fill-opacity': 0.5,
     'stroke-width': '2px'
