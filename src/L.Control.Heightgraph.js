@@ -307,7 +307,7 @@ import {
                     // save attribute types related to blocks
                     const attributeType = data[y].features[i].properties.attributeType
                     // check if mappings are defined, otherwise random colors
-                    let text, color, opacity = 1.0
+                    let text, color
                     if (this._mappings === undefined) {
                         if (attributeType in usedColors) {
                             text = attributeType;
@@ -320,10 +320,9 @@ import {
                     } else {
                         text = this._mappings[data[y].properties.summary][attributeType].text;
                         color = this._mappings[data[y].properties.summary][attributeType].color;
-                        opacity = this._mappings[data[y].properties.summary][attributeType].opacity;
                     }
                     const attribute = {
-                        type: attributeType, text: text, color: color, opacity: opacity
+                        type: attributeType, text: text, color: color
                     }
                     this._profile.blocks[y].attributes.push(attribute);
                     // add to legend
@@ -718,7 +717,6 @@ import {
          */
         _appendAreas(block, idx, eleIdx) {
             const c = this._profile.blocks[idx].attributes[eleIdx].color
-            const opacity = this._profile.blocks[idx].attributes[eleIdx].opacity
             const self = this
             const area = this._area = d3Area().x(d => {
                 const xDiagonalCoordinate = self._x(d.position)
@@ -731,7 +729,6 @@ import {
                 .attr("d", this._area)
                 .attr("stroke", c)
                 .style("fill", c)
-                .style("opacity", opacity)
                 .style("pointer-events", "none");
         },
         // grid lines in x axis function

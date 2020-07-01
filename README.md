@@ -188,13 +188,11 @@ Example:
 colorMappings.Steepness = {
     '3': {
         text: '1-3%',
-        color: '#F29898',
-        opacity: 0.8
+        color: '#F29898'
     },
     '0': {
         text: '4-6%',
         color: '#E07575'
-        /* opacity defaults to 1.0 */
     }
 };
 ```
