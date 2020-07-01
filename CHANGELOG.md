@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 - graphStyle option to customize the graph style ([PR #85](https://github.com/GIScience/Leaflet.Heightgraph/pull/85))
+- resize method for dynamic resizing of the heightgraph ([#78](https://github.com/GIScience/Leaflet.Heightgraph/issues/78))
 
 ## v1.0.0 (2020-06-26)
 

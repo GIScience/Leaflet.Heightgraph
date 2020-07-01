@@ -4643,9 +4643,10 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._initToggle();
 
-      this._init_options();
+      this._init_options(); // Note: this._svg really contains the <g> inside the <svg>
 
-      var svg = this._svg = select(this._container).append("svg").attr("class", "heightgraph-container").attr("width", this._svgWidth + this._margin.left + this._margin.right).attr("height", this._svgHeight + this._margin.top + this._margin.bottom).append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
+
+      this._svg = select(this._container).append("svg").attr("class", "heightgraph-container").attr("width", this._svgWidth + this._margin.left + this._margin.right).attr("height", this._svgHeight + this._margin.top + this._margin.bottom).append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
       return container;
     },
     onRemove: function onRemove(map) {
@@ -4680,6 +4681,16 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       if (this._data.length > 1) this._createSelectionBox();
       if (this.options.expand) this._expand();
+    },
+    resize: function resize(size) {
+      if (size.width) this.options.width = size.width;
+      if (size.height) this.options.height = size.height; // Resize the <svg> along with its container
+
+      select(this._container).selectAll("svg").attr("width", size.width).attr("height", size.height); // Re-add the data to redraw the chart.
+      // Note: addData() toggles the expansion state, so turn that into a no-op by fake-toggling it first.
+
+      this._showState = !this._showState;
+      this.addData(this._data);
     },
     _initToggle: function _initToggle() {
       if (!L.Browser.touch) {
@@ -5320,8 +5331,10 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         "type": symbolTriangle,
         "id": "rightArrowSelection",
         "angle": 180
-      }];
-      var selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles).enter().append("path").attr("class", "select-symbol").attr("d", symbol().type(function (d) {
+      }]; // Use update pattern to update existing symbols in case of resize
+
+      var selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles);
+      selectionSign.enter().append("path").merge(selectionSign).attr("class", "select-symbol").attr("d", symbol().type(function (d) {
         return d.type;
       })).attr("transform", function (d) {
         return "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")";
