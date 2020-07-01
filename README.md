@@ -257,6 +257,18 @@ Specify the tick frequency in the *y axis* of the graph. Corresponds approximate
 
 default: `yTicks: 3`
 
+## Methods
+These methods are available on a created `L.control.heightgraph` instance:
+
+### resize
+Use this to resize the heightgraph container including the graph to the
+specified extent by passing an object including defined `width` and `height`
+properties in pixel values:
+```js
+// hg represents the L.control.heightgraph instance
+hg.resize({width: 1000, height: 300})
+```
+
 ## Development setup
 
 ```bash

@@ -81,7 +81,8 @@ import {
             this._showState = false;
             this._initToggle();
             this._init_options();
-            const svg = this._svg = select(this._container).append("svg").attr("class", "heightgraph-container").
+            // Note: this._svg really contains the <g> inside the <svg>
+            this._svg = select(this._container).append("svg").attr("class", "heightgraph-container").
                 attr("width", this._svgWidth + this._margin.left + this._margin.right).
                 attr("height", this._svgHeight + this._margin.top + this._margin.bottom).append("g").
                 attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")")
@@ -110,6 +111,22 @@ import {
             this._createChart(this._selectedOption);
             if (this._data.length > 1) this._createSelectionBox();
             if (this.options.expand) this._expand();
+        },
+        resize(size) {
+            if (size.width)
+                this.options.width = size.width;
+            if (size.height)
+                this.options.height = size.height;
+
+            // Resize the <svg> along with its container
+            select(this._container).selectAll("svg")
+                .attr("width", size.width)
+                .attr("height", size.height);
+
+            // Re-add the data to redraw the chart.
+            // Note: addData() toggles the expansion state, so turn that into a no-op by fake-toggling it first.
+            this._showState = !this._showState;
+            this.addData(this._data);
         },
         _initToggle() {
             if (!L.Browser.touch) {
@@ -770,7 +787,9 @@ import {
                     "angle": 180
                 }
             ]
-            const selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles).enter().append("path").
+            // Use update pattern to update existing symbols in case of resize
+            const selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles);
+            selectionSign.enter().append("path").merge(selectionSign).
                 attr("class", "select-symbol").attr("d", symbol().type(d => d.type)).attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")").attr("id", d => d.id).style("fill", d => d.color).on("click", d => {
                     if (d.id === "rightArrowSelection") arrowRight()
                     if (d.id === "leftArrowSelection") arrowLeft()
