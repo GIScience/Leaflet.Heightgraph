@@ -22,9 +22,9 @@ const hg = L.control.heightgraph({
 
 hg.addTo(map)
 
-hg.addData(geojson)
+hg.addData(geojson1)
 
-L.geoJson(geojson).addTo(map)
+L.geoJson(geojson1).addTo(map)
 
 map.addLayer(openstreetmap).fitBounds(bounds)
 
@@ -38,7 +38,7 @@ $('.heightgraph').resizable({
     },
     resize: function(event, ui) {
 
-        if(ui.originalPosition.left != ui.position.left || ui.originalPosition.top != ui.position.top) {
+        if(ui.originalPosition.left !== ui.position.left || ui.originalPosition.top !== ui.position.top) {
             // left/upper edge was dragged => only keep size change since we're sticking to the right/bottom
             ui.position.left = 0;
             ui.position.top = 0;
