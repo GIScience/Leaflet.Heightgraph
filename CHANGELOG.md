@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 - graphStyle option to customize the graph style ([PR #85](https://github.com/GIScience/Leaflet.Heightgraph/pull/85))
 - resize method for dynamic resizing of the heightgraph ([#78](https://github.com/GIScience/Leaflet.Heightgraph/issues/78))
 
+**Changed**
+- dependencies to latest ([#83](https://github.com/GIScience/Leaflet.Heightgraph/issues/83))
+
+**Removed**
+- unused dependencies: bower, concurrently & connect-modrewrite
+
 ## v1.0.0 (2020-06-26)
 
 **Added**
