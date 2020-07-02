@@ -106,20 +106,17 @@ import {
                     .remove();
             }
 
+            this._removeMarkedSegmentsOnMap();
+            this._resetDrag(false);
+
             this._data = data;
+            this._init_options();
             this._prepareData();
             this._computeStats();
-            this._onAddData();
-        },
-        /**
-         * Trigger a re-render of the chart based on the existing data (e.g. on container resize).
-         */
-        _onAddData() {
-            this._init_options();
             this._appendScales();
             this._appendGrid();
             this._createChart(this._selectedOption);
-            if (this._data.length > 1) this._createSelectionBox();
+            this._createSelectionBox();
             if (this.options.expand) this._expand();
         },
         resize(size) {
@@ -183,17 +180,21 @@ import {
             }
         },
         /**
-         * Removes the drag rectangle and zooms back to the total extent of the data.
+         * Removes the drag rectangle
+         * @param {boolean} skipMapFitBounds - whether to zoom the map back to the total extent of the data 
          */
-        _resetDrag() {
+        _resetDrag(skipMapFitBounds) {
             if (this._dragRectangleG) {
                 this._dragRectangleG.remove();
                 this._dragRectangleG = null;
                 this._dragRectangle = null;
 
-                // Performance improvement: we could cache the full extend when addData() is called
-                let fullExtent = this._calculateFullExtent(this._areasFlattended);
-                if (fullExtent) this._map.fitBounds(fullExtent);
+                if (skipMapFitBounds !== true) {
+                    // potential performance improvement:
+                    // we could cache the full extend when addData() is called
+                    let fullExtent = this._calculateFullExtent(this._areasFlattended);
+                    if (fullExtent) this._map.fitBounds(fullExtent);
+                }
             }
         },
         /**
@@ -811,19 +812,32 @@ import {
             ]
             // Use update pattern to update existing symbols in case of resize
             const selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles);
-            selectionSign.enter().append("path").merge(selectionSign).
-                attr("class", "select-symbol").attr("d", symbol().type(d => d.type)).attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")").attr("id", d => d.id).style("fill", d => d.color).on("click", d => {
-                    if (d.id === "rightArrowSelection") arrowRight()
-                    if (d.id === "leftArrowSelection") arrowLeft()
-                })
+            // remove any existing selection first
+            selectionSign.remove();
+            // then add only if needed
+            if (self._data.length > 1) {
+                selectionSign.enter().
+                    append("path").
+                    merge(selectionSign).
+                    attr("class", "select-symbol").
+                    attr("d", symbol().type(d => d.type)).
+                    attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")").
+                    attr("id", d => d.id).style("fill", d => d.color).
+                    on("click", d => {
+                        if (d.id === "rightArrowSelection") arrowRight()
+                        if (d.id === "leftArrowSelection") arrowLeft()
+                    })
+            }
             const chooseSelection = (id) => {
+                if (self._selectionText) self._selectionText.remove();
+                // after cleaning up, there is nothing left to do if there is no data
+                if (self._profile.blocks.length === 0) return;
                 const type = self._profile.blocks[id].info
                 const data = [
                     {
                         "selection": type.text
                     }
                 ]
-                if (self._selectionText) self._selectionText.remove();
                 self._selectionText = svg.selectAll('selection_text')
                     .data(data)
                     .enter()
