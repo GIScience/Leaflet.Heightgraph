@@ -30,6 +30,8 @@ map.addLayer(openstreetmap).fitBounds(bounds)
 
 $('.heightgraph').resizable({
     handles: 'w, n, nw',
+    minWidth: 380,
+    minHeight: 140,
     stop: function(event, ui) {
         // Remove the size/position of the UI element (.heightgraph .leaflet-control) because
         // it should be sized dynamically based on its contents. Giving it a fixed size causes
