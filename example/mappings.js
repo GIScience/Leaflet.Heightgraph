@@ -1,4 +1,4 @@
-var colorMappings = {
+const colorMappings = {
     steepness: {
         '-5': {
             text: '16%+',
@@ -201,6 +201,16 @@ var colorMappings = {
         '10': {
             text: '10/10',
             color: '#ADADAD'
+        }
+    },
+    conditionally_closed: {
+        'true': {
+            text: 'true',
+            color: '#ff6f45'
+        },
+        'false': {
+            text: 'false',
+            color: '#6788ff'
         }
     }
 };

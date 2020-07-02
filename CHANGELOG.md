@@ -1,6 +1,34 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+**Added**
+- graphStyle option to customize the graph style ([PR #85](https://github.com/GIScience/Leaflet.Heightgraph/pull/85))
+- resize method for dynamic resizing of the heightgraph ([#78](https://github.com/GIScience/Leaflet.Heightgraph/issues/78))
+
+**Changed**
+- dependencies to latest ([#83](https://github.com/GIScience/Leaflet.Heightgraph/issues/83))
+
+**Removed**
+- unused dependencies: bower, concurrently & connect-modrewrite
+
+## v1.0.0 (2020-06-26)
+
+**Added**
+- rollup for building and bundling d3 ([#45](https://github.com/GIScience/Leaflet.Heightgraph/issues/45))
+- modularization
+- `es-dev-server` (replaces lite-server) for development
+
+**Changed**
+- folder structure
+
+**Removed**
+- removed d3 dependency
+- grunt as task runner
+- unused dev-dependencies
+- lite-server
+
 ## v0.4.1 (2019-11-15)
 
 **Added**

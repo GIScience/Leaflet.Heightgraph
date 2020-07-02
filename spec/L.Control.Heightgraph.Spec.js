@@ -1,3 +1,4 @@
+import {select} from 'd3-selection'
 describe('L.Control.Heightgraph', () => {
     let el, geojson;
     beforeEach(() => {
@@ -20,7 +21,7 @@ describe('L.Control.Heightgraph', () => {
                 left: 50
         }
         el._container = L.DomUtil.create('div', 'heightgraph');
-        el._svg = d3.select(el._container)
+        el._svg = select(el._container)
             .append("svg")
             .attr("class", "heightgraph-container")
             .attr("width", 100)
@@ -111,7 +112,7 @@ describe('L.Control.Heightgraph', () => {
                 "summary": "surfaces"
             }
         }];
-        el.addData(geojson);
+        el.addData(geojson );
     });
     it('reads data of geojson correctly', () => {
         expect(el._data).toEqual(geojson);

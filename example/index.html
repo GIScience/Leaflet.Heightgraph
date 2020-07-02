@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+ <html lang="en">
+     <head>
+         <meta charset="utf-8"/>
+         <title>Height Graph Development Example</title>
+         <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+         <style>
+             html, body, #map {
+                 height:100%;
+                 width:100%;
+                 padding:0;
+                 margin:0;
+             }
+         </style>
+         <link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css" />
+         <script src="../node_modules/leaflet/dist/leaflet.js"></script>
+         <link rel="stylesheet" href="../src/L.Control.Heightgraph.css"/>
+         <script type="text/javascript" src="../example/data.js"></script>
+         <script type="text/javascript" src="../example/data_2.js"></script>
+         <script type="text/javascript" src="../example/data_3.js"></script>
+         <script type="text/javascript" src="../example/mappings.js"></script>
+         <script type="module" src="../src/L.Control.Heightgraph.js"></script>
+
+     </head>
+     <body>
+     <div id="overlay" style="position:absolute; bottom:10px; left:10px; background-color:white; width:100px; height:150px; z-index: 1000 ; opacity: 0.7">
+         <button onclick="changeData('1')">Data 1 <br>(4 cat)</button>
+         <button onclick="changeData('2')">Data 2 <br>(1 cat)</button>
+         <button onclick="changeData('3')">Data 3 <br>(1 different)</button>
+         <button onclick="changeData('4')">Data 4 <br>(empty)</button>
+     </div>
+     <div id="map"></div>
+     </body>
+    <script type="text/javascript" src="../example/example.js" defer></script>
+ </html>

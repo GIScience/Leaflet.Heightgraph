@@ -16,58 +16,14 @@
          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
          <script src="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
          <link rel="stylesheet" href="dist/L.Control.Heightgraph.min.css"/>
-         <!--Only use required libraries-->
-         <script src="https://d3js.org/d3-selection.v1.min.js"></script>
-         <script src="https://d3js.org/d3-array.v2.min.js"></script>
-         <script src="https://d3js.org/d3-color.v1.min.js"></script>
-         <script src="https://d3js.org/d3-drag.v1.min.js"></script>
-         <script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
-         <script src="https://d3js.org/d3-scale.v2.min.js"></script>
-         <script src="https://d3js.org/d3-axis.v1.min.js"></script>
-         <script src="https://d3js.org/d3-format.v1.min.js"></script>
-         <script src="https://d3js.org/d3-shape.v1.min.js"></script>
-         <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-         <script src="https://d3js.org/d3-path.v1.min.js"></script>
-         <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-         <script src="https://d3js.org/d3-collection.v1.min.js"></script>
-         <script type="text/javascript" src="example_data.js"></script>
-         <script type="text/javascript" src="example_mappings.js"></script>
+         <script type="text/javascript" src="example/data.js"></script>
+         <script type="text/javascript" src="example/mappings.js"></script>
          <script type="text/javascript" src="dist/L.Control.Heightgraph.min.js"></script>
 
      </head>
      <body>
      <div id="map"></div>
      </body>
-     <script type="text/javascript">
-         const map = new L.Map("map")
-
-         const url = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-             attr = "Map data © <a href=\"https://openstreetmap.org\">OpenStreetMap</a> contributors"
-
-         const openstreetmap = L.tileLayer(url, {
-             id: "openstreetmap",
-             attribution: attr
-         })
-
-         const bounds = new L.LatLngBounds(new L.LatLng(47.323989, 8.108683), new L.LatLng(46.96485, 8.029803))
-
-         const hg = L.control.heightgraph({
-             mappings: colorMappings,
-             translation: {
-                 distance: "My custom distance"
-             },
-             expandCallback(expand) {
-                 console.log("Expand: "+expand)
-             }
-         })
-
-         hg.addTo(map)
-
-         hg.addData(geojson)
-
-         L.geoJson(geojson).addTo(map)
-
-         map.addLayer(openstreetmap).fitBounds(bounds)
-
+     <script type="text/javascript" src="example/example.js">
      </script>
  </html>
