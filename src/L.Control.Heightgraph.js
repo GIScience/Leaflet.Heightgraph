@@ -667,7 +667,6 @@ import {
         /**
          * Defines the ranges and format of x- and y- scales and appends them
          */
-
         _appendScales() {
             const shortDist = Boolean(this._profile.totalDistance <= 10)
             const yHeightMin = this._profile.yElevationMin
@@ -989,11 +988,17 @@ import {
                 }
         },
         /*
+         * Handles the mouseout event and clears the current point info.
+         */
+        mapMouseoutHandler() {
+            this._mouseoutHandler();
+        },
+        /*
          * Handles the mouseover the map and displays distance and altitude level.
          * Since this does a lookup of the point on the graph
          * the closest to the given latlng on the provided event, it could be slow.
          */
-        _mapMousemoveHandler(event) {
+        mapMousemoveHandler(event) {
             if (this._areasFlattended === false) {
                 return;
             }
