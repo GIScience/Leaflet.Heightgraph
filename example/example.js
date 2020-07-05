@@ -1,8 +1,10 @@
 const onRoute = event => {
-    hg.mapMousemoveHandler(event)
+    hg.mapMousemoveHandler(event, {showMapMarker:false})
 }
 const outRoute = event => {
-    hg.mapMouseoutHandler()
+    setTimeout(()=> {
+        hg.mapMouseoutHandler()
+    }, 1000)
 }
 const changeData = setNumber => {
     let dataSet = setNumber === '1' ? geojson1 : setNumber === '2' ? geojson2 : setNumber === '3' ? geojson3 : []

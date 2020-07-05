@@ -181,7 +181,7 @@ import {
         },
         /**
          * Removes the drag rectangle
-         * @param {boolean} skipMapFitBounds - whether to zoom the map back to the total extent of the data 
+         * @param {boolean} skipMapFitBounds - whether to zoom the map back to the total extent of the data
          */
         _resetDrag(skipMapFitBounds) {
             if (this._dragRectangleG) {
@@ -434,9 +434,9 @@ import {
          * @param {Number} height: height as float
          * @param {string} type: type of element
          */
-        _showMarker(ll, height, type) {
-            const layerpoint = this._map.latLngToLayerPoint(ll)
-            const normalizedY = layerpoint.y - 75
+        _showMapMarker(ll, height, type) {
+            const layerPoint = this._map.latLngToLayerPoint(ll)
+            const normalizedY = layerPoint.y - 75
             if (!this._mouseHeightFocus) {
                 const heightG = select(".leaflet-overlay-pane svg").append("g")
                 this._mouseHeightFocus = heightG.append('svg:line')
@@ -461,21 +461,21 @@ import {
                     .attr("class", "height-focus circle-lower");
             }
             this._mouseHeightFocusLabel.style("display", "block");
-            this._mouseHeightFocus.attr("x1", layerpoint.x)
-                .attr("x2", layerpoint.x)
-                .attr("y1", layerpoint.y)
+            this._mouseHeightFocus.attr("x1", layerPoint.x)
+                .attr("x2", layerPoint.x)
+                .attr("y1", layerPoint.y)
                 .attr("y2", normalizedY)
                 .style("display", "block");
-            this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")")
+            this._pointG.attr("transform", "translate(" + layerPoint.x + "," + layerPoint.y + ")")
                 .style("display", "block");
-            this._mouseHeightFocusLabelRect.attr("x", layerpoint.x + 3)
+            this._mouseHeightFocusLabelRect.attr("x", layerPoint.x + 3)
                 .attr("y", normalizedY)
                 .attr("class", 'bBox');
-            this._mouseHeightFocusLabelTextElev.attr("x", layerpoint.x + 5)
+            this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 12)
                 .text(height + " m")
                 .attr("class", "tspan mouse-height-box-text");
-            this._mouseHeightFocusLabelTextType.attr("x", layerpoint.x + 5)
+            this._mouseHeightFocusLabelTextType.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 24)
                 .text(type)
                 .attr("class", "tspan mouse-height-box-text");
@@ -998,7 +998,7 @@ import {
          * Since this does a lookup of the point on the graph
          * the closest to the given latlng on the provided event, it could be slow.
          */
-        mapMousemoveHandler(event) {
+        mapMousemoveHandler(event, {showMapMarker: showMapMarker = true} = {}) {
             if (this._areasFlattended === false) {
                 return;
             }
@@ -1014,7 +1014,7 @@ import {
                 let lngDiff = event.latlng.lng - item.latlng.lng;
                 // first check for an almost exact match; it's simple and avoid further calculations
                 if (Math.abs(latDiff) < exactMatchRounding && Math.abs(lngDiff) < exactMatchRounding) {
-                    this._internalMousemoveHandler(item);
+                    this._internalMousemoveHandler(item, showMapMarker);
                     break;
                 }
                 // calculate the squared distance from the current to the given;
@@ -1026,7 +1026,7 @@ import {
                 }
             }
 
-            if (closestItem) this._internalMousemoveHandler(closestItem);
+            if (closestItem) this._internalMousemoveHandler(closestItem, showMapMarker);
         },
         /*
          * Handles the mouseover the chart and displays distance and altitude level
@@ -1039,7 +1039,7 @@ import {
         /*
          * Handles the mouseover, given the current item the mouse is over
          */
-        _internalMousemoveHandler(item) {
+        _internalMousemoveHandler(item, showMapMarker = true) {
             let areaLength
             const alt = item.altitude, dist = item.position,
                 ll = item.latlng, areaIdx = item.areaIdx, type = item.type
@@ -1049,7 +1049,9 @@ import {
             } else {
                 areaLength = this._profile.blocks[this._selectedOption].distances[areaIdx] - this._profile.blocks[this._selectedOption].distances[areaIdx - 1];
             }
-            this._showMarker(ll, alt, type);
+            if (showMapMarker) {
+                this._showMapMarker(ll, alt, type);
+            }
             this._distTspan.text(" " + dist.toFixed(1) + ' km');
             this._altTspan.text(" " + alt + ' m');
             this._areaTspan.text(" " + areaLength.toFixed(1) + ' km');
