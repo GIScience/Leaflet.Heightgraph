@@ -107,7 +107,7 @@ import {
             }
 
             this._removeMarkedSegmentsOnMap();
-            this._resetDrag(false);
+            this._resetDrag(true);
 
             this._data = data;
             this._init_options();
