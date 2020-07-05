@@ -646,7 +646,7 @@ import {
                     for (let linePart of coords) {
                         L.polyline(
                             linePart,
-                            this._highlightStyle
+                            {...this._highlightStyle,...{interactive: false}}
                         ).addTo(this._markedSegments)
                     }
                     this._markedSegments.addTo(this._map)
