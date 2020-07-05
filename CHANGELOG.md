@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 - `mapMouseoutHandler` method for handling the mouseout event, removing the markers ([PR #82](https://github.com/GIScience/Leaflet.Heightgraph/pull/82))
 
 **Changed**
-- `addData` method functionality:
+- `addData` method functionality ([#37](https://github.com/GIScience/Leaflet.Heightgraph/issues/37)):
     - instead of removing and adding the whole height graph only the data
     is cleared and replaced, keeping the L.control.heightgraph instance
     - mappings for subsequent data sets need to be specified during
