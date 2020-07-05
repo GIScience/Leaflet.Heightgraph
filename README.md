@@ -265,14 +265,37 @@ Specify the tick frequency in the *y axis* of the graph. Corresponds approximate
 default: `yTicks: 3`
 
 ## Methods
-These methods are available on a created `L.control.heightgraph` instance:
+The following methods are available on a created `L.control.heightgraph` instance,
+represented by `hg` in the examples.
+
+### mapMousemoveHandler
+Used together with mapMouseoutHandler.
+Takes a mousemove event as input `hg.mapMousemoveHandler(event)` to show
+the current position on the heightgraph when hovering over the respective
+geometry on the map.
+The marker on the map can be disabled by passing an object with properties
+`showMapMarker:false` as second argument. `showMapMarker` is `true` by default.
+```js
+hg.mapMousemoveHandler(mousemoveEvent, {showMapMarker: false})
+```
+Check [example.js](/example/example.js) for an implementation example.
+
+
+### mapMouseoutHandler
+Used together with mapMousemoveHandler.
+Responsible for removing the created markers again.
+You can pass a timeout in milliseconds to delay the removal.
+The default timeout is `1000`.
+```js
+hg.mapMouseoutHandler(0)
+```
+Check [example.js](/example/example.js) for an implementation example.
 
 ### resize
 Use this to resize the heightgraph container including the graph to the
 specified extent by passing an object including defined `width` and `height`
 properties in pixel values:
 ```js
-// hg represents the L.control.heightgraph instance
 hg.resize({width: 1000, height: 300})
 ```
 
