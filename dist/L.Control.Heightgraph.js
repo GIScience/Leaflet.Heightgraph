@@ -16,6 +16,55 @@ function _typeof(obj) {
   return _typeof(obj);
 }
 
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
 function _unsupportedIterableToArray(o, minLen) {
   if (!o) return;
   if (typeof o === "string") return _arrayLikeToArray(o, minLen);
@@ -4606,6 +4655,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       },
       mappings: undefined,
       expand: true,
+      expandControls: true,
       translation: {},
       expandCallback: undefined,
       xTicks: undefined,
@@ -4636,9 +4686,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     onAdd: function onAdd(map) {
       var container = this._container = L.DomUtil.create("div", "heightgraph");
       L.DomEvent.disableClickPropagation(container);
-      var buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
-      var link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer);
-      var closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container);
+
+      if (this.options.expandControls) {
+        var buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
+        var link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer);
+        var closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container);
+      }
+
       this._showState = false;
 
       this._initToggle();
@@ -4665,6 +4719,10 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         this._svg.selectAll("*").remove();
       }
 
+      this._removeMarkedSegmentsOnMap();
+
+      this._resetDrag(true);
+
       this._data = data;
 
       this._init_options();
@@ -4679,7 +4737,8 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._createChart(this._selectedOption);
 
-      if (this._data.length > 1) this._createSelectionBox();
+      this._createSelectionBox();
+
       if (this.options.expand) this._expand();
     },
     resize: function resize(size) {
@@ -4699,8 +4758,10 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         L.DomEvent.on(this._container, 'click', L.DomEvent.stopPropagation);
       }
 
-      L.DomEvent.on(this._button, 'click', this._expand, this);
-      L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+      if (this.options.expandControls) {
+        L.DomEvent.on(this._button, 'click', this._expand, this);
+        L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+      }
     },
     _dragHandler: function _dragHandler() {
       //we don´t want map events to occur here
@@ -4733,14 +4794,23 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     },
 
     /**
-     * Removes the drag rectangle and zooms back to the total extent of the data.
+     * Removes the drag rectangle
+     * @param {boolean} skipMapFitBounds - whether to zoom the map back to the total extent of the data
      */
-    _resetDrag: function _resetDrag() {
+    _resetDrag: function _resetDrag(skipMapFitBounds) {
       if (this._dragRectangleG) {
         this._dragRectangleG.remove();
 
         this._dragRectangleG = null;
         this._dragRectangle = null;
+
+        if (skipMapFitBounds !== true) {
+          // potential performance improvement:
+          // we could cache the full extend when addData() is called
+          var fullExtent = this._calculateFullExtent(this._areasFlattended);
+
+          if (fullExtent) this._map.fitBounds(fullExtent);
+        }
       }
     },
 
@@ -4777,7 +4847,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      */
     _calculateFullExtent: function _calculateFullExtent(data) {
       if (!data || data.length < 1) {
-        throw new Error("no data in parameters");
+        return null;
       }
 
       var full_extent = new L.latLngBounds(data[0].latlng, data[0].latlng);
@@ -4799,17 +4869,22 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       if (start !== end) {
         ext = this._calculateFullExtent(this._areasFlattended.slice(start, end + 1));
-      } else {
+      } else if (this._areasFlattended.length > 0) {
         ext = [this._areasFlattended[start].latlng, this._areasFlattended[end].latlng];
       }
 
-      this._map.fitBounds(ext);
+      if (ext) this._map.fitBounds(ext);
     },
 
     /**
      * Expand container when button clicked and shrink when close-Button clicked
      */
     _expand: function _expand() {
+      if (this.options.expandControls !== true) {
+        // always expand, never collapse
+        this._showState = false;
+      }
+
       if (!this._showState) {
         select(this._button).style("display", "none");
         select(this._container).selectAll('svg').style("display", "block");
@@ -5013,10 +5088,10 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * @param {Number} height: height as float
      * @param {string} type: type of element
      */
-    _showMarker: function _showMarker(ll, height, type) {
-      var layerpoint = this._map.latLngToLayerPoint(ll);
+    _showMapMarker: function _showMapMarker(ll, height, type) {
+      var layerPoint = this._map.latLngToLayerPoint(ll);
 
-      var normalizedY = layerpoint.y - 75;
+      var normalizedY = layerPoint.y - 75;
 
       if (!this._mouseHeightFocus) {
         var heightG = select(".leaflet-overlay-pane svg").append("g");
@@ -5031,15 +5106,15 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._mouseHeightFocusLabel.style("display", "block");
 
-      this._mouseHeightFocus.attr("x1", layerpoint.x).attr("x2", layerpoint.x).attr("y1", layerpoint.y).attr("y2", normalizedY).style("display", "block");
+      this._mouseHeightFocus.attr("x1", layerPoint.x).attr("x2", layerPoint.x).attr("y1", layerPoint.y).attr("y2", normalizedY).style("display", "block");
 
-      this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")").style("display", "block");
+      this._pointG.attr("transform", "translate(" + layerPoint.x + "," + layerPoint.y + ")").style("display", "block");
 
-      this._mouseHeightFocusLabelRect.attr("x", layerpoint.x + 3).attr("y", normalizedY).attr("class", 'bBox');
+      this._mouseHeightFocusLabelRect.attr("x", layerPoint.x + 3).attr("y", normalizedY).attr("class", 'bBox');
 
-      this._mouseHeightFocusLabelTextElev.attr("x", layerpoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan mouse-height-box-text");
+      this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan mouse-height-box-text");
 
-      this._mouseHeightFocusLabelTextType.attr("x", layerpoint.x + 5).attr("y", normalizedY + 24).text(type).attr("class", "tspan mouse-height-box-text");
+      this._mouseHeightFocusLabelTextType.attr("x", layerPoint.x + 5).attr("y", normalizedY + 24).text(type).attr("class", "tspan mouse-height-box-text");
 
       var maxWidth = this._dynamicBoxSize("text.tspan")[1]; // box size should change for profile none (no type)
 
@@ -5052,7 +5127,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Creates the elevation profile
      */
     _createChart: function _createChart(idx) {
-      var areas = this._profile.blocks[idx].geometries;
+      var areas = this._profile.blocks.length == 0 ? [] : this._profile.blocks[idx].geometries;
       this._areasFlattended = [].concat.apply([], areas);
 
       for (var i = 0; i < areas.length; i++) {
@@ -5087,13 +5162,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._focusRect = this._focus.append("rect").attr("x", 3).attr("y", -this._y(boxPosition)).attr("display", "none"); // text line 1
 
-      this._focusDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + textDistance).attr("id", "distance").text(this._getTranslation('distance') + ':'); // text line 2
+      this._focusDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + textDistance).attr("id", "heightgraph.distance").text(this._getTranslation('distance') + ':'); // text line 2
 
-      this._focusHeight = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 2 * textDistance).attr("id", "height").text(this._getTranslation('elevation') + ':'); // text line 3
+      this._focusHeight = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 2 * textDistance).attr("id", "heightgraph.height").text(this._getTranslation('elevation') + ':'); // text line 3
 
-      this._focusBlockDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 3 * textDistance).attr("id", "blockdistance").text(this._getTranslation('segment_length') + ':'); // text line 4
+      this._focusBlockDistance = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 3 * textDistance).attr("id", "heightgraph.blockdistance").text(this._getTranslation('segment_length') + ':'); // text line 4
 
-      this._focusType = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 4 * textDistance).attr("id", "type").text(this._getTranslation('type') + ':');
+      this._focusType = this._focus.append("text").attr("x", 7).attr("y", -this._y(boxPosition) + 4 * textDistance).attr("id", "heightgraph.type").text(this._getTranslation('type') + ':');
       this._areaTspan = this._focusBlockDistance.append('tspan').attr("class", "tspan");
       this._typeTspan = this._focusType.append('tspan').attr("class", "tspan");
 
@@ -5187,7 +5262,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done;) {
               var linePart = _step.value;
-              L.polyline(linePart, this._highlightStyle).addTo(this._markedSegments);
+              L.polyline(linePart, _objectSpread2(_objectSpread2({}, this._highlightStyle), {
+                interactive: false
+              })).addTo(this._markedSegments);
             }
           } catch (err) {
             _iterator.e(err);
@@ -5333,26 +5410,33 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         "angle": 180
       }]; // Use update pattern to update existing symbols in case of resize
 
-      var selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles);
-      selectionSign.enter().append("path").merge(selectionSign).attr("class", "select-symbol").attr("d", symbol().type(function (d) {
-        return d.type;
-      })).attr("transform", function (d) {
-        return "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")";
-      }).attr("id", function (d) {
-        return d.id;
-      }).style("fill", function (d) {
-        return d.color;
-      }).on("click", function (d) {
-        if (d.id === "rightArrowSelection") arrowRight();
-        if (d.id === "leftArrowSelection") arrowLeft();
-      });
+      var selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles); // remove any existing selection first
+
+      selectionSign.remove(); // then add only if needed
+
+      if (self._data.length > 1) {
+        selectionSign.enter().append("path").merge(selectionSign).attr("class", "select-symbol").attr("d", symbol().type(function (d) {
+          return d.type;
+        })).attr("transform", function (d) {
+          return "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")";
+        }).attr("id", function (d) {
+          return d.id;
+        }).style("fill", function (d) {
+          return d.color;
+        }).on("click", function (d) {
+          if (d.id === "rightArrowSelection") arrowRight();
+          if (d.id === "leftArrowSelection") arrowLeft();
+        });
+      }
 
       var chooseSelection = function chooseSelection(id) {
+        if (self._selectionText) self._selectionText.remove(); // after cleaning up, there is nothing left to do if there is no data
+
+        if (self._profile.blocks.length === 0) return;
         var type = self._profile.blocks[id].info;
         var data = [{
           "selection": type.text
         }];
-        if (self._selectionText) self._selectionText.remove();
         self._selectionText = svg.selectAll('selection_text').data(data).enter().append('text').attr("x", width - 20).attr("y", height + 50).text(function (d) {
           return d.selection;
         }).attr("class", "select-info").attr("id", "selectionText");
@@ -5402,8 +5486,10 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       var self = this;
       var data = [];
 
-      for (var item in this._profile.blocks[this._selectedOption].legend) {
-        data.push(this._profile.blocks[this._selectedOption].legend[item]);
+      if (this._profile.blocks.length > 0) {
+        for (var item in this._profile.blocks[this._selectedOption].legend) {
+          data.push(this._profile.blocks[this._selectedOption].legend[item]);
+        }
       }
 
       var margin = this._margin,
@@ -5493,19 +5579,100 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     },
 
     /*
+     * Handles the mouseout event and clears the current point info.
+     * @param {int} delay - time before markers are removed in milliseconds
+     */
+    mapMouseoutHandler: function mapMouseoutHandler() {
+      var _this = this;
+
+      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1000;
+
+      if (this.mouseoutDelay) {
+        window.clearTimeout(this.mouseoutDelay);
+      }
+
+      this.mouseoutDelay = window.setTimeout(function () {
+        _this._mouseoutHandler();
+      }, delay);
+    },
+
+    /*
+     * Handles the mouseover the map and displays distance and altitude level.
+     * Since this does a lookup of the point on the graph
+     * the closest to the given latlng on the provided event, it could be slow.
+     */
+    mapMousemoveHandler: function mapMousemoveHandler(event) {
+      var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          _ref$showMapMarker = _ref.showMapMarker,
+          showMapMarker = _ref$showMapMarker === void 0 ? true : _ref$showMapMarker;
+
+      if (this._areasFlattended === false) {
+        return;
+      } // initialize the vars for the closest item calculation
+
+
+      var closestItem = null; // large enough to be trumped by any point on the chart
+
+      var closestDistance = 2 * Math.pow(100, 2); // consider a good enough match if the given point (lat and lng) is within
+      // 1.1 meters of a point on the chart (there are 111,111 meters in a degree)
+
+      var exactMatchRounding = 1.1 / 111111;
+
+      var _iterator2 = _createForOfIteratorHelper(this._areasFlattended),
+          _step2;
+
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var item = _step2.value;
+          var latDiff = event.latlng.lat - item.latlng.lat;
+          var lngDiff = event.latlng.lng - item.latlng.lng; // first check for an almost exact match; it's simple and avoid further calculations
+
+          if (Math.abs(latDiff) < exactMatchRounding && Math.abs(lngDiff) < exactMatchRounding) {
+            this._internalMousemoveHandler(item, showMapMarker);
+
+            break;
+          } // calculate the squared distance from the current to the given;
+          // it's the squared distance, to avoid the expensive square root
+
+
+          var distance = Math.pow(latDiff, 2) + Math.pow(lngDiff, 2);
+
+          if (distance < closestDistance) {
+            closestItem = item;
+            closestDistance = distance;
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+
+      if (closestItem) this._internalMousemoveHandler(closestItem, showMapMarker);
+    },
+
+    /*
      * Handles the mouseover the chart and displays distance and altitude level
      */
     _mousemoveHandler: function _mousemoveHandler(d, i, ctx) {
       var coords = mouse(this._svg.node());
-      var areaLength;
 
-      var item = this._areasFlattended[this._findItemForX(coords[0])],
-          alt = item.altitude,
+      var item = this._areasFlattended[this._findItemForX(coords[0])];
+
+      if (item) this._internalMousemoveHandler(item);
+    },
+
+    /*
+     * Handles the mouseover, given the current item the mouse is over
+     */
+    _internalMousemoveHandler: function _internalMousemoveHandler(item) {
+      var showMapMarker = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      var areaLength;
+      var alt = item.altitude,
           dist = item.position,
           ll = item.latlng,
           areaIdx = item.areaIdx,
           type = item.type;
-
       var boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10;
 
       if (areaIdx === 0) {
@@ -5514,7 +5681,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         areaLength = this._profile.blocks[this._selectedOption].distances[areaIdx] - this._profile.blocks[this._selectedOption].distances[areaIdx - 1];
       }
 
-      this._showMarker(ll, alt, type);
+      if (showMapMarker) {
+        this._showMapMarker(ll, alt, type);
+      }
 
       this._distTspan.text(" " + dist.toFixed(1) + ' km');
 

@@ -47,6 +47,7 @@ import {
             },
             mappings: undefined,
             expand: true,
+            expandControls: true,
             translation: {},
             expandCallback: undefined,
             xTicks: undefined,
@@ -75,9 +76,11 @@ import {
         onAdd(map) {
             let container = this._container = L.DomUtil.create("div", "heightgraph")
             L.DomEvent.disableClickPropagation(container);
-            let buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
-            const link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer)
-            const closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container)
+            if (this.options.expandControls) {
+                let buttonContainer = this._button = L.DomUtil.create('div', "heightgraph-toggle", container);
+                const link = L.DomUtil.create("a", "heightgraph-toggle-icon", buttonContainer)
+                const closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container)
+            }
             this._showState = false;
             this._initToggle();
             this._init_options();
@@ -102,6 +105,10 @@ import {
                 this._svg.selectAll("*")
                     .remove();
             }
+
+            this._removeMarkedSegmentsOnMap();
+            this._resetDrag(true);
+
             this._data = data;
             this._init_options();
             this._prepareData();
@@ -109,7 +116,7 @@ import {
             this._appendScales();
             this._appendGrid();
             this._createChart(this._selectedOption);
-            if (this._data.length > 1) this._createSelectionBox();
+            this._createSelectionBox();
             if (this.options.expand) this._expand();
         },
         resize(size) {
@@ -134,8 +141,10 @@ import {
             } else {
                 L.DomEvent.on(this._container, 'click', L.DomEvent.stopPropagation);
             }
-            L.DomEvent.on(this._button, 'click', this._expand, this);
-            L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+            if (this.options.expandControls) {
+                L.DomEvent.on(this._button, 'click', this._expand, this);
+                L.DomEvent.on(this._closeButton, 'click', this._expand, this);
+            }
         },
         _dragHandler() {
             //we don´t want map events to occur here
@@ -171,13 +180,21 @@ import {
             }
         },
         /**
-         * Removes the drag rectangle and zooms back to the total extent of the data.
+         * Removes the drag rectangle
+         * @param {boolean} skipMapFitBounds - whether to zoom the map back to the total extent of the data
          */
-        _resetDrag() {
+        _resetDrag(skipMapFitBounds) {
             if (this._dragRectangleG) {
                 this._dragRectangleG.remove();
                 this._dragRectangleG = null;
                 this._dragRectangle = null;
+
+                if (skipMapFitBounds !== true) {
+                    // potential performance improvement:
+                    // we could cache the full extend when addData() is called
+                    let fullExtent = this._calculateFullExtent(this._areasFlattended);
+                    if (fullExtent) this._map.fitBounds(fullExtent);
+                }
             }
         },
         /**
@@ -207,7 +224,7 @@ import {
          */
         _calculateFullExtent(data) {
             if (!data || data.length < 1) {
-                throw new Error("no data in parameters");
+                return null;
             }
             let full_extent = new L.latLngBounds(data[0].latlng, data[0].latlng);
             data.forEach((item) => {
@@ -225,15 +242,19 @@ import {
             let ext
             if (start !== end) {
                 ext = this._calculateFullExtent(this._areasFlattended.slice(start, end + 1));
-            } else {
+            } else if (this._areasFlattended.length > 0) {
                 ext = [this._areasFlattended[start].latlng, this._areasFlattended[end].latlng];
             }
-            this._map.fitBounds(ext);
+            if (ext) this._map.fitBounds(ext);
         },
         /**
          * Expand container when button clicked and shrink when close-Button clicked
          */
         _expand() {
+            if (this.options.expandControls !== true) {
+                // always expand, never collapse
+                this._showState = false;
+            }
             if (!this._showState) {
                 select(this._button)
                     .style("display", "none");
@@ -413,9 +434,9 @@ import {
          * @param {Number} height: height as float
          * @param {string} type: type of element
          */
-        _showMarker(ll, height, type) {
-            const layerpoint = this._map.latLngToLayerPoint(ll)
-            const normalizedY = layerpoint.y - 75
+        _showMapMarker(ll, height, type) {
+            const layerPoint = this._map.latLngToLayerPoint(ll)
+            const normalizedY = layerPoint.y - 75
             if (!this._mouseHeightFocus) {
                 const heightG = select(".leaflet-overlay-pane svg").append("g")
                 this._mouseHeightFocus = heightG.append('svg:line')
@@ -440,21 +461,21 @@ import {
                     .attr("class", "height-focus circle-lower");
             }
             this._mouseHeightFocusLabel.style("display", "block");
-            this._mouseHeightFocus.attr("x1", layerpoint.x)
-                .attr("x2", layerpoint.x)
-                .attr("y1", layerpoint.y)
+            this._mouseHeightFocus.attr("x1", layerPoint.x)
+                .attr("x2", layerPoint.x)
+                .attr("y1", layerPoint.y)
                 .attr("y2", normalizedY)
                 .style("display", "block");
-            this._pointG.attr("transform", "translate(" + layerpoint.x + "," + layerpoint.y + ")")
+            this._pointG.attr("transform", "translate(" + layerPoint.x + "," + layerPoint.y + ")")
                 .style("display", "block");
-            this._mouseHeightFocusLabelRect.attr("x", layerpoint.x + 3)
+            this._mouseHeightFocusLabelRect.attr("x", layerPoint.x + 3)
                 .attr("y", normalizedY)
                 .attr("class", 'bBox');
-            this._mouseHeightFocusLabelTextElev.attr("x", layerpoint.x + 5)
+            this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 12)
                 .text(height + " m")
                 .attr("class", "tspan mouse-height-box-text");
-            this._mouseHeightFocusLabelTextType.attr("x", layerpoint.x + 5)
+            this._mouseHeightFocusLabelTextType.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 24)
                 .text(type)
                 .attr("class", "tspan mouse-height-box-text");
@@ -469,7 +490,9 @@ import {
          * Creates the elevation profile
          */
         _createChart(idx) {
-            let areas = this._profile.blocks[idx].geometries;
+            let areas = this._profile.blocks.length == 0
+                ? []
+                : this._profile.blocks[idx].geometries;
             this._areasFlattended = [].concat.apply([], areas);
             for (let i = 0; i < areas.length; i++) {
                 this._appendAreas(areas[i], idx, i);
@@ -501,25 +524,25 @@ import {
             this._focusDistance = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + textDistance)
-                .attr("id", "distance")
+                .attr("id", "heightgraph.distance")
                 .text(this._getTranslation('distance')+':');
             // text line 2
             this._focusHeight = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + 2 * textDistance)
-                .attr("id", "height")
+                .attr("id", "heightgraph.height")
                 .text(this._getTranslation('elevation')+':');
             // text line 3
             this._focusBlockDistance = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + 3 * textDistance)
-                .attr("id", "blockdistance")
+                .attr("id", "heightgraph.blockdistance")
                 .text(this._getTranslation('segment_length')+':');
             // text line 4
             this._focusType = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + 4 * textDistance)
-                .attr("id", "type")
+                .attr("id", "heightgraph.type")
                 .text(this._getTranslation('type')+':');
             this._areaTspan = this._focusBlockDistance.append('tspan')
                 .attr("class", "tspan");
@@ -623,7 +646,7 @@ import {
                     for (let linePart of coords) {
                         L.polyline(
                             linePart,
-                            this._highlightStyle
+                            {...this._highlightStyle,...{interactive: false}}
                         ).addTo(this._markedSegments)
                     }
                     this._markedSegments.addTo(this._map)
@@ -644,7 +667,6 @@ import {
         /**
          * Defines the ranges and format of x- and y- scales and appends them
          */
-
         _appendScales() {
             const shortDist = Boolean(this._profile.totalDistance <= 10)
             const yHeightMin = this._profile.yElevationMin
@@ -789,19 +811,32 @@ import {
             ]
             // Use update pattern to update existing symbols in case of resize
             const selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles);
-            selectionSign.enter().append("path").merge(selectionSign).
-                attr("class", "select-symbol").attr("d", symbol().type(d => d.type)).attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")").attr("id", d => d.id).style("fill", d => d.color).on("click", d => {
-                    if (d.id === "rightArrowSelection") arrowRight()
-                    if (d.id === "leftArrowSelection") arrowLeft()
-                })
+            // remove any existing selection first
+            selectionSign.remove();
+            // then add only if needed
+            if (self._data.length > 1) {
+                selectionSign.enter().
+                    append("path").
+                    merge(selectionSign).
+                    attr("class", "select-symbol").
+                    attr("d", symbol().type(d => d.type)).
+                    attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")").
+                    attr("id", d => d.id).style("fill", d => d.color).
+                    on("click", d => {
+                        if (d.id === "rightArrowSelection") arrowRight()
+                        if (d.id === "leftArrowSelection") arrowLeft()
+                    })
+            }
             const chooseSelection = (id) => {
+                if (self._selectionText) self._selectionText.remove();
+                // after cleaning up, there is nothing left to do if there is no data
+                if (self._profile.blocks.length === 0) return;
                 const type = self._profile.blocks[id].info
                 const data = [
                     {
                         "selection": type.text
                     }
                 ]
-                if (self._selectionText) self._selectionText.remove();
                 self._selectionText = svg.selectAll('selection_text')
                     .data(data)
                     .enter()
@@ -845,8 +880,10 @@ import {
         _createLegend() {
             const self = this
             const data = []
-            for (let item in this._profile.blocks[this._selectedOption].legend) {
-                data.push(this._profile.blocks[this._selectedOption].legend[item]);
+            if (this._profile.blocks.length > 0) {
+                for (let item in this._profile.blocks[this._selectedOption].legend) {
+                    data.push(this._profile.blocks[this._selectedOption].legend[item]);
+                }
             }
             const margin = this._margin, width = this._width - this._margin.left - this._margin.right,
                 height = this._height - this._margin.top - this._margin.bottom
@@ -951,12 +988,66 @@ import {
                 }
         },
         /*
+         * Handles the mouseout event and clears the current point info.
+         * @param {int} delay - time before markers are removed in milliseconds
+         */
+        mapMouseoutHandler(delay = 1000) {
+            if (this.mouseoutDelay) {
+                window.clearTimeout(this.mouseoutDelay)
+            }
+            this.mouseoutDelay = window.setTimeout(() => {
+                this._mouseoutHandler();
+            }, delay)
+        },
+        /*
+         * Handles the mouseover the map and displays distance and altitude level.
+         * Since this does a lookup of the point on the graph
+         * the closest to the given latlng on the provided event, it could be slow.
+         */
+        mapMousemoveHandler(event, {showMapMarker: showMapMarker = true} = {}) {
+            if (this._areasFlattended === false) {
+                return;
+            }
+            // initialize the vars for the closest item calculation
+            let closestItem = null;
+            // large enough to be trumped by any point on the chart
+            let closestDistance = 2 * Math.pow(100, 2);
+            // consider a good enough match if the given point (lat and lng) is within
+            // 1.1 meters of a point on the chart (there are 111,111 meters in a degree)
+            const exactMatchRounding = 1.1 / 111111;
+            for (let item of this._areasFlattended) {
+                let latDiff = event.latlng.lat - item.latlng.lat;
+                let lngDiff = event.latlng.lng - item.latlng.lng;
+                // first check for an almost exact match; it's simple and avoid further calculations
+                if (Math.abs(latDiff) < exactMatchRounding && Math.abs(lngDiff) < exactMatchRounding) {
+                    this._internalMousemoveHandler(item, showMapMarker);
+                    break;
+                }
+                // calculate the squared distance from the current to the given;
+                // it's the squared distance, to avoid the expensive square root
+                const distance = Math.pow(latDiff, 2) + Math.pow(lngDiff, 2);
+                if (distance < closestDistance) {
+                    closestItem = item;
+                    closestDistance = distance;
+                }
+            }
+
+            if (closestItem) this._internalMousemoveHandler(closestItem, showMapMarker);
+        },
+        /*
          * Handles the mouseover the chart and displays distance and altitude level
          */
         _mousemoveHandler(d, i, ctx) {
             const coords = mouse(this._svg.node())
+            const item = this._areasFlattended[this._findItemForX(coords[0])];
+            if (item) this._internalMousemoveHandler(item);
+        },
+        /*
+         * Handles the mouseover, given the current item the mouse is over
+         */
+        _internalMousemoveHandler(item, showMapMarker = true) {
             let areaLength
-            const item = this._areasFlattended[this._findItemForX(coords[0])], alt = item.altitude, dist = item.position,
+            const alt = item.altitude, dist = item.position,
                 ll = item.latlng, areaIdx = item.areaIdx, type = item.type
             const boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10
             if (areaIdx === 0) {
@@ -964,7 +1055,9 @@ import {
             } else {
                 areaLength = this._profile.blocks[this._selectedOption].distances[areaIdx] - this._profile.blocks[this._selectedOption].distances[areaIdx - 1];
             }
-            this._showMarker(ll, alt, type);
+            if (showMapMarker) {
+                this._showMapMarker(ll, alt, type);
+            }
             this._distTspan.text(" " + dist.toFixed(1) + ' km');
             this._altTspan.text(" " + alt + ' m');
             this._areaTspan.text(" " + areaLength.toFixed(1) + ' km');

@@ -4,11 +4,20 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 **Added**
-- graphStyle option to customize the graph style ([PR #85](https://github.com/GIScience/Leaflet.Heightgraph/pull/85))
-- resize method for dynamic resizing of the heightgraph ([#78](https://github.com/GIScience/Leaflet.Heightgraph/issues/78))
+- `graphStyle` option to customize the graph style ([PR #85](https://github.com/GIScience/Leaflet.Heightgraph/pull/85))
+- `expandControls` option to hide the close button and expand by default ([PR #82](https://github.com/GIScience/Leaflet.Heightgraph/pull/82))
+- `resize` method for dynamic resizing of the heightgraph ([#78](https://github.com/GIScience/Leaflet.Heightgraph/issues/78))
+- `mapMousemoveHandler` method for handling a mousemove event to show the graph- and optionally the map-marker ([PR #82](https://github.com/GIScience/Leaflet.Heightgraph/pull/82))
+- `mapMouseoutHandler` method for handling the mouseout event, removing the markers ([PR #82](https://github.com/GIScience/Leaflet.Heightgraph/pull/82))
 
 **Changed**
+- `addData` method functionality ([#37](https://github.com/GIScience/Leaflet.Heightgraph/issues/37)):
+    - instead of removing and adding the whole height graph only the data
+    is cleared and replaced, keeping the L.control.heightgraph instance
+    - mappings for subsequent data sets need to be specified during
+    initialization of the height graph
 - dependencies to latest ([#83](https://github.com/GIScience/Leaflet.Heightgraph/issues/83))
+- prefixed class names ([#65](https://github.com/GIScience/Leaflet.Heightgraph/issues/65))
 
 **Removed**
 - unused dependencies: bower, concurrently & connect-modrewrite
