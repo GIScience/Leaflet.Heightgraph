@@ -1,8 +1,18 @@
+const onRoute = event => {
+    hg.mapMousemoveHandler(event)
+}
+const outRoute = event => {
+    hg.mapMouseoutHandler()
+}
 const changeData = setNumber => {
     let dataSet = setNumber === '1' ? geojson1 : setNumber === '2' ? geojson2 : setNumber === '3' ? geojson3 : []
     displayGroup.clearLayers()
     if (dataSet.length !== 0) {
         let newLayer = L.geoJson(dataSet)
+        newLayer.on({
+            'mousemove': onRoute,
+            'mouseout': outRoute,
+        })
         let newBounds = newLayer.getBounds()
         displayGroup.addLayer(newLayer)
         map.fitBounds(newBounds)
@@ -47,6 +57,11 @@ hg.addTo(map)
 
 hg.addData(geojson1)
 
-L.geoJson(geojson1).addTo(displayGroup)
+L.geoJson(geojson1)
+    .on({
+        'mousemove': onRoute,
+        'mouseout': outRoute,
+    })
+    .addTo(displayGroup)
 
 map.addLayer(openstreetmap).fitBounds(bounds)
