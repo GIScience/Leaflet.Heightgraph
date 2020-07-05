@@ -989,9 +989,15 @@ import {
         },
         /*
          * Handles the mouseout event and clears the current point info.
+         * @param {int} delay - time before markers are removed in milliseconds
          */
-        mapMouseoutHandler() {
-            this._mouseoutHandler();
+        mapMouseoutHandler(delay = 1000) {
+            if (this.mouseoutDelay) {
+                window.clearTimeout(this.mouseoutDelay)
+            }
+            this.mouseoutDelay = window.setTimeout(() => {
+                this._mouseoutHandler();
+            }, delay)
         },
         /*
          * Handles the mouseover the map and displays distance and altitude level.
