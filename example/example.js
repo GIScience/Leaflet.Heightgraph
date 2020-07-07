@@ -47,7 +47,7 @@ const hg = L.control.heightgraph({
     expandCallback(expand) {
         console.log("Expand: "+expand)
     },
-    expandControls: false,
+    expandControls: true,
     highlightStyle: {
         color: "purple"
     }
@@ -65,3 +65,5 @@ L.geoJson(geojson1)
     .addTo(displayGroup)
 
 map.addLayer(openstreetmap).fitBounds(bounds)
+
+hg.resize({width:1000,height:300})
