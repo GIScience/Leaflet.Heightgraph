@@ -902,14 +902,20 @@ import {
                     const vertical = i * height - offset
                     return "translate(" + horizontal + "," + vertical + ")"
                 })
-            legend.append('rect')
+            const legendRect = legend.append('rect')
                 .attr('class', 'legend-rect')
                 .attr('x', 15)
                 .attr('y', 6 * 6)
                 .attr('width', 6)
-                .style('stroke', 'black')
-                .attr('height', 6)
-                .style('fill', (d, i) => d.color);
+                .attr('height', 6);
+            if (Object.keys(this._graphStyle).length !== 0) {
+                legendRect.styles(this._graphStyle)
+                    .style('stroke', (d, i) => d.color)
+                    .style('fill', (d, i) => d.color);
+            } else {
+                legendRect.style('stroke', 'black')
+                    .style('fill', (d, i) => d.color);
+            }
             legend.append('text')
                 .attr('class', 'legend-text')
                 .attr('x', 30)
