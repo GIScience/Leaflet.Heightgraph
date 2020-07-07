@@ -127,8 +127,8 @@ import {
 
             // Resize the <svg> along with its container
             select(this._container).selectAll("svg")
-                .attr("width", size.width)
-                .attr("height", size.height);
+                .attr("width", this.options.width)
+                .attr("height", this.options.height);
 
             // Re-add the data to redraw the chart.
             // Note: addData() toggles the expansion state, so turn that into a no-op by fake-toggling it first.

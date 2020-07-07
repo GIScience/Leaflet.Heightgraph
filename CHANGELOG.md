@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+**Fixed**
+- resizing with less than 2 parameters crops height graph ([#93](https://github.com/GIScience/Leaflet.Heightgraph/issues/93))
+
 ## v1.1.0 (2020-07-05)
 
 **Added**
