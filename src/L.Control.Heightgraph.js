@@ -937,14 +937,10 @@ import {
                 .attr('y', height + 40)
                 .text((d, i) => d.text)
                 .on('mouseover', () => {
-                    select('.legend-box')
-                        .style("display", "block");
                     selectAll('.legend')
                         .style("display", "block");
                 })
                 .on('mouseleave', () => {
-                    select('.legend-box')
-                        .style("display", "none");
                     selectAll('.legend')
                         .style("display", "none");
                 });
