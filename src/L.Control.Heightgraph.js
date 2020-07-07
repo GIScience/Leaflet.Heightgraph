@@ -72,6 +72,7 @@ import {
             this._selectedOption = 0
             this._highlightStyle = this.options.highlightStyle || {color: 'red'}
             this._graphStyle = this.options.graphStyle || {}
+            this._dragCache = {}
         },
         onAdd(map) {
             let container = this._container = L.DomUtil.create("div", "heightgraph")
@@ -158,7 +159,7 @@ import {
             if (!this._dragStartCoords) {
                 return;
             }
-            const dragEndCoords = this._dragCurrentCoords = mouse(this._background.node())
+            const dragEndCoords = this._dragCurrentCoords = this._dragCache.end = mouse(this._background.node())
             const x1 = Math.min(this._dragStartCoords[0], dragEndCoords[0]),
                 x2 = Math.max(this._dragStartCoords[0], dragEndCoords[0])
             if (!this._dragRectangle && !this._dragRectangleG) {
@@ -215,7 +216,7 @@ import {
             event.preventDefault();
             event.stopPropagation();
             this._gotDragged = false;
-            this._dragStartCoords = mouse(this._background.node());
+            this._dragStartCoords = this._dragCache.start = mouse(this._background.node());
         },
         /*
          * Calculates the full extent of the data array
@@ -820,9 +821,13 @@ import {
                     attr("d", symbol().type(d => d.type)).
                     attr("transform", d => "translate(" + d.x + "," + d.y + ") rotate(" + d.angle + ")").
                     attr("id", d => d.id).style("fill", d => d.color).
-                    on("click", d => {
+                    on("mousedown", d => {
                         if (d.id === "rightArrowSelection") arrowRight()
                         if (d.id === "leftArrowSelection") arrowLeft()
+                        // fake a drag event from cache values to keep selection
+                        self._gotDragged = true
+                        self._dragStartCoords = self._dragCache.start
+                        self._dragCurrentCoords = self._dragCache.end
                     })
             }
             const chooseSelection = (id) => {
