@@ -89,6 +89,7 @@ import {
                 attr("width", this._svgWidth + this._margin.left + this._margin.right).
                 attr("height", this._svgHeight + this._margin.top + this._margin.bottom).append("g").
                 attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")")
+            if (this.options.expand) this._expand();
             return container;
         },
         onRemove(map) {
@@ -117,7 +118,6 @@ import {
             this._appendGrid();
             this._createChart(this._selectedOption);
             this._createSelectionBox();
-            if (this.options.expand) this._expand();
         },
         resize(size) {
             if (size.width)
@@ -131,8 +131,6 @@ import {
                 .attr("height", this.options.height);
 
             // Re-add the data to redraw the chart.
-            // Note: addData() toggles the expansion state, so turn that into a no-op by fake-toggling it first.
-            this._showState = !this._showState;
             this.addData(this._data);
         },
         _initToggle() {
