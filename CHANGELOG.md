@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 - graphStyle not adjusting legend items([#89](https://github.com/GIScience/Leaflet.Heightgraph/issues/89))
 - zooming out when changing category ([#90](https://github.com/GIScience/Leaflet.Heightgraph/issues/90))
 
+**Security**
+- update dependencies
+- `npm audit fix` lodash issues
+
 ## v1.1.0 (2020-07-05)
 
 **Added**
