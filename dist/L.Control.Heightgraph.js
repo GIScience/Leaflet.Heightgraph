@@ -4682,6 +4682,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         color: 'red'
       };
       this._graphStyle = this.options.graphStyle || {};
+      this._dragCache = {};
     },
     onAdd: function onAdd(map) {
       var container = this._container = L.DomUtil.create("div", "heightgraph");
@@ -4701,6 +4702,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
 
       this._svg = select(this._container).append("svg").attr("class", "heightgraph-container").attr("width", this._svgWidth + this._margin.left + this._margin.right).attr("height", this._svgHeight + this._margin.top + this._margin.bottom).append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
+      if (this.options.expand) this._expand();
       return container;
     },
     onRemove: function onRemove(map) {
@@ -4738,17 +4740,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       this._createChart(this._selectedOption);
 
       this._createSelectionBox();
-
-      if (this.options.expand) this._expand();
     },
     resize: function resize(size) {
       if (size.width) this.options.width = size.width;
       if (size.height) this.options.height = size.height; // Resize the <svg> along with its container
 
-      select(this._container).selectAll("svg").attr("width", size.width).attr("height", size.height); // Re-add the data to redraw the chart.
-      // Note: addData() toggles the expansion state, so turn that into a no-op by fake-toggling it first.
+      select(this._container).selectAll("svg").attr("width", this.options.width).attr("height", this.options.height); // Re-add the data to redraw the chart.
 
-      this._showState = !this._showState;
       this.addData(this._data);
     },
     _initToggle: function _initToggle() {
@@ -4780,7 +4778,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         return;
       }
 
-      var dragEndCoords = this._dragCurrentCoords = mouse(this._background.node());
+      var dragEndCoords = this._dragCurrentCoords = this._dragCache.end = mouse(this._background.node());
       var x1 = Math.min(this._dragStartCoords[0], dragEndCoords[0]),
           x2 = Math.max(this._dragStartCoords[0], dragEndCoords[0]);
 
@@ -4839,7 +4837,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       event.preventDefault();
       event.stopPropagation();
       this._gotDragged = false;
-      this._dragStartCoords = mouse(this._background.node());
+      this._dragStartCoords = this._dragCache.start = mouse(this._background.node());
     },
 
     /*
@@ -5412,7 +5410,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       var selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles); // remove any existing selection first
 
-      selectionSign.remove(); // then add only if needed
+      selectionSign.remove(); // select again
+
+      selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles); // then add only if needed
 
       if (self._data.length > 1) {
         selectionSign.enter().append("path").merge(selectionSign).attr("class", "select-symbol").attr("d", symbol().type(function (d) {
@@ -5423,9 +5423,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
           return d.id;
         }).style("fill", function (d) {
           return d.color;
-        }).on("click", function (d) {
+        }).on("mousedown", function (d) {
           if (d.id === "rightArrowSelection") arrowRight();
-          if (d.id === "leftArrowSelection") arrowLeft();
+          if (d.id === "leftArrowSelection") arrowLeft(); // fake a drag event from cache values to keep selection
+
+          self._gotDragged = true;
+          self._dragStartCoords = self._dragCache.start;
+          self._dragCurrentCoords = self._dragCache.end;
         });
       }
 
@@ -5509,9 +5513,20 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         return "translate(" + horizontal + "," + vertical + ")";
       });
 
-      legend.append('rect').attr('class', 'legend-rect').attr('x', 15).attr('y', 6 * 6).attr('width', 6).style('stroke', 'black').attr('height', 6).style('fill', function (d, i) {
-        return d.color;
-      });
+      var legendRect = legend.append('rect').attr('class', 'legend-rect').attr('x', 15).attr('y', 6 * 6).attr('width', 6).attr('height', 6);
+
+      if (Object.keys(this._graphStyle).length !== 0) {
+        legendRect.styles(this._graphStyle).style('stroke', function (d, i) {
+          return d.color;
+        }).style('fill', function (d, i) {
+          return d.color;
+        });
+      } else {
+        legendRect.style('stroke', 'black').style('fill', function (d, i) {
+          return d.color;
+        });
+      }
+
       legend.append('text').attr('class', 'legend-text').attr('x', 30).attr('y', 6 * 7).text(function (d, i) {
         var textProp = d.text;
         self._boxBoundY = (height - 2 * height / 3 + 7) * i;
@@ -5523,10 +5538,8 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       legendHover.append('text').attr('class', 'legend-menu').attr("class", "no-select").attr('x', 15).attr('y', height + 40).text(function (d, i) {
         return d.text;
       }).on('mouseover', function () {
-        select('.legend-box').style("display", "block");
         selectAll('.legend').style("display", "block");
       }).on('mouseleave', function () {
-        select('.legend-box').style("display", "none");
         selectAll('.legend').style("display", "none");
       });
     },

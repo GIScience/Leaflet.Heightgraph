@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - resizing with less than 2 parameters crops height graph ([#93](https://github.com/GIScience/Leaflet.Heightgraph/issues/93))
 - graphStyle not adjusting legend items([#89](https://github.com/GIScience/Leaflet.Heightgraph/issues/89))
 - zooming out when changing category ([#90](https://github.com/GIScience/Leaflet.Heightgraph/issues/90))
+- disappearing category selection arrows on resize ([#92](https://github.com/GIScience/Leaflet.Heightgraph/issues/92))
 
 **Security**
 - update dependencies

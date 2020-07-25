@@ -809,9 +809,11 @@ import {
                 }
             ]
             // Use update pattern to update existing symbols in case of resize
-            const selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles);
+            let selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles);
             // remove any existing selection first
             selectionSign.remove();
+            // select again
+            selectionSign = svg.selectAll(".select-symbol").data(jsonTriangles)
             // then add only if needed
             if (self._data.length > 1) {
                 selectionSign.enter().
