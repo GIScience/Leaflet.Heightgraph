@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v1.2.0 (2020-07-25)
 
 **Added**
 - click option to legend to keep it open
