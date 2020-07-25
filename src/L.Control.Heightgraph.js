@@ -117,7 +117,9 @@ import {
             this._computeStats();
             this._appendScales();
             this._appendGrid();
-            this._createChart(this._selectedOption);
+            if (Object.keys(data).length !== 0) {
+                this._createChart(this._selectedOption);
+            }
             this._createSelectionBox();
         },
         resize(size) {
@@ -489,7 +491,7 @@ import {
          * Creates the elevation profile
          */
         _createChart(idx) {
-            let areas = this._profile.blocks.length == 0
+            let areas = this._profile.blocks.length === 0
                 ? []
                 : this._profile.blocks[idx].geometries;
             this._areasFlattended = [].concat.apply([], areas);

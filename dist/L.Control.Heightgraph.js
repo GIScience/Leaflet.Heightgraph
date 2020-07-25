@@ -4737,7 +4737,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._appendGrid();
 
-      this._createChart(this._selectedOption);
+      if (Object.keys(data).length !== 0) {
+        this._createChart(this._selectedOption);
+      }
 
       this._createSelectionBox();
     },
@@ -5125,7 +5127,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Creates the elevation profile
      */
     _createChart: function _createChart(idx) {
-      var areas = this._profile.blocks.length == 0 ? [] : this._profile.blocks[idx].geometries;
+      var areas = this._profile.blocks.length === 0 ? [] : this._profile.blocks[idx].geometries;
       this._areasFlattended = [].concat.apply([], areas);
 
       for (var i = 0; i < areas.length; i++) {
