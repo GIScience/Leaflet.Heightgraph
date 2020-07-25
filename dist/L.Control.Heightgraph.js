@@ -5489,6 +5489,8 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Creates and appends legend to chart
      */
     _createLegend: function _createLegend() {
+      var _this = this;
+
       var self = this;
       var data = [];
 
@@ -5536,12 +5538,17 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       var legendHover = this._svg.selectAll('.legend-hover').data(leg).enter().append('g').attr('class', 'legend-hover');
 
-      legendHover.append('text').attr('class', 'legend-menu').attr("class", "no-select").attr('x', 15).attr('y', verticalItemPosition).text(function (d, i) {
+      this._showLegend = false;
+      legendHover.append('text').attr('x', 15).attr('y', verticalItemPosition).attr('text-anchor', "start").text(function (d, i) {
         return d.text;
       }).on('mouseover', function () {
         selectAll('.legend').style("display", "block");
       }).on('mouseleave', function () {
-        selectAll('.legend').style("display", "none");
+        if (!_this._showLegend) {
+          selectAll('.legend').style("display", "none");
+        }
+      }).on('click', function () {
+        _this._showLegend = !_this._showLegend;
       });
     },
 
@@ -5597,7 +5604,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * @param {int} delay - time before markers are removed in milliseconds
      */
     mapMouseoutHandler: function mapMouseoutHandler() {
-      var _this = this;
+      var _this2 = this;
 
       var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1000;
 
@@ -5606,7 +5613,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       }
 
       this.mouseoutDelay = window.setTimeout(function () {
-        _this._mouseoutHandler();
+        _this2._mouseoutHandler();
       }, delay);
     },
 

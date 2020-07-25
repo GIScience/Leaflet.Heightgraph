@@ -939,20 +939,26 @@ import {
                 .enter()
                 .append('g')
                 .attr('class', 'legend-hover');
+            this._showLegend = false
             legendHover.append('text')
-                .attr('class', 'legend-menu')
-                .attr("class", "no-select")
                 .attr('x', 15)
                 .attr('y', verticalItemPosition)
+                .attr('text-anchor', "start")
                 .text((d, i) => d.text)
                 .on('mouseover', () => {
                     selectAll('.legend')
                         .style("display", "block");
                 })
                 .on('mouseleave', () => {
-                    selectAll('.legend')
-                        .style("display", "none");
-                });
+                    if (!this._showLegend) {
+                        selectAll('.legend')
+                            .style("display", "none");
+                    }
+                })
+                .on('click', () => {
+                    this._showLegend = !this._showLegend
+            })
+            ;
         }, /**
          * calculates the margins of boxes
          * @param {String} className: name of the class

@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+**Added**
+- click option to legend to keep it open
+
 **Fixed**
 - hg.addData toggles expand/minimize ([#94](https://github.com/GIScience/Leaflet.Heightgraph/issues/94))
 - resizing with less than 2 parameters crops height graph ([#93](https://github.com/GIScience/Leaflet.Heightgraph/issues/93))
