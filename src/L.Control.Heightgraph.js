@@ -791,19 +791,20 @@ import {
         _createSelectionBox() {
             const self = this
             const svg = select(this._container).select("svg")
-            const margin = this._margin, width = this._width - this._margin.left - this._margin.right,
-                height = this._height - this._margin.top - this._margin.bottom
+            const width = this._width - this._margin.right,
+                height = this._height - this._margin.bottom
+            const verticalItemPosition = height + this._margin.bottom / 2 + 6
             const jsonTriangles = [
                 {
-                    "x": width - 50,
-                    "y": height + 48,
+                    "x": width - 25,
+                    "y": verticalItemPosition + 3,
                     "color": "#000",
                     "type": symbolTriangle,
                     "id": "leftArrowSelection",
-                    "angle": -360
+                    "angle": 0
                 }, {
-                    "x": width - 35,
-                    "y": height + 45,
+                    "x": width - 10,
+                    "y": verticalItemPosition,
                     "color": "#000",
                     "type": symbolTriangle,
                     "id": "rightArrowSelection",
@@ -848,11 +849,12 @@ import {
                     .data(data)
                     .enter()
                     .append('text')
-                    .attr("x", width - 20)
-                    .attr("y", height + 50)
+                    .attr("x", width - 35)
+                    .attr("y", verticalItemPosition + 4)
                     .text(d => d.selection)
                     .attr("class", "select-info")
                     .attr("id", "selectionText")
+                    .attr("text-anchor", "end")
             }
             const length = this._profile.blocks.length
             const id = this._selectedOption
@@ -892,8 +894,8 @@ import {
                     data.push(this._profile.blocks[this._selectedOption].legend[item]);
                 }
             }
-            const margin = this._margin, width = this._width - this._margin.left - this._margin.right,
-                height = this._height - this._margin.top - this._margin.bottom
+            const height = this._height - this._margin.bottom
+            const verticalItemPosition = height + this._margin.bottom / 2
             const leg = [
                 {
                     "text": this._getTranslation("legend")
@@ -941,7 +943,7 @@ import {
                 .attr('class', 'legend-menu')
                 .attr("class", "no-select")
                 .attr('x', 15)
-                .attr('y', height + 40)
+                .attr('y', verticalItemPosition)
                 .text((d, i) => d.text)
                 .on('mouseover', () => {
                     selectAll('.legend')

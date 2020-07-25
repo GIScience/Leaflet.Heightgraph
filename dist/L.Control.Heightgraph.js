@@ -5391,19 +5391,19 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     _createSelectionBox: function _createSelectionBox() {
       var self = this;
       var svg = select(this._container).select("svg");
-      var margin = this._margin,
-          width = this._width - this._margin.left - this._margin.right,
-          height = this._height - this._margin.top - this._margin.bottom;
+      var width = this._width - this._margin.right,
+          height = this._height - this._margin.bottom;
+      var verticalItemPosition = height + this._margin.bottom / 2 + 6;
       var jsonTriangles = [{
-        "x": width - 50,
-        "y": height + 48,
+        "x": width - 25,
+        "y": verticalItemPosition + 3,
         "color": "#000",
         "type": symbolTriangle,
         "id": "leftArrowSelection",
-        "angle": -360
+        "angle": 0
       }, {
-        "x": width - 35,
-        "y": height + 45,
+        "x": width - 10,
+        "y": verticalItemPosition,
         "color": "#000",
         "type": symbolTriangle,
         "id": "rightArrowSelection",
@@ -5443,9 +5443,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         var data = [{
           "selection": type.text
         }];
-        self._selectionText = svg.selectAll('selection_text').data(data).enter().append('text').attr("x", width - 20).attr("y", height + 50).text(function (d) {
+        self._selectionText = svg.selectAll('selection_text').data(data).enter().append('text').attr("x", width - 35).attr("y", verticalItemPosition + 4).text(function (d) {
           return d.selection;
-        }).attr("class", "select-info").attr("id", "selectionText");
+        }).attr("class", "select-info").attr("id", "selectionText").attr("text-anchor", "end");
       };
 
       var length = this._profile.blocks.length;
@@ -5498,9 +5498,8 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         }
       }
 
-      var margin = this._margin,
-          width = this._width - this._margin.left - this._margin.right,
-          height = this._height - this._margin.top - this._margin.bottom;
+      var height = this._height - this._margin.bottom;
+      var verticalItemPosition = height + this._margin.bottom / 2;
       var leg = [{
         "text": this._getTranslation("legend")
       }];
@@ -5537,7 +5536,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       var legendHover = this._svg.selectAll('.legend-hover').data(leg).enter().append('g').attr('class', 'legend-hover');
 
-      legendHover.append('text').attr('class', 'legend-menu').attr("class", "no-select").attr('x', 15).attr('y', height + 40).text(function (d, i) {
+      legendHover.append('text').attr('class', 'legend-menu').attr("class", "no-select").attr('x', 15).attr('y', verticalItemPosition).text(function (d, i) {
         return d.text;
       }).on('mouseover', function () {
         selectAll('.legend').style("display", "block");
