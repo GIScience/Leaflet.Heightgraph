@@ -69,7 +69,6 @@ import {
             this._mappings = this.options.mappings;
             this._svgWidth = this._width - this._margin.left - this._margin.right;
             this._svgHeight = this._height - this._margin.top - this._margin.bottom;
-            this._selectedOption = 0
             this._highlightStyle = this.options.highlightStyle || {color: 'red'}
             this._graphStyle = this.options.graphStyle || {}
             this._dragCache = {}
@@ -83,6 +82,7 @@ import {
                 const closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container)
             }
             this._showState = false;
+            this._selectedAttributeIdx = 0
             this._initToggle();
             this._init_options();
             // Note: this._svg really contains the <g> inside the <svg>
@@ -103,11 +103,21 @@ import {
          * @param {Object} data
          */
         addData(data) {
+            this._addData(data)
+        }, /**
+         * Internal function. Overloads public addData().
+         * Call with resize = true when resizing instead of actually adding data.
+         * TODO: this should be refactored to avoid calling addData on resize
+         * @param data
+         * @param resize
+         * @private
+         */
+        _addData(data, resize = false) {
             if (this._svg !== undefined) {
                 this._svg.selectAll("*")
-                    .remove();
+                .remove();
             }
-
+            this._selectedAttributeIdx = resize ? this._selectedAttributeIdx : 0
             this._removeMarkedSegmentsOnMap();
             this._resetDrag(true);
 
@@ -118,7 +128,7 @@ import {
             this._appendScales();
             this._appendGrid();
             if (Object.keys(data).length !== 0) {
-                this._createChart(this._selectedOption);
+                this._createChart(this._selectedAttributeIdx);
             }
             this._createSelectionBox();
         },
@@ -134,7 +144,7 @@ import {
                 .attr("height", this.options.height);
 
             // Re-add the data to redraw the chart.
-            this.addData(this._data);
+            this._addData(this._data, true);
         },
         _initToggle() {
             if (!L.Browser.touch) {
@@ -857,14 +867,14 @@ import {
                     .attr("text-anchor", "end")
             }
             const length = this._profile.blocks.length
-            const id = this._selectedOption
+            const id = this._selectedAttributeIdx
 
             chooseSelection(id);
 
             let arrowRight = () => {
-                let idx = self._selectedOption += 1
+                let idx = self._selectedAttributeIdx += 1
                 if (idx === self._profile.blocks.length) {
-                    self._selectedOption = idx = 0
+                    self._selectedAttributeIdx = idx = 0
                 }
                 chooseSelection(idx)
                 self._removeChart()
@@ -873,9 +883,9 @@ import {
             }
 
             let arrowLeft = () => {
-                let idx = self._selectedOption -= 1
+                let idx = self._selectedAttributeIdx -= 1
                 if (idx === -1) {
-                    self._selectedOption = idx = self._profile.blocks.length - 1
+                    self._selectedAttributeIdx = idx = self._profile.blocks.length - 1
                 }
                 chooseSelection(idx)
                 self._removeChart()
@@ -890,8 +900,8 @@ import {
             const self = this
             const data = []
             if (this._profile.blocks.length > 0) {
-                for (let item in this._profile.blocks[this._selectedOption].legend) {
-                    data.push(this._profile.blocks[this._selectedOption].legend[item]);
+                for (let item in this._profile.blocks[this._selectedAttributeIdx].legend) {
+                    data.push(this._profile.blocks[this._selectedAttributeIdx].legend[item]);
                 }
             }
             const height = this._height - this._margin.bottom
@@ -1068,9 +1078,9 @@ import {
                 ll = item.latlng, areaIdx = item.areaIdx, type = item.type
             const boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10
             if (areaIdx === 0) {
-                areaLength = this._profile.blocks[this._selectedOption].distances[areaIdx];
+                areaLength = this._profile.blocks[this._selectedAttributeIdx].distances[areaIdx];
             } else {
-                areaLength = this._profile.blocks[this._selectedOption].distances[areaIdx] - this._profile.blocks[this._selectedOption].distances[areaIdx - 1];
+                areaLength = this._profile.blocks[this._selectedAttributeIdx].distances[areaIdx] - this._profile.blocks[this._selectedAttributeIdx].distances[areaIdx - 1];
             }
             if (showMapMarker) {
                 this._showMapMarker(ll, alt, type);

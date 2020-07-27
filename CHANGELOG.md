@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+**Fixed**
+- resize() resets chosen category ([#97](https://github.com/GIScience/Leaflet.Heightgraph/issues/97))
+
 ## v1.2.0 (2020-07-25)
 
 **Added**
