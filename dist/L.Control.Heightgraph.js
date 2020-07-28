@@ -2929,10 +2929,6 @@ function ascendingComparator(f) {
 var ascendingBisect = bisector(ascending$1);
 var bisectRight = ascendingBisect.right;
 
-function number(x) {
-  return x === null ? NaN : +x;
-}
-
 var e10 = Math.sqrt(50),
     e5 = Math.sqrt(10),
     e2 = Math.sqrt(2);
@@ -2983,19 +2979,6 @@ function tickStep(start, stop, count) {
   else if (error >= e5) step1 *= 5;
   else if (error >= e2) step1 *= 2;
   return stop < start ? -step1 : step1;
-}
-
-function d3Quantile(values, p, valueof) {
-  if (valueof == null) valueof = number;
-  if (!(n = values.length)) return;
-  if ((p = +p) <= 0 || n < 2) return +valueof(values[0], 0, values);
-  if (p >= 1) return +valueof(values[n - 1], n - 1, values);
-  var n,
-      i = (n - 1) * p,
-      i0 = Math.floor(i),
-      value0 = +valueof(values[i0], i0, values),
-      value1 = +valueof(values[i0 + 1], i0 + 1, values);
-  return value0 + (value1 - value0) * (i - i0);
 }
 
 function d3Max(values, valueof) {
@@ -3240,7 +3223,7 @@ function constant$2(x) {
   };
 }
 
-function number$1(x) {
+function number(x) {
   return +x;
 }
 
@@ -3330,7 +3313,7 @@ function transformer() {
   };
 
   scale.domain = function(_) {
-    return arguments.length ? (domain = map$1.call(_, number$1), clamp === identity$1 || (clamp = clamper(domain)), rescale()) : domain.slice();
+    return arguments.length ? (domain = map$1.call(_, number), clamp === identity$1 || (clamp = clamper(domain)), rescale()) : domain.slice();
   };
 
   scale.range = function(_) {
@@ -4021,7 +4004,7 @@ function translateY(y) {
   return "translate(0," + (y + 0.5) + ")";
 }
 
-function number$2(scale) {
+function number$1(scale) {
   return function(d) {
     return +scale(d);
   };
@@ -4057,7 +4040,7 @@ function axis(orient, scale) {
         range = scale.range(),
         range0 = +range[0] + 0.5,
         range1 = +range[range.length - 1] + 0.5,
-        position = (scale.bandwidth ? center : number$2)(scale.copy()),
+        position = (scale.bandwidth ? center : number$1)(scale.copy()),
         selection = context.selection ? context.selection() : context,
         path = selection.selectAll(".domain").data([null]),
         tick = selection.selectAll(".tick").data(values, scale).order(),
@@ -4747,7 +4730,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._prepareData();
 
-      this._computeStats();
+      this._calculateElevationBounds();
 
       this._appendScales();
 
@@ -5088,14 +5071,14 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     },
 
     /**
-     * Creates a list with four x,y coords and other important info for the bars drawn with d3
+     * calculates minimum and maximum values for the elevation scale drawn with d3
      */
-    _computeStats: function _computeStats() {
+    _calculateElevationBounds: function _calculateElevationBounds() {
       var max = this._profile.maxElevation = d3Max(this._profile.elevations);
       var min = this._profile.minElevation = d3Min(this._profile.elevations);
-      var quantile = this._profile.elevationQuantile = d3Quantile(this._profile.elevations, 0.75);
-      this._profile.yElevationMin = quantile < min + min / 10 ? min - max / 5 < 0 ? 0 : min - max / 5 : min - max / 10;
-      this._profile.yElevationMax = quantile > max - max / 10 ? max + max / 3 : max;
+      var range = max - min;
+      this._profile.yElevationMin = range < 10 ? min - 10 : min - 0.1 * range;
+      this._profile.yElevationMax = range < 10 ? max + 10 : max + 0.1 * range;
     },
 
     /**

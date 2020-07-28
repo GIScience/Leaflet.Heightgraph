@@ -1,7 +1,7 @@
 import {select, selectAll, mouse} from 'd3-selection'
 import 'd3-selection-multi'
 import {scaleOrdinal,scaleLinear} from 'd3-scale'
-import {quantile as d3Quantile, min as d3Min, max as d3Max, bisector} from 'd3-array'
+import {min as d3Min, max as d3Max, bisector} from 'd3-array'
 import {drag} from 'd3-drag'
 import {axisLeft, axisBottom, axisRight} from 'd3-axis'
 import {format} from 'd3-format'
@@ -124,7 +124,7 @@ import {
             this._data = data;
             this._init_options();
             this._prepareData();
-            this._computeStats();
+            this._calculateElevationBounds();
             this._appendScales();
             this._appendGrid();
             if (Object.keys(data).length !== 0) {
@@ -430,14 +430,14 @@ import {
             }
         },
         /**
-         * Creates a list with four x,y coords and other important info for the bars drawn with d3
+         * calculates minimum and maximum values for the elevation scale drawn with d3
          */
-        _computeStats() {
+        _calculateElevationBounds() {
             const max = this._profile.maxElevation = d3Max(this._profile.elevations)
             const min = this._profile.minElevation = d3Min(this._profile.elevations)
-            const quantile = this._profile.elevationQuantile = d3Quantile(this._profile.elevations, 0.75)
-            this._profile.yElevationMin = (quantile < (min + min / 10)) ? (min - max / 5 < 0 ? 0 : min - max / 5) : min - (max / 10);
-            this._profile.yElevationMax = quantile > (max - max / 10) ? max + (max / 3) : max;
+            const range = max - min
+            this._profile.yElevationMin = range < 10 ? min - 10 : min - 0.1 * range
+            this._profile.yElevationMax = range < 10 ? max + 10 : max + 0.1 * range
         },
         /**
          * Creates a marker on the map while hovering

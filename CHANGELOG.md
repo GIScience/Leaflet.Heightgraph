@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+**Changed**
+- calculation of elevation bounds to a simpler method
+
 **Fixed**
 - resize() resets chosen category ([#97](https://github.com/GIScience/Leaflet.Heightgraph/issues/97))
 
