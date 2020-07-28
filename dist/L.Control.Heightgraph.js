@@ -4701,7 +4701,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       this._init_options(); // Note: this._svg really contains the <g> inside the <svg>
 
 
-      this._svg = select(this._container).append("svg").attr("class", "heightgraph-container").attr("width", this._svgWidth + this._margin.left + this._margin.right).attr("height", this._svgHeight + this._margin.top + this._margin.bottom).append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
+      this._svg = select(this._container).append("svg").attr("class", "heightgraph-container").attr("width", this._width).attr("height", this._height).append("g").attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
       if (this.options.expand) this._expand();
       return container;
     },
