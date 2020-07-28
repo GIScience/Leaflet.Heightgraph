@@ -326,12 +326,11 @@ import {
          * Prepares the data needed for the height graph
          */
         _prepareData() {
-            this._profile = {};
-            this._profile.coordinates = [];
-            this._profile.elevations = [];
-            this._profile.cumDistances = [];
-            this._profile.cumDistances.push(0);
-            this._profile.blocks = [];
+            this._coordinates = [];
+            this._elevations = [];
+            this._cumulatedDistances = [];
+            this._cumulatedDistances.push(0);
+            this._categories = [];
             const data = this._data
             let colorScale
             if (this._mappings === undefined) {
@@ -340,15 +339,16 @@ import {
             }
             for (let y = 0; y < data.length; y++) {
                 let cumDistance = 0
-                this._profile.blocks[y] = {};
-                this._profile.blocks[y].info = {
-                    id: y,
-                    text: data[y].properties.summary
+                this._categories[y] = {
+                    info : {
+                        id: y,
+                        text: data[y].properties.summary
+                    },
+                    distances: [],
+                    attributes: [],
+                    geometries: [],
+                    legend: {}
                 };
-                this._profile.blocks[y].distances = [];
-                this._profile.blocks[y].attributes = [];
-                this._profile.blocks[y].geometries = [];
-                this._profile.blocks[y].legend = {};
                 let i, cnt = 0
                 const usedColors = {}
                 for (i = 0; i < data[y].features.length; i++) {
@@ -376,10 +376,10 @@ import {
                     const attribute = {
                         type: attributeType, text: text, color: color
                     }
-                    this._profile.blocks[y].attributes.push(attribute);
+                    this._categories[y].attributes.push(attribute);
                     // add to legend
-                    if (!(attributeType in this._profile.blocks[y].legend)) {
-                        this._profile.blocks[y].legend[attributeType] = attribute;
+                    if (!(attributeType in this._categories[y].legend)) {
+                        this._categories[y].legend[attributeType] = attribute;
                     }
                     for (let j = 0; j < coordsLength; j++) {
                         ptA = new L.LatLng(data[y].features[i].geometry.coordinates[j][1], data[y].features[i].geometry.coordinates[j][0]);
@@ -392,24 +392,24 @@ import {
                             // calculate distances of specific block
                             cumDistance += ptDistance;
                             if (y === 0) {
-                                this._profile.elevations.push(altitude);
-                                this._profile.coordinates.push(ptA);
-                                this._profile.cumDistances.push(cumDistance);
+                                this._elevations.push(altitude);
+                                this._coordinates.push(ptA);
+                                this._cumulatedDistances.push(cumDistance);
                             }
                             cnt += 1;
                         } else if (j === coordsLength - 1 && i === data[y].features.length - 1) {
                             if (y === 0) {
-                                this._profile.elevations.push(altitude);
-                                this._profile.coordinates.push(ptB);
+                                this._elevations.push(altitude);
+                                this._coordinates.push(ptB);
                             }
                             cnt += 1;
                         }
                         // save the position which corresponds to the distance along the route.
                         let position
                         if (j === coordsLength - 1 && i < data[y].features.length - 1) {
-                            position = this._profile.cumDistances[cnt];
+                            position = this._cumulatedDistances[cnt];
                         } else {
-                            position = this._profile.cumDistances[cnt - 1];
+                            position = this._cumulatedDistances[cnt - 1];
                         }
                         geometry.push({
                             altitude: altitude,
@@ -421,11 +421,11 @@ import {
                             areaIdx: i
                         });
                     }
-                    this._profile.blocks[y].distances.push(cumDistance);
-                    this._profile.blocks[y].geometries.push(geometry);
+                    this._categories[y].distances.push(cumDistance);
+                    this._categories[y].geometries.push(geometry);
                 }
                 if (y === data.length - 1) {
-                    this._profile.totalDistance = cumDistance;
+                    this._totalDistance = cumDistance;
                 }
             }
         },
@@ -433,11 +433,13 @@ import {
          * calculates minimum and maximum values for the elevation scale drawn with d3
          */
         _calculateElevationBounds() {
-            const max = this._profile.maxElevation = d3Max(this._profile.elevations)
-            const min = this._profile.minElevation = d3Min(this._profile.elevations)
+            const max = d3Max(this._elevations)
+            const min = d3Min(this._elevations)
             const range = max - min
-            this._profile.yElevationMin = range < 10 ? min - 10 : min - 0.1 * range
-            this._profile.yElevationMax = range < 10 ? max + 10 : max + 0.1 * range
+            this._elevationBounds = {
+                min: range < 10 ? min - 10 : min - 0.1 * range,
+                max: range < 10 ? max + 10 : max + 0.1 * range
+            }
         },
         /**
          * Creates a marker on the map while hovering
@@ -501,9 +503,9 @@ import {
          * Creates the elevation profile
          */
         _createChart(idx) {
-            let areas = this._profile.blocks.length === 0
+            let areas = this._categories.length === 0
                 ? []
-                : this._profile.blocks[idx].geometries;
+                : this._categories[idx].geometries;
             this._areasFlattended = [].concat.apply([], areas);
             for (let i = 0; i < areas.length; i++) {
                 this._appendAreas(areas[i], idx, i);
@@ -518,7 +520,7 @@ import {
          *  Creates focus Line and focus box while hovering
          */
         _createFocus() {
-            const boxPosition = this._profile.yElevationMin
+            const boxPosition = this._elevationBounds.min
             const textDistance = 15
             if (this._focus) {
                 this._focus.remove();
@@ -567,7 +569,7 @@ import {
                 .attr("class", "focusLine");
             this._focusLine = this._focusLineGroup.append("line")
                 .attr("y1", 0)
-                .attr("y2", this._y(this._profile.yElevationMin));
+                .attr("y2", this._y(this._elevationBounds.min));
             this._distTspan = this._focusDistance.append('tspan')
                 .attr("class", "tspan");
             this._altTspan = this._focusHeight.append('tspan')
@@ -582,19 +584,19 @@ import {
                 .attr("class", "horizontalLine")
                 .attr("x1", 0)
                 .attr("x2", this._width - this._margin.left - this._margin.right)
-                .attr("y1", this._y(this._profile.yElevationMin))
-                .attr("y2", this._y(this._profile.yElevationMin))
+                .attr("y1", this._y(this._elevationBounds.min))
+                .attr("y2", this._y(this._elevationBounds.min))
                 .style("stroke", "black");
             this._elevationValueText = this._svg.append("text")
                 .attr("class", "horizontalLineText")
                 .attr("x", this._width - this._margin.left - this._margin.right - 20)
-                .attr("y", this._y(this._profile.yElevationMin)-10)
+                .attr("y", this._y(this._elevationBounds.min)-10)
                 .attr("fill", "black");
             //triangle symbol as controller
             const jsonTriangle = [
                 {
                     "x": this._width - this._margin.left - this._margin.right + 7,
-                    "y": this._y(this._profile.yElevationMin),
+                    "y": this._y(this._elevationBounds.min),
                     "color": "black",
                     "type": symbolTriangle,
                     "angle": -90,
@@ -679,17 +681,13 @@ import {
          * Defines the ranges and format of x- and y- scales and appends them
          */
         _appendScales() {
-            const shortDist = Boolean(this._profile.totalDistance <= 10)
-            const yHeightMin = this._profile.yElevationMin
-            const yHeightMax = this._profile.yElevationMax
-            const margin = this._margin, width = this._width - this._margin.left - this._margin.right,
-                height = this._height - this._margin.top - this._margin.bottom
+            const shortDist = Boolean(this._totalDistance <= 10)
             this._x = scaleLinear()
-                .range([0, width]);
+                .range([0, this._svgWidth]);
             this._y = scaleLinear()
-                .range([height, 0]);
-            this._x.domain([0, this._profile.totalDistance]);
-            this._y.domain([yHeightMin, yHeightMax]);
+                .range([this._svgHeight, 0]);
+            this._x.domain([0, this._totalDistance]);
+            this._y.domain([this._elevationBounds.min, this._elevationBounds.max]);
             if (shortDist === true) {
                 this._xAxis = axisBottom()
                     .scale(this._x)
@@ -769,7 +767,7 @@ import {
          * Appends the areas to the graph
          */
         _appendAreas(block, idx, eleIdx) {
-            const c = this._profile.blocks[idx].attributes[eleIdx].color
+            const c = this._categories[idx].attributes[eleIdx].color
             const self = this
             const area = this._area = d3Area().x(d => {
                 const xDiagonalCoordinate = self._x(d.position)
@@ -848,8 +846,8 @@ import {
             const chooseSelection = (id) => {
                 if (self._selectionText) self._selectionText.remove();
                 // after cleaning up, there is nothing left to do if there is no data
-                if (self._profile.blocks.length === 0) return;
-                const type = self._profile.blocks[id].info
+                if (self._categories.length === 0) return;
+                const type = self._categories[id].info
                 const data = [
                     {
                         "selection": type.text
@@ -866,14 +864,14 @@ import {
                     .attr("id", "selectionText")
                     .attr("text-anchor", "end")
             }
-            const length = this._profile.blocks.length
+            const length = this._categories.length
             const id = this._selectedAttributeIdx
 
             chooseSelection(id);
 
             let arrowRight = () => {
                 let idx = self._selectedAttributeIdx += 1
-                if (idx === self._profile.blocks.length) {
+                if (idx === self._categories.length) {
                     self._selectedAttributeIdx = idx = 0
                 }
                 chooseSelection(idx)
@@ -885,7 +883,7 @@ import {
             let arrowLeft = () => {
                 let idx = self._selectedAttributeIdx -= 1
                 if (idx === -1) {
-                    self._selectedAttributeIdx = idx = self._profile.blocks.length - 1
+                    self._selectedAttributeIdx = idx = self._categories.length - 1
                 }
                 chooseSelection(idx)
                 self._removeChart()
@@ -899,9 +897,9 @@ import {
         _createLegend() {
             const self = this
             const data = []
-            if (this._profile.blocks.length > 0) {
-                for (let item in this._profile.blocks[this._selectedAttributeIdx].legend) {
-                    data.push(this._profile.blocks[this._selectedAttributeIdx].legend[item]);
+            if (this._categories.length > 0) {
+                for (let item in this._categories[this._selectedAttributeIdx].legend) {
+                    data.push(this._categories[this._selectedAttributeIdx].legend[item]);
                 }
             }
             const height = this._height - this._margin.bottom
@@ -1078,9 +1076,9 @@ import {
                 ll = item.latlng, areaIdx = item.areaIdx, type = item.type
             const boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10
             if (areaIdx === 0) {
-                areaLength = this._profile.blocks[this._selectedAttributeIdx].distances[areaIdx];
+                areaLength = this._categories[this._selectedAttributeIdx].distances[areaIdx];
             } else {
-                areaLength = this._profile.blocks[this._selectedAttributeIdx].distances[areaIdx] - this._profile.blocks[this._selectedAttributeIdx].distances[areaIdx - 1];
+                areaLength = this._categories[this._selectedAttributeIdx].distances[areaIdx] - this._categories[this._selectedAttributeIdx].distances[areaIdx - 1];
             }
             if (showMapMarker) {
                 this._showMapMarker(ll, alt, type);
@@ -1097,11 +1095,11 @@ import {
             const totalWidth = this._width - this._margin.left - this._margin.right
             if (this._x(dist) + boxWidth < totalWidth) {
                 this._focus.style("display", "initial")
-                    .attr("transform", "translate(" + this._x(dist) + "," + this._y(this._profile.yElevationMin) + ")");
+                    .attr("transform", "translate(" + this._x(dist) + "," + this._y(this._elevationBounds.min) + ")");
             }
             if (this._x(dist) + boxWidth > totalWidth) {
                 this._focus.style("display", "initial")
-                    .attr("transform", "translate(" + xPositionBox + "," + this._y(this._profile.yElevationMin) + ")");
+                    .attr("transform", "translate(" + xPositionBox + "," + this._y(this._elevationBounds.min) + ")");
             }
         },
         /*

@@ -4936,14 +4936,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     * Prepares the data needed for the height graph
     */
     _prepareData: function _prepareData() {
-      this._profile = {};
-      this._profile.coordinates = [];
-      this._profile.elevations = [];
-      this._profile.cumDistances = [];
+      this._coordinates = [];
+      this._elevations = [];
+      this._cumulatedDistances = [];
 
-      this._profile.cumDistances.push(0);
+      this._cumulatedDistances.push(0);
 
-      this._profile.blocks = [];
+      this._categories = [];
       var data = this._data;
       var colorScale;
 
@@ -4955,15 +4954,16 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       for (var y = 0; y < data.length; y++) {
         var cumDistance = 0;
-        this._profile.blocks[y] = {};
-        this._profile.blocks[y].info = {
-          id: y,
-          text: data[y].properties.summary
+        this._categories[y] = {
+          info: {
+            id: y,
+            text: data[y].properties.summary
+          },
+          distances: [],
+          attributes: [],
+          geometries: [],
+          legend: {}
         };
-        this._profile.blocks[y].distances = [];
-        this._profile.blocks[y].attributes = [];
-        this._profile.blocks[y].geometries = [];
-        this._profile.blocks[y].legend = {};
         var i = void 0,
             cnt = 0;
         var usedColors = {};
@@ -5002,11 +5002,11 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
             color: color
           };
 
-          this._profile.blocks[y].attributes.push(attribute); // add to legend
+          this._categories[y].attributes.push(attribute); // add to legend
 
 
-          if (!(attributeType in this._profile.blocks[y].legend)) {
-            this._profile.blocks[y].legend[attributeType] = attribute;
+          if (!(attributeType in this._categories[y].legend)) {
+            this._categories[y].legend[attributeType] = attribute;
           }
 
           for (var j = 0; j < coordsLength; j++) {
@@ -5021,19 +5021,19 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
               cumDistance += ptDistance;
 
               if (y === 0) {
-                this._profile.elevations.push(altitude);
+                this._elevations.push(altitude);
 
-                this._profile.coordinates.push(ptA);
+                this._coordinates.push(ptA);
 
-                this._profile.cumDistances.push(cumDistance);
+                this._cumulatedDistances.push(cumDistance);
               }
 
               cnt += 1;
             } else if (j === coordsLength - 1 && i === data[y].features.length - 1) {
               if (y === 0) {
-                this._profile.elevations.push(altitude);
+                this._elevations.push(altitude);
 
-                this._profile.coordinates.push(ptB);
+                this._coordinates.push(ptB);
               }
 
               cnt += 1;
@@ -5043,9 +5043,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
             var position = void 0;
 
             if (j === coordsLength - 1 && i < data[y].features.length - 1) {
-              position = this._profile.cumDistances[cnt];
+              position = this._cumulatedDistances[cnt];
             } else {
-              position = this._profile.cumDistances[cnt - 1];
+              position = this._cumulatedDistances[cnt - 1];
             }
 
             geometry.push({
@@ -5059,13 +5059,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
             });
           }
 
-          this._profile.blocks[y].distances.push(cumDistance);
+          this._categories[y].distances.push(cumDistance);
 
-          this._profile.blocks[y].geometries.push(geometry);
+          this._categories[y].geometries.push(geometry);
         }
 
         if (y === data.length - 1) {
-          this._profile.totalDistance = cumDistance;
+          this._totalDistance = cumDistance;
         }
       }
     },
@@ -5074,11 +5074,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * calculates minimum and maximum values for the elevation scale drawn with d3
      */
     _calculateElevationBounds: function _calculateElevationBounds() {
-      var max = this._profile.maxElevation = d3Max(this._profile.elevations);
-      var min = this._profile.minElevation = d3Min(this._profile.elevations);
+      var max = d3Max(this._elevations);
+      var min = d3Min(this._elevations);
       var range = max - min;
-      this._profile.yElevationMin = range < 10 ? min - 10 : min - 0.1 * range;
-      this._profile.yElevationMax = range < 10 ? max + 10 : max + 0.1 * range;
+      this._elevationBounds = {
+        min: range < 10 ? min - 10 : min - 0.1 * range,
+        max: range < 10 ? max + 10 : max + 0.1 * range
+      };
     },
 
     /**
@@ -5126,7 +5128,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Creates the elevation profile
      */
     _createChart: function _createChart(idx) {
-      var areas = this._profile.blocks.length === 0 ? [] : this._profile.blocks[idx].geometries;
+      var areas = this._categories.length === 0 ? [] : this._categories[idx].geometries;
       this._areasFlattended = [].concat.apply([], areas);
 
       for (var i = 0; i < areas.length; i++) {
@@ -5148,7 +5150,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      *  Creates focus Line and focus box while hovering
      */
     _createFocus: function _createFocus() {
-      var boxPosition = this._profile.yElevationMin;
+      var boxPosition = this._elevationBounds.min;
       var textDistance = 15;
 
       if (this._focus) {
@@ -5175,7 +5177,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       selectAll('.focusbox rect').attr("height", height * textDistance + textDistance / 2).attr("display", "block");
       this._focusLineGroup = this._svg.append("g").attr("class", "focusLine");
-      this._focusLine = this._focusLineGroup.append("line").attr("y1", 0).attr("y2", this._y(this._profile.yElevationMin));
+      this._focusLine = this._focusLineGroup.append("line").attr("y1", 0).attr("y2", this._y(this._elevationBounds.min));
       this._distTspan = this._focusDistance.append('tspan').attr("class", "tspan");
       this._altTspan = this._focusHeight.append('tspan').attr("class", "tspan");
     },
@@ -5185,12 +5187,12 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      */
     _createHorizontalLine: function _createHorizontalLine() {
       var self = this;
-      this._horizontalLine = this._svg.append("line").attr("class", "horizontalLine").attr("x1", 0).attr("x2", this._width - this._margin.left - this._margin.right).attr("y1", this._y(this._profile.yElevationMin)).attr("y2", this._y(this._profile.yElevationMin)).style("stroke", "black");
-      this._elevationValueText = this._svg.append("text").attr("class", "horizontalLineText").attr("x", this._width - this._margin.left - this._margin.right - 20).attr("y", this._y(this._profile.yElevationMin) - 10).attr("fill", "black"); //triangle symbol as controller
+      this._horizontalLine = this._svg.append("line").attr("class", "horizontalLine").attr("x1", 0).attr("x2", this._width - this._margin.left - this._margin.right).attr("y1", this._y(this._elevationBounds.min)).attr("y2", this._y(this._elevationBounds.min)).style("stroke", "black");
+      this._elevationValueText = this._svg.append("text").attr("class", "horizontalLineText").attr("x", this._width - this._margin.left - this._margin.right - 20).attr("y", this._y(this._elevationBounds.min) - 10).attr("fill", "black"); //triangle symbol as controller
 
       var jsonTriangle = [{
         "x": this._width - this._margin.left - this._margin.right + 7,
-        "y": this._y(this._profile.yElevationMin),
+        "y": this._y(this._elevationBounds.min),
         "color": "black",
         "type": symbolTriangle,
         "angle": -90,
@@ -5291,18 +5293,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Defines the ranges and format of x- and y- scales and appends them
      */
     _appendScales: function _appendScales() {
-      var shortDist = Boolean(this._profile.totalDistance <= 10);
-      var yHeightMin = this._profile.yElevationMin;
-      var yHeightMax = this._profile.yElevationMax;
-      var margin = this._margin,
-          width = this._width - this._margin.left - this._margin.right,
-          height = this._height - this._margin.top - this._margin.bottom;
-      this._x = linear$1().range([0, width]);
-      this._y = linear$1().range([height, 0]);
+      var shortDist = Boolean(this._totalDistance <= 10);
+      this._x = linear$1().range([0, this._svgWidth]);
+      this._y = linear$1().range([this._svgHeight, 0]);
 
-      this._x.domain([0, this._profile.totalDistance]);
+      this._x.domain([0, this._totalDistance]);
 
-      this._y.domain([yHeightMin, yHeightMax]);
+      this._y.domain([this._elevationBounds.min, this._elevationBounds.max]);
 
       if (shortDist === true) {
         this._xAxis = axisBottom().scale(this._x).tickFormat(function (d) {
@@ -5361,7 +5358,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Appends the areas to the graph
      */
     _appendAreas: function _appendAreas(block, idx, eleIdx) {
-      var c = this._profile.blocks[idx].attributes[eleIdx].color;
+      var c = this._categories[idx].attributes[eleIdx].color;
       var self = this;
       var area = this._area = d3Area().x(function (d) {
         var xDiagonalCoordinate = self._x(d.position);
@@ -5437,8 +5434,8 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       var chooseSelection = function chooseSelection(id) {
         if (self._selectionText) self._selectionText.remove(); // after cleaning up, there is nothing left to do if there is no data
 
-        if (self._profile.blocks.length === 0) return;
-        var type = self._profile.blocks[id].info;
+        if (self._categories.length === 0) return;
+        var type = self._categories[id].info;
         var data = [{
           "selection": type.text
         }];
@@ -5447,14 +5444,14 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         }).attr("class", "select-info").attr("id", "selectionText").attr("text-anchor", "end");
       };
 
-      var length = this._profile.blocks.length;
+      var length = this._categories.length;
       var id = this._selectedAttributeIdx;
       chooseSelection(id);
 
       var arrowRight = function arrowRight() {
         var idx = self._selectedAttributeIdx += 1;
 
-        if (idx === self._profile.blocks.length) {
+        if (idx === self._categories.length) {
           self._selectedAttributeIdx = idx = 0;
         }
 
@@ -5471,7 +5468,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         var idx = self._selectedAttributeIdx -= 1;
 
         if (idx === -1) {
-          self._selectedAttributeIdx = idx = self._profile.blocks.length - 1;
+          self._selectedAttributeIdx = idx = self._categories.length - 1;
         }
 
         chooseSelection(idx);
@@ -5493,9 +5490,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       var self = this;
       var data = [];
 
-      if (this._profile.blocks.length > 0) {
-        for (var item in this._profile.blocks[this._selectedAttributeIdx].legend) {
-          data.push(this._profile.blocks[this._selectedAttributeIdx].legend[item]);
+      if (this._categories.length > 0) {
+        for (var item in this._categories[this._selectedAttributeIdx].legend) {
+          data.push(this._categories[this._selectedAttributeIdx].legend[item]);
         }
       }
 
@@ -5696,9 +5693,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       var boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10;
 
       if (areaIdx === 0) {
-        areaLength = this._profile.blocks[this._selectedAttributeIdx].distances[areaIdx];
+        areaLength = this._categories[this._selectedAttributeIdx].distances[areaIdx];
       } else {
-        areaLength = this._profile.blocks[this._selectedAttributeIdx].distances[areaIdx] - this._profile.blocks[this._selectedAttributeIdx].distances[areaIdx - 1];
+        areaLength = this._categories[this._selectedAttributeIdx].distances[areaIdx] - this._categories[this._selectedAttributeIdx].distances[areaIdx - 1];
       }
 
       if (showMapMarker) {
@@ -5721,11 +5718,11 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       var totalWidth = this._width - this._margin.left - this._margin.right;
 
       if (this._x(dist) + boxWidth < totalWidth) {
-        this._focus.style("display", "initial").attr("transform", "translate(" + this._x(dist) + "," + this._y(this._profile.yElevationMin) + ")");
+        this._focus.style("display", "initial").attr("transform", "translate(" + this._x(dist) + "," + this._y(this._elevationBounds.min) + ")");
       }
 
       if (this._x(dist) + boxWidth > totalWidth) {
-        this._focus.style("display", "initial").attr("transform", "translate(" + xPositionBox + "," + this._y(this._profile.yElevationMin) + ")");
+        this._focus.style("display", "initial").attr("transform", "translate(" + xPositionBox + "," + this._y(this._elevationBounds.min) + ")");
       }
     },
 
