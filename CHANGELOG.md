@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 **Fixed**
 - resize() resets chosen category ([#97](https://github.com/GIScience/Leaflet.Heightgraph/issues/97))
+- overlapping axis ticks for small heightgraph size ([#87](https://github.com/GIScience/Leaflet.Heightgraph/issues/87))
 
 ## v1.2.0 (2020-07-25)
 

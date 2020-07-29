@@ -253,13 +253,13 @@ translation: {
 ```
 
 ### xTicks
-Specify the tick frequency in the *x axis* of the graph. Corresponds approximately to 
+Overwrite automatic tick handling for x axis and specify the tick frequency in the *x axis* of the graph. Corresponds approximately to 
 2 to the power of `value` ticks.
 
 default: `xTicks: 3`
 
 ### yTicks
-Specify the tick frequency in the *y axis* of the graph. Corresponds approximately to 
+Overwrite automatic tick handling for y axis and specify the tick frequency in the *y axis* of the graph. Corresponds approximately to 
 2 to the power of `value` ticks.
 
 default: `yTicks: 3`

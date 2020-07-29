@@ -4146,10 +4146,6 @@ function axis(orient, scale) {
   return axis;
 }
 
-function axisRight(scale) {
-  return axis(right, scale);
-}
-
 function axisBottom(scale) {
   return axis(bottom, scale);
 }
@@ -5301,29 +5297,25 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._y.domain([this._elevationBounds.min, this._elevationBounds.max]);
 
+      this._xAxis = axisBottom().scale(this._x);
+
       if (shortDist === true) {
-        this._xAxis = axisBottom().scale(this._x).tickFormat(function (d) {
+        this._xAxis.tickFormat(function (d) {
           return format(".2f")(d) + " km";
         });
       } else {
-        this._xAxis = axisBottom().scale(this._x).tickFormat(function (d) {
+        this._xAxis.tickFormat(function (d) {
           return format(".0f")(d) + " km";
         });
       }
 
-      if (this.options.xTicks !== undefined) {
-        this._xAxis.ticks(Math.pow(2, this.options.xTicks));
-      }
+      this._xAxis.ticks(this.options.xTicks ? Math.pow(2, this.options.xTicks) : Math.round(this._width / 75), "s");
 
       this._yAxis = axisLeft().scale(this._y).tickFormat(function (d) {
         return d + " m";
       });
 
-      if (this.options.yTicks !== undefined) {
-        this._yAxis.ticks(Math.pow(2, this.options.yTicks));
-      }
-
-      this._yEndAxis = axisRight().scale(this._yEnd).ticks(0);
+      this._yAxis.ticks(this.options.yTicks ? Math.pow(2, this.options.yTicks) : Math.round(this._height / 30), "s");
     },
 
     /**
@@ -5345,9 +5337,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Appends a grid to the graph
      */
     _appendGrid: function _appendGrid() {
-      this._svg.append("g").attr("class", "grid").attr("transform", "translate(0," + this._svgHeight + ")").call(this._make_x_axis().tickSize(-this._svgHeight, 0, 0).tickFormat(""));
+      this._svg.append("g").attr("class", "grid").attr("transform", "translate(0," + this._svgHeight + ")").call(this._make_x_axis().tickSize(-this._svgHeight, 0, 0).ticks(Math.round(this._width / 75)).tickFormat(""));
 
-      this._svg.append("g").attr("class", "grid").call(this._make_y_axis().tickSize(-this._svgWidth, 0, 0).ticks(5).tickFormat(""));
+      this._svg.append("g").attr("class", "grid").call(this._make_y_axis().tickSize(-this._svgWidth, 0, 0).ticks(Math.round(this._height / 30)).tickFormat(""));
 
       this._svg.append('g').attr("transform", "translate(0," + this._svgHeight + ")").attr('class', 'x axis').call(this._xAxis);
 

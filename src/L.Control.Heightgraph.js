@@ -688,27 +688,18 @@ import {
                 .range([this._svgHeight, 0]);
             this._x.domain([0, this._totalDistance]);
             this._y.domain([this._elevationBounds.min, this._elevationBounds.max]);
+            this._xAxis = axisBottom()
+                .scale(this._x)
             if (shortDist === true) {
-                this._xAxis = axisBottom()
-                    .scale(this._x)
-                    .tickFormat(d => format(".2f")(d) + " km");
+                this._xAxis.tickFormat(d => format(".2f")(d) + " km");
             } else {
-                this._xAxis = axisBottom()
-                    .scale(this._x)
-                    .tickFormat(d => format(".0f")(d) + " km");
+                this._xAxis.tickFormat(d => format(".0f")(d) + " km");
             }
-            if(this.options.xTicks !== undefined){
-                this._xAxis.ticks(Math.pow(2, this.options.xTicks));
-            }
+            this._xAxis.ticks(this.options.xTicks ? Math.pow( 2, this.options.xTicks) : Math.round(this._width / 75),"s");
             this._yAxis = axisLeft()
                 .scale(this._y)
                 .tickFormat(d => d + " m");
-            if(this.options.yTicks !== undefined){
-                this._yAxis.ticks(Math.pow(2, this.options.yTicks));
-            }
-            this._yEndAxis = axisRight()
-                .scale(this._yEnd)
-                .ticks(0);
+            this._yAxis.ticks(this.options.yTicks ? Math.pow(2, this.options.yTicks) : Math.round(this._height / 30),"s");
         },
         /**
          * Appends a background and adds mouse handlers
@@ -747,12 +738,13 @@ import {
                 .attr("transform", "translate(0," + this._svgHeight + ")")
                 .call(this._make_x_axis()
                     .tickSize(-this._svgHeight, 0, 0)
+                    .ticks(Math.round(this._width / 75))
                     .tickFormat(""));
             this._svg.append("g")
                 .attr("class", "grid")
                 .call(this._make_y_axis()
                     .tickSize(-this._svgWidth, 0, 0)
-                    .ticks(5)
+                    .ticks(Math.round(this._height / 30))
                     .tickFormat(""));
             this._svg.append('g')
                 .attr("transform", "translate(0," + this._svgHeight + ")")
