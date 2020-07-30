@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 **Fixed**
-- using margin width and height in tick and grid generation
+- using margin width and height in tick and grid generation ([#87](https://github.com/GIScience/Leaflet.Heightgraph/issues/87))
 
 ## v1.3.0 (2020-07-30)
 
