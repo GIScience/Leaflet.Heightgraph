@@ -695,11 +695,11 @@ import {
             } else {
                 this._xAxis.tickFormat(d => format(".0f")(d) + " km");
             }
-            this._xAxis.ticks(this.options.xTicks ? Math.pow( 2, this.options.xTicks) : Math.round(this._width / 75),"s");
+            this._xAxis.ticks(this.options.xTicks ? Math.pow( 2, this.options.xTicks) : Math.round(this._svgWidth / 75),"s");
             this._yAxis = axisLeft()
                 .scale(this._y)
                 .tickFormat(d => d + " m");
-            this._yAxis.ticks(this.options.yTicks ? Math.pow(2, this.options.yTicks) : Math.round(this._height / 30),"s");
+            this._yAxis.ticks(this.options.yTicks ? Math.pow(2, this.options.yTicks) : Math.round(this._svgHeight / 30),"s");
         },
         /**
          * Appends a background and adds mouse handlers
@@ -738,13 +738,13 @@ import {
                 .attr("transform", "translate(0," + this._svgHeight + ")")
                 .call(this._make_x_axis()
                     .tickSize(-this._svgHeight, 0, 0)
-                    .ticks(Math.round(this._width / 75))
+                    .ticks(Math.round(this._svgWidth / 75))
                     .tickFormat(""));
             this._svg.append("g")
                 .attr("class", "grid")
                 .call(this._make_y_axis()
                     .tickSize(-this._svgWidth, 0, 0)
-                    .ticks(Math.round(this._height / 30))
+                    .ticks(Math.round(this._svgHeight / 30))
                     .tickFormat(""));
             this._svg.append('g')
                 .attr("transform", "translate(0," + this._svgHeight + ")")
