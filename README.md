@@ -4,7 +4,7 @@ This plugin is inspired by [MrMufflon/Leaflet.Elevation](https://github.com/MrMu
 You may use this plugin to view an interactive height profile of linestring segments using d3js.
 The input data may consist of different types of attributes you wish to display.
 
-![preview](https://cloud.githubusercontent.com/assets/10322094/22474104/472bcc88-e7db-11e6-8c9e-7e1d53cd0b57.png)
+![height_graph](https://user-images.githubusercontent.com/23240110/88930276-8efd5980-d27b-11ea-9b85-f6a864417f38.png)
 
 Supported Browsers:
 - Chrome
