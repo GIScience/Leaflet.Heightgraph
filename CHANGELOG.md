@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v1.3.0 (2020-07-30)
 
 **Changed**
 - calculation of elevation bounds to a simpler method
