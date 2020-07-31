@@ -3,7 +3,7 @@ import 'd3-selection-multi'
 import {scaleOrdinal,scaleLinear} from 'd3-scale'
 import {min as d3Min, max as d3Max, bisector} from 'd3-array'
 import {drag} from 'd3-drag'
-import {axisLeft, axisBottom, axisRight} from 'd3-axis'
+import {axisLeft, axisBottom} from 'd3-axis'
 import {format} from 'd3-format'
 import {curveBasis, curveLinear, line, area as d3Area, symbol, symbolTriangle} from 'd3-shape'
 import {
