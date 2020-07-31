@@ -1,7 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v1.3.2 (2020-07-31)
+
+**Changed**
+- module field path in package.json
+
+## v1.3.1 (2020-07-30)
 
 **Fixed**
 - using margin width and height in tick and grid generation ([#87](https://github.com/GIScience/Leaflet.Heightgraph/issues/87))
