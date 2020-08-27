@@ -342,7 +342,7 @@ import {
                 this._categories[y] = {
                     info : {
                         id: y,
-                        text: data[y].properties.summary
+                        text: data[y].properties.label || data[y].properties.summary
                     },
                     distances: [],
                     attributes: [],
