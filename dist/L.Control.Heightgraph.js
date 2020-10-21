@@ -4953,7 +4953,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         this._categories[y] = {
           info: {
             id: y,
-            text: data[y].properties.summary
+            text: data[y].properties.label || data[y].properties.summary
           },
           distances: [],
           attributes: [],

@@ -1381,7 +1381,8 @@ const geojson1 = [{
     "properties": {
         "Creator": "OpenRouteService.org",
         "records": 10,
-        "summary": "surface"
+        "summary": "surface",
+        "label": "Surface"
     }
 }, {
     "type": "FeatureCollection",
@@ -3118,7 +3119,8 @@ const geojson1 = [{
     "properties": {
         "Creator": "OpenRouteService.org",
         "records": 42,
-        "summary": "waytypes"
+        "summary": "waytypes",
+        "label": "Waytypes"
     }
 }, {
     "type": "FeatureCollection",
@@ -4734,7 +4736,8 @@ const geojson1 = [{
     "properties": {
         "Creator": "OpenRouteService.org",
         "records": 31,
-        "summary": "steepness"
+        "summary": "steepness",
+        "label": "Steepness"
     }
 }, {
     "type": "FeatureCollection",
@@ -6405,6 +6408,7 @@ const geojson1 = [{
     "properties": {
         "Creator": "OpenRouteService.org",
         "records": 36,
-        "summary": "suitability"
+        "summary": "suitability",
+        "label": "Suitability"
     }
 }];
