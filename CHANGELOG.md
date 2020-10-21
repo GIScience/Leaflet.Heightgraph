@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v1.3.3 (2020-10-21)
+
+**Added**
+- human readable label in the data (see example/data.js) ([#99](https://github.com/GIScience/Leaflet.Heightgraph/issues/99))
+
+**Fixed**
+- undefined event ([#102](https://github.com/GIScience/Leaflet.Heightgraph/issues/102))
+
 ## v1.3.2 (2020-07-31)
 
 **Changed**
