@@ -159,8 +159,10 @@ import {
         },
         _dragHandler() {
             //we don´t want map events to occur here
-            event.preventDefault();
-            event.stopPropagation();
+            if(typeof event !== 'undefined'){
+                event.preventDefault();
+                event.stopPropagation();
+            }
             this._gotDragged = true;
             this._drawDragRectangle();
         },
