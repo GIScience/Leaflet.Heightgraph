@@ -1,11 +1,11 @@
-import {select, selectAll, mouse} from 'd3-selection'
+import { select, selectAll, mouse } from 'd3-selection'
 import 'd3-selection-multi'
-import {scaleOrdinal,scaleLinear} from 'd3-scale'
-import {min as d3Min, max as d3Max, bisector} from 'd3-array'
-import {drag} from 'd3-drag'
-import {axisLeft, axisBottom} from 'd3-axis'
-import {format} from 'd3-format'
-import {curveBasis, curveLinear, line, area as d3Area, symbol, symbolTriangle} from 'd3-shape'
+import { scaleOrdinal, scaleLinear } from 'd3-scale'
+import { min as d3Min, max as d3Max, bisector } from 'd3-array'
+import { drag } from 'd3-drag'
+import { axisLeft, axisBottom } from 'd3-axis'
+import { format } from 'd3-format'
+import { curveBasis, curveLinear, line, area as d3Area, symbol, symbolTriangle } from 'd3-shape'
 import {
     schemeAccent,
     schemeDark2,
@@ -51,6 +51,7 @@ import {
             translation: {},
             expandCallback: undefined,
             chooseSelectionCallback: undefined,
+            selectedAttributeIdx: 0,
             xTicks: undefined,
             yTicks: undefined,
             highlightStyle: undefined,
@@ -70,7 +71,7 @@ import {
             this._mappings = this.options.mappings;
             this._svgWidth = this._width - this._margin.left - this._margin.right;
             this._svgHeight = this._height - this._margin.top - this._margin.bottom;
-            this._highlightStyle = this.options.highlightStyle || {color: 'red'}
+            this._highlightStyle = this.options.highlightStyle || { color: 'red' }
             this._graphStyle = this.options.graphStyle || {}
             this._dragCache = {}
         },
@@ -83,14 +84,13 @@ import {
                 const closeButton = this._closeButton = L.DomUtil.create("a", "heightgraph-close-icon", container)
             }
             this._showState = false;
-            this._selectedAttributeIdx = 0
             this._initToggle();
             this._init_options();
             // Note: this._svg really contains the <g> inside the <svg>
             this._svg = select(this._container).append("svg").attr("class", "heightgraph-container")
-            .attr("width", this._width)
-            .attr("height", this._height).append("g")
-            .attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")")
+                .attr("width", this._width)
+                .attr("height", this._height).append("g")
+                .attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")")
             if (this.options.expand) this._expand();
             return container;
         },
@@ -113,12 +113,14 @@ import {
          * @param resize
          * @private
          */
-        _addData(data, resize = false) {
+        _addData(data) {
             if (this._svg !== undefined) {
                 this._svg.selectAll("*")
-                .remove();
+                    .remove();
             }
-            this._selectedAttributeIdx = resize ? this._selectedAttributeIdx : 0
+            if (!data || this.options.selectedAttributeIdx > data.length) {
+                this.options.selectedAttributeIdx = 0;
+            }
             this._removeMarkedSegmentsOnMap();
             this._resetDrag(true);
 
@@ -129,7 +131,7 @@ import {
             this._appendScales();
             this._appendGrid();
             if (Object.keys(data).length !== 0) {
-                this._createChart(this._selectedAttributeIdx);
+                this._createChart(this.options.selectedAttributeIdx);
             }
             this._createSelectionBox();
         },
@@ -145,7 +147,7 @@ import {
                 .attr("height", this.options.height);
 
             // Re-add the data to redraw the chart.
-            this._addData(this._data, true);
+            this._addData(this._data);
         },
         _initToggle() {
             if (!L.Browser.touch) {
@@ -160,7 +162,7 @@ import {
         },
         _dragHandler() {
             //we don´t want map events to occur here
-            if(typeof event !== 'undefined'){
+            if (typeof event !== 'undefined') {
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -287,7 +289,7 @@ import {
                     .style("display", "none");
             }
             this._showState = !this._showState;
-            if(typeof this.options.expandCallback === "function"){
+            if (typeof this.options.expandCallback === "function") {
                 this.options.expandCallback(this._showState);
             }
         },
@@ -343,7 +345,7 @@ import {
             for (let y = 0; y < data.length; y++) {
                 let cumDistance = 0
                 this._categories[y] = {
-                    info : {
+                    info: {
                         id: y,
                         text: data[y].properties.label || data[y].properties.summary
                     },
@@ -548,25 +550,25 @@ import {
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + textDistance)
                 .attr("id", "heightgraph.distance")
-                .text(this._getTranslation('distance')+':');
+                .text(this._getTranslation('distance') + ':');
             // text line 2
             this._focusHeight = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + 2 * textDistance)
                 .attr("id", "heightgraph.height")
-                .text(this._getTranslation('elevation')+':');
+                .text(this._getTranslation('elevation') + ':');
             // text line 3
             this._focusBlockDistance = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + 3 * textDistance)
                 .attr("id", "heightgraph.blockdistance")
-                .text(this._getTranslation('segment_length')+':');
+                .text(this._getTranslation('segment_length') + ':');
             // text line 4
             this._focusType = this._focus.append("text")
                 .attr("x", 7)
                 .attr("y", -this._y(boxPosition) + 4 * textDistance)
                 .attr("id", "heightgraph.type")
-                .text(this._getTranslation('type')+':');
+                .text(this._getTranslation('type') + ':');
             this._areaTspan = this._focusBlockDistance.append('tspan')
                 .attr("class", "tspan");
             this._typeTspan = this._focusType.append('tspan')
@@ -600,7 +602,7 @@ import {
             this._elevationValueText = this._svg.append("text")
                 .attr("class", "horizontalLineText")
                 .attr("x", this._width - this._margin.left - this._margin.right - 20)
-                .attr("y", this._y(this._elevationBounds.min)-10)
+                .attr("y", this._y(this._elevationBounds.min) - 10)
                 .attr("fill", "black");
             //triangle symbol as controller
             const jsonTriangle = [
@@ -622,29 +624,29 @@ import {
                 const maxY = self._svgHeight
                 let eventY = mouse(self._container)[1] - 10
                 select(this)
-                .attr("transform", d => "translate(" + d.x + "," + (eventY < 0 ? 0
-                    : eventY > maxY ? maxY
-                        : eventY) + ") rotate(" + d.angle + ")");
+                    .attr("transform", d => "translate(" + d.x + "," + (eventY < 0 ? 0
+                        : eventY > maxY ? maxY
+                            : eventY) + ") rotate(" + d.angle + ")");
                 select(".horizontalLine")
-                .attr("y1", (eventY < 0 ? 0 : (eventY > maxY ? maxY : eventY)))
-                .attr("y2", (eventY < 0 ? 0 : (eventY > maxY ? maxY : eventY)));
-                if(eventY >= maxY){
+                    .attr("y1", (eventY < 0 ? 0 : (eventY > maxY ? maxY : eventY)))
+                    .attr("y2", (eventY < 0 ? 0 : (eventY > maxY ? maxY : eventY)));
+                if (eventY >= maxY) {
                     self._highlightedCoords = [];
                 } else {
                     self._highlightedCoords = self._findCoordsForY(eventY);
                 }
                 select(".horizontalLineText")
-                .attr("y", (eventY <= 10 ? 0 : (eventY > maxY ? maxY-10 : eventY-10)))
-                .text(format(".0f")(self._y.invert((eventY < 0 ? 0 : (eventY > maxY ? maxY : eventY)))) + " m");
+                    .attr("y", (eventY <= 10 ? 0 : (eventY > maxY ? maxY - 10 : eventY - 10)))
+                    .text(format(".0f")(self._y.invert((eventY < 0 ? 0 : (eventY > maxY ? maxY : eventY)))) + " m");
                 self._removeMarkedSegmentsOnMap();
                 self._markSegmentsOnMap(self._highlightedCoords);
             }
 
             const dragend = function (d) {
                 select(this)
-                .classed("active", false);
+                    .classed("active", false);
                 select(".horizontalLine")
-                .classed("active", false);
+                    .classed("active", false);
                 self._removeMarkedSegmentsOnMap();
                 self._markSegmentsOnMap(self._highlightedCoords);
             }
@@ -661,7 +663,7 @@ import {
          * Highlights segments on the map above given elevation value
          */
         _markSegmentsOnMap(coords) {
-            if(coords){
+            if (coords) {
                 if (coords.length > 1) {
                     // some other leaflet plugins can't deal with multi-Polylines very well
                     // therefore multiple single polylines are used here
@@ -669,11 +671,11 @@ import {
                     for (let linePart of coords) {
                         L.polyline(
                             linePart,
-                            {...this._highlightStyle,...{interactive: false}}
+                            { ...this._highlightStyle, ...{ interactive: false } }
                         ).addTo(this._markedSegments)
                     }
                     this._markedSegments.addTo(this._map)
-                    .bringToFront()
+                        .bringToFront()
                 } else {
                     this._markedSegments = L.polyline(coords, this._highlightStyle).addTo(this._map);
                 }
@@ -705,11 +707,11 @@ import {
             } else {
                 this._xAxis.tickFormat(d => format(".0f")(d) + " km");
             }
-            this._xAxis.ticks(this.options.xTicks ? Math.pow( 2, this.options.xTicks) : Math.round(this._svgWidth / 75),"s");
+            this._xAxis.ticks(this.options.xTicks ? Math.pow(2, this.options.xTicks) : Math.round(this._svgWidth / 75), "s");
             this._yAxis = axisLeft()
                 .scale(this._y)
                 .tickFormat(d => d + " m");
-            this._yAxis.ticks(this.options.yTicks ? Math.pow(2, this.options.yTicks) : Math.round(this._svgHeight / 30),"s");
+            this._yAxis.ticks(this.options.yTicks ? Math.pow(2, this.options.yTicks) : Math.round(this._svgHeight / 30), "s");
         },
         /**
          * Appends a background and adds mouse handlers
@@ -850,7 +852,7 @@ import {
                 // after cleaning up, there is nothing left to do if there is no data
                 if (self._categories.length === 0) return;
                 const type = self._categories[id].info
-                if(typeof self.options.chooseSelectionCallback === "function"){
+                if (typeof self.options.chooseSelectionCallback === "function") {
                     self.options.chooseSelectionCallback(id, type);
                 }
                 const data = [
@@ -869,14 +871,13 @@ import {
                     .attr("id", "selectionText")
                     .attr("text-anchor", "end")
             }
-            const id = this._selectedAttributeIdx
 
-            chooseSelection(id);
+            chooseSelection(this.options.selectedAttributeIdx);
 
             let arrowRight = () => {
-                let idx = self._selectedAttributeIdx += 1
+                let idx = self.options.selectedAttributeIdx += 1
                 if (idx === self._categories.length) {
-                    self._selectedAttributeIdx = idx = 0
+                    self.options.selectedAttributeIdx = idx = 0
                 }
                 chooseSelection(idx)
                 self._removeChart()
@@ -885,9 +886,9 @@ import {
             }
 
             let arrowLeft = () => {
-                let idx = self._selectedAttributeIdx -= 1
+                let idx = self.options.selectedAttributeIdx -= 1
                 if (idx === -1) {
-                    self._selectedAttributeIdx = idx = self._categories.length - 1
+                    self.options.selectedAttributeIdx = idx = self._categories.length - 1
                 }
                 chooseSelection(idx)
                 self._removeChart()
@@ -902,8 +903,8 @@ import {
             const self = this
             const data = []
             if (this._categories.length > 0) {
-                for (let item in this._categories[this._selectedAttributeIdx].legend) {
-                    data.push(this._categories[this._selectedAttributeIdx].legend[item]);
+                for (let item in this._categories[this.options.selectedAttributeIdx].legend) {
+                    data.push(this._categories[this.options.selectedAttributeIdx].legend[item]);
                 }
             }
             const height = this._height - this._margin.bottom
@@ -944,7 +945,7 @@ import {
                 .text((d, i) => {
                     const textProp = d.text
                     self._boxBoundY = (height - (2 * height / 3) + 7) * i;
-                        return textProp;
+                    return textProp;
                 });
             let legendHover = this._svg.selectAll('.legend-hover')
                 .data(leg)
@@ -969,8 +970,8 @@ import {
                 })
                 .on('click', () => {
                     this._showLegend = !this._showLegend
-            })
-            ;
+                })
+                ;
         }, /**
          * calculates the margins of boxes
          * @param {String} className: name of the class
@@ -1033,7 +1034,7 @@ import {
          * Since this does a lookup of the point on the graph
          * the closest to the given latlng on the provided event, it could be slow.
          */
-        mapMousemoveHandler(event, {showMapMarker: showMapMarker = true} = {}) {
+        mapMousemoveHandler(event, { showMapMarker: showMapMarker = true } = {}) {
             if (this._areasFlattended === false) {
                 return;
             }
@@ -1080,9 +1081,9 @@ import {
                 ll = item.latlng, areaIdx = item.areaIdx, type = item.type
             const boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10
             if (areaIdx === 0) {
-                areaLength = this._categories[this._selectedAttributeIdx].distances[areaIdx];
+                areaLength = this._categories[this.options.selectedAttributeIdx].distances[areaIdx];
             } else {
-                areaLength = this._categories[this._selectedAttributeIdx].distances[areaIdx] - this._categories[this._selectedAttributeIdx].distances[areaIdx - 1];
+                areaLength = this._categories[this.options.selectedAttributeIdx].distances[areaIdx] - this._categories[this.options.selectedAttributeIdx].distances[areaIdx - 1];
             }
             if (showMapMarker) {
                 this._showMapMarker(ll, alt, type);
@@ -1152,15 +1153,15 @@ import {
          * Checks the user passed translations, if they don't exist, fallback to the default translations
          */
         _getTranslation(key) {
-            if(this.options.translation[key])
+            if (this.options.translation[key])
                 return this.options.translation[key];
-            if(this._defaultTranslation[key])
+            if (this._defaultTranslation[key])
                 return this._defaultTranslation[key];
-            console.error("Unexpected error when looking up the translation for "+key);
+            console.error("Unexpected error when looking up the translation for " + key);
             return 'No translation found';
         }
     });
-    L.control.heightgraph = function(options) {
+    L.control.heightgraph = function (options) {
         return new L.Control.Heightgraph(options)
     }
 
