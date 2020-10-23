@@ -4966,6 +4966,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         var i = void 0,
             cnt = 0;
         var usedColors = {};
+        var isMappingFunction = this._mappings !== undefined && typeof this._mappings[data[y].properties.summary] === 'function';
 
         for (i = 0; i < data[y].features.length; i++) {
           // data is redundant in every element of data which is why we collect it once
@@ -4991,8 +4992,15 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
               usedColors[attributeType] = color;
             }
           } else {
-            text = this._mappings[data[y].properties.summary][attributeType].text;
-            color = this._mappings[data[y].properties.summary][attributeType].color;
+            if (isMappingFunction) {
+              var result = this._mappings[data[y].properties.summary](attributeType);
+
+              text = result.text;
+              color = result.color;
+            } else {
+              text = this._mappings[data[y].properties.summary][attributeType].text;
+              color = this._mappings[data[y].properties.summary][attributeType].color;
+            }
           }
 
           var attribute = {

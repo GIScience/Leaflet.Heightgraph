@@ -353,6 +353,7 @@ import {
                 };
                 let i, cnt = 0
                 const usedColors = {}
+                const isMappingFunction = this._mappings !== undefined && typeof this._mappings[data[y].properties.summary] === 'function';
                 for (i = 0; i < data[y].features.length; i++) {
                     // data is redundant in every element of data which is why we collect it once
                     let altitude, ptA, ptB, ptDistance
@@ -372,8 +373,14 @@ import {
                             usedColors[attributeType] = color;
                         }
                     } else {
-                        text = this._mappings[data[y].properties.summary][attributeType].text;
-                        color = this._mappings[data[y].properties.summary][attributeType].color;
+                        if (isMappingFunction) {
+                            const result = this._mappings[data[y].properties.summary](attributeType);
+                            text = result.text;
+                            color = result.color;
+                        } else {
+                            text = this._mappings[data[y].properties.summary][attributeType].text;
+                            color = this._mappings[data[y].properties.summary][attributeType].color;
+                        }
                     }
                     const attribute = {
                         type: attributeType, text: text, color: color

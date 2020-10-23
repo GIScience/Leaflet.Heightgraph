@@ -169,39 +169,14 @@ const colorMappings = {
             color: '#dbe3ff'
         }
     },
-    suitability: {
-        '3': {
-            text: '3/10',
-            color: '#3D3D3D'
-        },
-        '4': {
-            text: '4/10',
-            color: '#4D4D4D'
-        },
-        '5': {
-            text: '5/10',
-            color: '#5D5D5D'
-        },
-        '6': {
-            text: '6/10',
-            color: '#6D6D6D'
-        },
-        '7': {
-            text: '7/10',
-            color: '#7C7C7C'
-        },
-        '8': {
-            text: '8/10',
-            color: '#8D8D8D'
-        },
-        '9': {
-            text: '9/10',
-            color: '#9D9D9D'
-        },
-        '10': {
-            text: '10/10',
-            color: '#ADADAD'
-        }
+    suitability: function(data){
+
+        const hex = parseInt(data).toString(16).toUpperCase();
+
+        return {
+            text: `${data}/10`,
+            color: `#${hex}D${hex}D${hex}D`
+        };
     },
     conditionally_closed: {
         'true': {
