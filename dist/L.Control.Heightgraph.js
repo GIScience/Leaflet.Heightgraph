@@ -4637,6 +4637,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       expandControls: true,
       translation: {},
       expandCallback: undefined,
+      chooseSelectionCallback: undefined,
       xTicks: undefined,
       yTicks: undefined,
       highlightStyle: undefined,
@@ -5439,6 +5440,11 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
         if (self._categories.length === 0) return;
         var type = self._categories[id].info;
+
+        if (typeof self.options.chooseSelectionCallback === "function") {
+          self.options.chooseSelectionCallback(id, type);
+        }
+
         var data = [{
           "selection": type.text
         }];
@@ -5447,7 +5453,6 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         }).attr("class", "select-info").attr("id", "selectionText").attr("text-anchor", "end");
       };
 
-      var length = this._categories.length;
       var id = this._selectedAttributeIdx;
       chooseSelection(id);
 

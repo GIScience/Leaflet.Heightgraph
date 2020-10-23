@@ -50,6 +50,7 @@ import {
             expandControls: true,
             translation: {},
             expandCallback: undefined,
+            chooseSelectionCallback: undefined,
             xTicks: undefined,
             yTicks: undefined,
             highlightStyle: undefined,
@@ -849,6 +850,9 @@ import {
                 // after cleaning up, there is nothing left to do if there is no data
                 if (self._categories.length === 0) return;
                 const type = self._categories[id].info
+                if(typeof self.options.chooseSelectionCallback === "function"){
+                    self.options.chooseSelectionCallback(id, type);
+                }
                 const data = [
                     {
                         "selection": type.text
@@ -865,7 +869,6 @@ import {
                     .attr("id", "selectionText")
                     .attr("text-anchor", "end")
             }
-            const length = this._categories.length
             const id = this._selectedAttributeIdx
 
             chooseSelection(id);
