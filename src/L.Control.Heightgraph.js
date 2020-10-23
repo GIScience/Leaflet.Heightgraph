@@ -118,7 +118,7 @@ import {
                 this._svg.selectAll("*")
                     .remove();
             }
-            if (!data || this.options.selectedAttributeIdx > data.length) {
+            if (!data || this.options.selectedAttributeIdx >= data.length) {
                 this.options.selectedAttributeIdx = 0;
             }
             this._removeMarkedSegmentsOnMap();
