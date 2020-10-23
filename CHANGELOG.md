@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v1.4.0 (XXXX)
+
+**Added**
+- Option pass a callback function in the mappings object. This can be used for path details that have many possible values. See the example mappings.js for an example.
+
 ## v1.3.3 (2020-10-21)
 
 **Added**
