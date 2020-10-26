@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## v1.4.0 (XXXX)
+## v1.4.0 (2020-10-26)
 
 **Added**
 - Option pass a callback function in the mappings object. This can be used for path details that have many possible values. See the example mappings.js for an example ([#103](https://github.com/GIScience/Leaflet.Heightgraph/issues/103)).
