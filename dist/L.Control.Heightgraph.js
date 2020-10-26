@@ -4638,6 +4638,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       translation: {},
       expandCallback: undefined,
       chooseSelectionCallback: undefined,
+      selectedAttributeIdx: 0,
       xTicks: undefined,
       yTicks: undefined,
       highlightStyle: undefined,
@@ -4674,7 +4675,6 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       }
 
       this._showState = false;
-      this._selectedAttributeIdx = 0;
 
       this._initToggle();
 
@@ -4709,13 +4709,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     * @private
     */
     _addData: function _addData(data) {
-      var resize = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
       if (this._svg !== undefined) {
         this._svg.selectAll("*").remove();
       }
 
-      this._selectedAttributeIdx = resize ? this._selectedAttributeIdx : 0;
+      if (!data || this.options.selectedAttributeIdx >= data.length) {
+        this.options.selectedAttributeIdx = 0;
+      }
 
       this._removeMarkedSegmentsOnMap();
 
@@ -4734,7 +4734,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       this._appendGrid();
 
       if (Object.keys(data).length !== 0) {
-        this._createChart(this._selectedAttributeIdx);
+        this._createChart(this.options.selectedAttributeIdx);
       }
 
       this._createSelectionBox();
@@ -4745,7 +4745,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       select(this._container).selectAll("svg").attr("width", this.options.width).attr("height", this.options.height); // Re-add the data to redraw the chart.
 
-      this._addData(this._data, true);
+      this._addData(this._data);
     },
     _initToggle: function _initToggle() {
       if (!L.Browser.touch) {
@@ -5453,14 +5453,13 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         }).attr("class", "select-info").attr("id", "selectionText").attr("text-anchor", "end");
       };
 
-      var id = this._selectedAttributeIdx;
-      chooseSelection(id);
+      chooseSelection(this.options.selectedAttributeIdx);
 
       var arrowRight = function arrowRight() {
-        var idx = self._selectedAttributeIdx += 1;
+        var idx = self.options.selectedAttributeIdx += 1;
 
         if (idx === self._categories.length) {
-          self._selectedAttributeIdx = idx = 0;
+          self.options.selectedAttributeIdx = idx = 0;
         }
 
         chooseSelection(idx);
@@ -5473,10 +5472,10 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       };
 
       var arrowLeft = function arrowLeft() {
-        var idx = self._selectedAttributeIdx -= 1;
+        var idx = self.options.selectedAttributeIdx -= 1;
 
         if (idx === -1) {
-          self._selectedAttributeIdx = idx = self._categories.length - 1;
+          self.options.selectedAttributeIdx = idx = self._categories.length - 1;
         }
 
         chooseSelection(idx);
@@ -5499,8 +5498,8 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       var data = [];
 
       if (this._categories.length > 0) {
-        for (var item in this._categories[this._selectedAttributeIdx].legend) {
-          data.push(this._categories[this._selectedAttributeIdx].legend[item]);
+        for (var item in this._categories[this.options.selectedAttributeIdx].legend) {
+          data.push(this._categories[this.options.selectedAttributeIdx].legend[item]);
         }
       }
 
@@ -5701,9 +5700,9 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       var boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10;
 
       if (areaIdx === 0) {
-        areaLength = this._categories[this._selectedAttributeIdx].distances[areaIdx];
+        areaLength = this._categories[this.options.selectedAttributeIdx].distances[areaIdx];
       } else {
-        areaLength = this._categories[this._selectedAttributeIdx].distances[areaIdx] - this._categories[this._selectedAttributeIdx].distances[areaIdx - 1];
+        areaLength = this._categories[this.options.selectedAttributeIdx].distances[areaIdx] - this._categories[this.options.selectedAttributeIdx].distances[areaIdx - 1];
       }
 
       if (showMapMarker) {

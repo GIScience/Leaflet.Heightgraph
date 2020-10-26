@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 
 **Added**
 - Option pass a callback function in the mappings object. This can be used for path details that have many possible values. See the example mappings.js for an example ([#103](https://github.com/GIScience/Leaflet.Heightgraph/issues/103)).
-- Add choose selection callback to remember what data was selected ([#104](https://github.com/GIScience/Leaflet.Heightgraph/issues/104)).
+- Add choose selection callback to remember what attribute index was selected ([#104](https://github.com/GIScience/Leaflet.Heightgraph/issues/104)).
+- Add `selectedAttributeIdx` to options to allow choosing a different attribute index than 0 ([#105](https://github.com/GIScience/Leaflet.Heightgraph/issues/105)).
 
 ## v1.3.3 (2020-10-21)
 
