@@ -143,3 +143,80 @@ describe('L.Control.Heightgraph', () => {
     });
 });
 
+describe('L.Control.Heightgraph', () => {
+    let hg;
+    
+    function ctx(element, attributeName) {
+        let s = element.tagName;
+        if (element.classList.length > 0) {
+            s += '.' + element.classList.value;
+        }
+        s += '[' + attributeName + ']';
+        return s;
+    }
+
+    beforeEach(() => {
+        const geoJson = [
+            {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": [
+                                [0, 0],
+                                [1, 0],
+                                [2, 0],
+                                [3, 0]
+                            ]
+                        },
+                        "properties": {
+                            "attributeType": "0"
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": [
+                                [3, 0],
+                                [4, 0],
+                                [5, 0],
+                                [6, 0]
+                            ]
+                        },
+                        "properties": {
+                            "attributeType": "0"
+                        }
+                    }
+                ],
+                "properties": {
+                    "records": 1
+                }
+            }
+        ];
+
+        hg = L.control.heightgraph();
+        hg.onAdd();
+        hg.addData(geoJson);
+        hg._background.style("pointer-events", "none");
+        // uncomment to render on test page
+        //document.body.appendChild(hg._container);
+    });
+
+    it('handles missing elevation values', () => {
+        // setting invalid SVG element attributes does not throw, it just logs an error (Chrome) to the console,
+        // but `spyOn(console, 'error')` doesn't work, therefore test for invalid values in known attributes
+        const div = hg._container;
+        div.querySelectorAll('[d]').forEach(item => {
+            expect(item.getAttribute('d')).withContext(ctx(item, 'd')).not.toContain("NaN");
+        });
+        div.querySelectorAll('[y]').forEach(item => {
+            expect(item.getAttribute('y')).withContext(ctx(item, 'y')).not.toBe("NaN");
+        });
+        div.querySelectorAll('[transform]').forEach(item => {
+            expect(item.getAttribute('transform')).withContext(ctx(item, 'transform')).not.toContain("undefined");
+        });
+    });
+});
