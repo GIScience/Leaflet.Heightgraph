@@ -783,11 +783,16 @@ import {
         _appendAreas(block, idx, eleIdx) {
             const c = this._categories[idx].attributes[eleIdx].color
             const self = this
-            const area = this._area = d3Area().x(d => {
-                const xDiagonalCoordinate = self._x(d.position)
-                d.xDiagonalCoordinate = xDiagonalCoordinate
-                return xDiagonalCoordinate
-            }).y0(this._svgHeight).y1(d => self._y(d.altitude)).curve(curveLinear).defined(this._defined)
+            const area = this._area = d3Area()
+                .x(d => {
+                    const xDiagonalCoordinate = self._x(d.position)
+                    d.xDiagonalCoordinate = xDiagonalCoordinate
+                    return xDiagonalCoordinate
+                })
+                .y0(this._svgHeight)
+                .y1(d => self._y(d.altitude))
+                .curve(curveLinear)
+                .defined(this._defined)
             this._areapath = this._svg.append("path")
                 .attr("class", "area");
             this._areapath.datum(block)

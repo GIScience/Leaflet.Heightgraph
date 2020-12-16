@@ -5082,8 +5082,8 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * calculates minimum and maximum values for the elevation scale drawn with d3
      */
     _calculateElevationBounds: function _calculateElevationBounds() {
-      var max = d3Max(this._elevations);
-      var min = d3Min(this._elevations);
+      var max = d3Max(this._elevations) || 10;
+      var min = d3Min(this._elevations) || 0;
       var range = max - min;
       this._elevationBounds = {
         min: range < 10 ? min - 10 : min - 0.1 * range,
@@ -5121,7 +5121,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._mouseHeightFocusLabelRect.attr("x", layerPoint.x + 3).attr("y", normalizedY).attr("class", 'bBox');
 
-      this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan mouse-height-box-text");
+      this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5).attr("y", normalizedY + 12).text((height || '-') + " m").attr("class", "tspan mouse-height-box-text");
 
       this._mouseHeightFocusLabelTextType.attr("x", layerPoint.x + 5).attr("y", normalizedY + 24).text(type).attr("class", "tspan mouse-height-box-text");
 
@@ -5359,6 +5359,17 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     },
 
     /**
+     * Returns if the given data element is defined, in order to handle missing
+     * elevation values and show them as gap. Implements a d3 defined accessor
+     * that can be passed to area/line.defined.
+     * @param {*} d data element
+     * @return {boolean} true, if elevation value is defined, false otherwise
+     */
+    _defined: function _defined(d) {
+      return d && d.altitude !== undefined && d.altitude !== null;
+    },
+
+    /**
      * Appends the areas to the graph
      */
     _appendAreas: function _appendAreas(block, idx, eleIdx) {
@@ -5371,7 +5382,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         return xDiagonalCoordinate;
       }).y0(this._svgHeight).y1(function (d) {
         return self._y(d.altitude);
-      }).curve(curveLinear);
+      }).curve(curveLinear).defined(this._defined);
       this._areapath = this._svg.append("path").attr("class", "area");
 
       this._areapath.datum(block).attr("d", this._area).attr("stroke", c).styles(this._graphStyle).style("fill", c).style("pointer-events", "none");
@@ -5584,7 +5595,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       }).y(function (d) {
         var y = self._y;
         return y(d.altitude);
-      }).curve(curveBasis);
+      }).curve(curveBasis).defined(this._defined);
 
       this._svg.append("svg:path").attr("d", borderTopLine(data)).attr('class', 'border-top');
     },
@@ -5711,7 +5722,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._distTspan.text(" " + dist.toFixed(1) + ' km');
 
-      this._altTspan.text(" " + alt + ' m');
+      this._altTspan.text(" " + (alt || '-') + ' m');
 
       this._areaTspan.text(" " + areaLength.toFixed(1) + ' km');
 
