@@ -456,7 +456,7 @@ import {
         /**
          * Creates a marker on the map while hovering
          * @param {Object} ll: actual coordinates of the route
-         * @param {Number} height: height as float
+         * @param {*} height: height as float or undefined text
          * @param {string} type: type of element
          */
         _showMapMarker(ll, height, type) {
@@ -498,7 +498,7 @@ import {
                 .attr("class", 'bBox');
             this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 12)
-                .text((height || '-') + " m")
+                .text(height + " m")
                 .attr("class", "tspan mouse-height-box-text");
             this._mouseHeightFocusLabelTextType.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 24)
@@ -1093,7 +1093,7 @@ import {
          */
         _internalMousemoveHandler(item, showMapMarker = true) {
             let areaLength
-            const alt = item.altitude, dist = item.position,
+            const alt = this._defined(item) ? item.altitude : '-', dist = item.position,
                 ll = item.latlng, areaIdx = item.areaIdx, type = item.type
             const boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10
             if (areaIdx === 0) {
@@ -1105,7 +1105,7 @@ import {
                 this._showMapMarker(ll, alt, type);
             }
             this._distTspan.text(" " + dist.toFixed(1) + ' km');
-            this._altTspan.text(" " + (alt || '-') + ' m');
+            this._altTspan.text(" " + alt + ' m');
             this._areaTspan.text(" " + areaLength.toFixed(1) + ' km');
             this._typeTspan.text(" " + type);
             this._focusRect.attr("width", boxWidth);
