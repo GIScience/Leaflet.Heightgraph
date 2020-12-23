@@ -5094,7 +5094,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     /**
      * Creates a marker on the map while hovering
      * @param {Object} ll: actual coordinates of the route
-     * @param {Number} height: height as float
+     * @param {*} height: height as float or undefined text
      * @param {string} type: type of element
      */
     _showMapMarker: function _showMapMarker(ll, height, type) {
@@ -5121,7 +5121,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._mouseHeightFocusLabelRect.attr("x", layerPoint.x + 3).attr("y", normalizedY).attr("class", 'bBox');
 
-      this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5).attr("y", normalizedY + 12).text((height || '-') + " m").attr("class", "tspan mouse-height-box-text");
+      this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan mouse-height-box-text");
 
       this._mouseHeightFocusLabelTextType.attr("x", layerPoint.x + 5).attr("y", normalizedY + 24).text(type).attr("class", "tspan mouse-height-box-text");
 
@@ -5703,7 +5703,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
     _internalMousemoveHandler: function _internalMousemoveHandler(item) {
       var showMapMarker = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
       var areaLength;
-      var alt = item.altitude,
+      var alt = this._defined(item) ? item.altitude : '-',
           dist = item.position,
           ll = item.latlng,
           areaIdx = item.areaIdx,
@@ -5722,7 +5722,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._distTspan.text(" " + dist.toFixed(1) + ' km');
 
-      this._altTspan.text(" " + (alt || '-') + ' m');
+      this._altTspan.text(" " + alt + ' m');
 
       this._areaTspan.text(" " + areaLength.toFixed(1) + ' km');
 
