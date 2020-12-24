@@ -445,8 +445,8 @@ import {
          * calculates minimum and maximum values for the elevation scale drawn with d3
          */
         _calculateElevationBounds() {
-            const max = d3Max(this._elevations)
-            const min = d3Min(this._elevations)
+            const max = d3Max(this._elevations) || 10
+            const min = d3Min(this._elevations) || 0
             const range = max - min
             this._elevationBounds = {
                 min: range < 10 ? min - 10 : min - 0.1 * range,
@@ -456,7 +456,7 @@ import {
         /**
          * Creates a marker on the map while hovering
          * @param {Object} ll: actual coordinates of the route
-         * @param {Number} height: height as float
+         * @param {*} height: height as float or undefined text
          * @param {string} type: type of element
          */
         _showMapMarker(ll, height, type) {
@@ -768,16 +768,31 @@ import {
                 .call(this._yAxis);
         },
         /**
+         * Returns if the given data element is defined, in order to handle missing
+         * elevation values and show them as gap. Implements a d3 defined accessor
+         * that can be passed to area/line.defined.
+         * @param {*} d data element
+         * @return {boolean} true, if elevation value is defined, false otherwise
+         */
+        _defined(d) {
+            return d && d.altitude !== undefined && d.altitude !== null;
+        },
+        /**
          * Appends the areas to the graph
          */
         _appendAreas(block, idx, eleIdx) {
             const c = this._categories[idx].attributes[eleIdx].color
             const self = this
-            const area = this._area = d3Area().x(d => {
-                const xDiagonalCoordinate = self._x(d.position)
-                d.xDiagonalCoordinate = xDiagonalCoordinate
-                return xDiagonalCoordinate
-            }).y0(this._svgHeight).y1(d => self._y(d.altitude)).curve(curveLinear)
+            const area = this._area = d3Area()
+                .x(d => {
+                    const xDiagonalCoordinate = self._x(d.position)
+                    d.xDiagonalCoordinate = xDiagonalCoordinate
+                    return xDiagonalCoordinate
+                })
+                .y0(this._svgHeight)
+                .y1(d => self._y(d.altitude))
+                .curve(curveLinear)
+                .defined(this._defined)
             this._areapath = this._svg.append("path")
                 .attr("class", "area");
             this._areapath.datum(block)
@@ -1004,6 +1019,7 @@ import {
                     return y(d.altitude)
                 })
                 .curve(curveBasis)
+                .defined(this._defined)
             this._svg.append("svg:path")
                 .attr("d", borderTopLine(data))
                 .attr('class', 'border-top');
@@ -1077,7 +1093,7 @@ import {
          */
         _internalMousemoveHandler(item, showMapMarker = true) {
             let areaLength
-            const alt = item.altitude, dist = item.position,
+            const alt = this._defined(item) ? item.altitude : '-', dist = item.position,
                 ll = item.latlng, areaIdx = item.areaIdx, type = item.type
             const boxWidth = this._dynamicBoxSize(".focusbox text")[1] + 10
             if (areaIdx === 0) {
