@@ -143,7 +143,7 @@ default: `height: 280`
 
 ### margins
 The margins define the distance between the border of the heightgraph
-and the actual graph inside. You are able to specify margins for `top`, 
+and the actual graph inside. You are able to specify margins for `top`,
 `right`, `bottom` and `left` in pixels.
 
 default:
@@ -182,6 +182,9 @@ expandCallback: function(expanded){
 }
 ```
 
+### imperial
+Allows to use imperial units instead of the metric system.
+
 ### mappings
 You may add a mappings object to customize the colors and labels in the height graph.
 Without adding custom mappings the segments and labels within the graph will be displayed in random colors.
@@ -205,7 +208,7 @@ colorMappings.Steepness = {
 ```
 
 ### highlightStyle
-You can customize the highlight style when using the horizontal line to 
+You can customize the highlight style when using the horizontal line to
 find parts of the route above an elevation value.
 Use any [Leaflet Path options](https://leafletjs.com/reference-1.5.0.html#path-option)
 as value of the `highlightStyle` parameter.
@@ -253,13 +256,13 @@ translation: {
 ```
 
 ### xTicks
-Overwrite automatic tick handling for x axis and specify the tick frequency in the *x axis* of the graph. Corresponds approximately to 
+Overwrite automatic tick handling for x axis and specify the tick frequency in the *x axis* of the graph. Corresponds approximately to
 2 to the power of `value` ticks.
 
 default: `xTicks: 3`
 
 ### yTicks
-Overwrite automatic tick handling for y axis and specify the tick frequency in the *y axis* of the graph. Corresponds approximately to 
+Overwrite automatic tick handling for y axis and specify the tick frequency in the *y axis* of the graph. Corresponds approximately to
 2 to the power of `value` ticks.
 
 default: `yTicks: 3`
@@ -337,5 +340,5 @@ Debug jasmine tests with karma in WebStorm
 
 Run karma with coverage
 
-- once you have a karma task configured just click the run with coverage button 
+- once you have a karma task configured just click the run with coverage button
 - analyse coverage in Webstorm or Browser (open ./coverage/html/index.html)
