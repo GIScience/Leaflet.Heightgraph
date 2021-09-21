@@ -4632,6 +4632,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         bottom: 55,
         left: 50
       },
+      imperial: false,
       mappings: undefined,
       expand: true,
       expandControls: true,
@@ -5019,12 +5020,15 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
           for (var j = 0; j < coordsLength; j++) {
             ptA = new L.LatLng(data[y].features[i].geometry.coordinates[j][1], data[y].features[i].geometry.coordinates[j][0]);
-            altitude = data[y].features[i].geometry.coordinates[j][2]; // add elevations, coordinates and point distances only once
+            altitude = data[y].features[i].geometry.coordinates[j][2];
+            if (this.options.imperial) altitude = this._toFeet(altitude);
+            altitude = parseFloat(altitude.toFixed(1)); // add elevations, coordinates and point distances only once
             // last point in feature is first of next which is why we have to juggle with indices
 
             if (j < coordsLength - 1) {
               ptB = new L.LatLng(data[y].features[i].geometry.coordinates[j + 1][1], data[y].features[i].geometry.coordinates[j + 1][0]);
-              ptDistance = ptA.distanceTo(ptB) / 1000; // calculate distances of specific block
+              ptDistance = ptA.distanceTo(ptB) / 1000;
+              if (this.options.imperial) ptDistance = this._toMiles(ptDistance); // calculate distances of specific block
 
               cumDistance += ptDistance;
 
@@ -5121,7 +5125,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       this._mouseHeightFocusLabelRect.attr("x", layerPoint.x + 3).attr("y", normalizedY).attr("class", 'bBox');
 
-      this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5).attr("y", normalizedY + 12).text(height + " m").attr("class", "tspan mouse-height-box-text");
+      this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5).attr("y", normalizedY + 12).text(height + (this.options.imperial ? " ft" : " m")).attr("class", "tspan mouse-height-box-text");
 
       this._mouseHeightFocusLabelTextType.attr("x", layerPoint.x + 5).attr("y", normalizedY + 24).text(type).attr("class", "tspan mouse-height-box-text");
 
@@ -5301,6 +5305,8 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Defines the ranges and format of x- and y- scales and appends them
      */
     _appendScales: function _appendScales() {
+      var _this = this;
+
       var shortDist = Boolean(this._totalDistance <= 10);
       this._x = linear$1().range([0, this._svgWidth]);
       this._y = linear$1().range([this._svgHeight, 0]);
@@ -5313,18 +5319,18 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
 
       if (shortDist === true) {
         this._xAxis.tickFormat(function (d) {
-          return format(".2f")(d) + " km";
+          return format(".2f")(d) + (_this.options.imperial ? " mi" : " km");
         });
       } else {
         this._xAxis.tickFormat(function (d) {
-          return format(".0f")(d) + " km";
+          return format(".0f")(d) + (_this.options.imperial ? " mi" : " km");
         });
       }
 
       this._xAxis.ticks(this.options.xTicks ? Math.pow(2, this.options.xTicks) : Math.round(this._svgWidth / 75), "s");
 
       this._yAxis = axisLeft().scale(this._y).tickFormat(function (d) {
-        return d + " m";
+        return d + (_this.options.imperial ? " ft" : " m");
       });
 
       this._yAxis.ticks(this.options.yTicks ? Math.pow(2, this.options.yTicks) : Math.round(this._svgHeight / 30), "s");
@@ -5492,7 +5498,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * Creates and appends legend to chart
      */
     _createLegend: function _createLegend() {
-      var _this = this;
+      var _this2 = this;
 
       var self = this;
       var data = [];
@@ -5547,11 +5553,11 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       }).on('mouseover', function () {
         selectAll('.legend').style("display", "block");
       }).on('mouseleave', function () {
-        if (!_this._showLegend) {
+        if (!_this2._showLegend) {
           selectAll('.legend').style("display", "none");
         }
       }).on('click', function () {
-        _this._showLegend = !_this._showLegend;
+        _this2._showLegend = !_this2._showLegend;
       });
     },
 
@@ -5607,7 +5613,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
      * @param {int} delay - time before markers are removed in milliseconds
      */
     mapMouseoutHandler: function mapMouseoutHandler() {
-      var _this2 = this;
+      var _this3 = this;
 
       var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1000;
 
@@ -5616,7 +5622,7 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       }
 
       this.mouseoutDelay = window.setTimeout(function () {
-        _this2._mouseoutHandler();
+        _this3._mouseoutHandler();
       }, delay);
     },
 
@@ -5709,11 +5715,11 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
         this._showMapMarker(ll, alt, type);
       }
 
-      this._distTspan.text(" " + dist.toFixed(1) + ' km');
+      this._distTspan.text(" " + dist.toFixed(1) + (this.options.imperial ? " mi" : " km"));
 
-      this._altTspan.text(" " + alt + ' m');
+      this._altTspan.text(" " + alt + (this.options.imperial ? " ft" : " m"));
 
-      this._areaTspan.text(" " + areaLength.toFixed(1) + ' km');
+      this._areaTspan.text(" " + areaLength.toFixed(1) + (this.options.imperial ? " mi" : " km"));
 
       this._typeTspan.text(" " + type);
 
@@ -5795,6 +5801,20 @@ var schemeSet3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9b
       if (this._defaultTranslation[key]) return this._defaultTranslation[key];
       console.error("Unexpected error when looking up the translation for " + key);
       return 'No translation found';
+    },
+
+    /*
+     * Converts kilometers to miles
+     */
+    _toMiles: function _toMiles(km) {
+      return km / 1.609344;
+    },
+
+    /*
+     * Converts meters to feet
+     */
+    _toFeet: function _toFeet(m) {
+      return m * 3.280839895;
     }
   });
 
