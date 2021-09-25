@@ -10,7 +10,7 @@ export default {
     output: [
         {
             file: 'dist/L.Control.Heightgraph.js',
-            format: 'cjs'
+            format: 'iife'
         },
         {
             file: 'dist/L.Control.Heightgraph.min.js',

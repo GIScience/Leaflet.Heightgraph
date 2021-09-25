@@ -398,7 +398,7 @@ import {
                         ptA = new L.LatLng(data[y].features[i].geometry.coordinates[j][1], data[y].features[i].geometry.coordinates[j][0]);
                         altitude = data[y].features[i].geometry.coordinates[j][2];
                         if (this.options.imperial) altitude = this._toFeet(altitude);
-                        altitude = parseFloat(altitude.toFixed(1));
+
                         // add elevations, coordinates and point distances only once
                         // last point in feature is first of next which is why we have to juggle with indices
                         if (j < coordsLength - 1) {
@@ -502,7 +502,7 @@ import {
                 .attr("class", 'bBox');
             this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 12)
-                .text(height + (this.options.imperial ? " ft" : " m"))
+                .text(height.toFixed(1) + (this.options.imperial ? " ft" : " m"))
                 .attr("class", "tspan mouse-height-box-text");
             this._mouseHeightFocusLabelTextType.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 24)
@@ -1093,7 +1093,7 @@ import {
                 this._showMapMarker(ll, alt, type);
             }
             this._distTspan.text(" " + dist.toFixed(1) + (this.options.imperial ? " mi" : " km"));
-            this._altTspan.text(" " + alt + (this.options.imperial ? " ft" : " m"));
+            this._altTspan.text(" " + alt.toFixed(1) + (this.options.imperial ? " ft" : " m"));
             this._areaTspan.text(" " + areaLength.toFixed(1) + (this.options.imperial ? " mi" : " km"));
             this._typeTspan.text(" " + type);
             this._focusRect.attr("width", boxWidth);
