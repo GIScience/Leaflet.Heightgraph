@@ -45,6 +45,7 @@ import {
                 bottom: 55,
                 left: 50
             },
+            imperial: false,
             mappings: undefined,
             expand: true,
             expandControls: true,
@@ -396,11 +397,14 @@ import {
                     for (let j = 0; j < coordsLength; j++) {
                         ptA = new L.LatLng(data[y].features[i].geometry.coordinates[j][1], data[y].features[i].geometry.coordinates[j][0]);
                         altitude = data[y].features[i].geometry.coordinates[j][2];
+                        if (this.options.imperial) altitude = this._toFeet(altitude);
+
                         // add elevations, coordinates and point distances only once
                         // last point in feature is first of next which is why we have to juggle with indices
                         if (j < coordsLength - 1) {
                             ptB = new L.LatLng(data[y].features[i].geometry.coordinates[j + 1][1], data[y].features[i].geometry.coordinates[j + 1][0]);
                             ptDistance = ptA.distanceTo(ptB) / 1000;
+                            if (this.options.imperial) ptDistance = this._toMiles(ptDistance);
                             // calculate distances of specific block
                             cumDistance += ptDistance;
                             if (y === 0) {
@@ -498,7 +502,7 @@ import {
                 .attr("class", 'bBox');
             this._mouseHeightFocusLabelTextElev.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 12)
-                .text(height + " m")
+                .text(height.toFixed(1) + (this.options.imperial ? " ft" : " m"))
                 .attr("class", "tspan mouse-height-box-text");
             this._mouseHeightFocusLabelTextType.attr("x", layerPoint.x + 5)
                 .attr("y", normalizedY + 24)
@@ -703,14 +707,14 @@ import {
             this._xAxis = axisBottom()
                 .scale(this._x)
             if (shortDist === true) {
-                this._xAxis.tickFormat(d => format(".2f")(d) + " km");
+                this._xAxis.tickFormat(d => format(".2f")(d) + (this.options.imperial ? " mi" : " km"));
             } else {
-                this._xAxis.tickFormat(d => format(".0f")(d) + " km");
+                this._xAxis.tickFormat(d => format(".0f")(d) + (this.options.imperial ? " mi" : " km"));
             }
             this._xAxis.ticks(this.options.xTicks ? Math.pow(2, this.options.xTicks) : Math.round(this._svgWidth / 75), "s");
             this._yAxis = axisLeft()
                 .scale(this._y)
-                .tickFormat(d => d + " m");
+                .tickFormat(d => d + (this.options.imperial ? " ft" : " m"));
             this._yAxis.ticks(this.options.yTicks ? Math.pow(2, this.options.yTicks) : Math.round(this._svgHeight / 30), "s");
         },
         /**
@@ -1088,9 +1092,9 @@ import {
             if (showMapMarker) {
                 this._showMapMarker(ll, alt, type);
             }
-            this._distTspan.text(" " + dist.toFixed(1) + ' km');
-            this._altTspan.text(" " + alt + ' m');
-            this._areaTspan.text(" " + areaLength.toFixed(1) + ' km');
+            this._distTspan.text(" " + dist.toFixed(1) + (this.options.imperial ? " mi" : " km"));
+            this._altTspan.text(" " + alt.toFixed(1) + (this.options.imperial ? " ft" : " m"));
+            this._areaTspan.text(" " + areaLength.toFixed(1) + (this.options.imperial ? " mi" : " km"));
             this._typeTspan.text(" " + type);
             this._focusRect.attr("width", boxWidth);
             this._focusLine.style("display", "block")
@@ -1159,6 +1163,18 @@ import {
                 return this._defaultTranslation[key];
             console.error("Unexpected error when looking up the translation for " + key);
             return 'No translation found';
+        },
+        /*
+         * Converts kilometers to miles
+         */
+        _toMiles(km) {
+            return km / 1.609344;
+        },
+        /*
+         * Converts meters to feet
+         */
+        _toFeet(m) {
+            return m * 3.280839895;
         }
     });
     L.control.heightgraph = function (options) {
