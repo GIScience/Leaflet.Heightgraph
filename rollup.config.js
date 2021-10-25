@@ -1,4 +1,5 @@
 import nodeResolve from '@rollup/plugin-node-resolve'
+import cleaner from 'rollup-plugin-cleaner';
 import {terser} from 'rollup-plugin-terser'
 import babel from '@rollup/plugin-babel'
 import css from 'rollup-plugin-css-porter'
@@ -6,11 +7,12 @@ import copy from 'rollup-plugin-copy'
 
 // noinspection JSUnusedGlobalSymbols
 export default {
-    input: 'src/L.Control.Heightgraph.js',
+    input: 'src/index.js',
     output: [
         {
             file: 'dist/L.Control.Heightgraph.js',
-            format: 'cjs'
+            format: 'cjs',
+            sourcemap: true
         },
         {
             file: 'dist/L.Control.Heightgraph.min.js',
@@ -21,6 +23,11 @@ export default {
 
     ],
     plugins: [
+        cleaner({
+            targets: [
+                './dist/'
+            ]
+        }),
         nodeResolve({
             mainFields: ['module','jsnext', 'main']
         }),
