@@ -16,7 +16,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "leaflet": "^1.6.0"
+    "leaflet": "^1.9.3"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",
